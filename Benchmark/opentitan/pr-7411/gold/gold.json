@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          183,
+          183
+        ],
+        [
+          210,
+          210
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge KMAC key output path, the CDI variant of the key state was selected with `key_state_q[cnt[cdi_sel_o]][i]` instead of `key_state_q[cdi_sel_o][i]`. The same counter `cnt` is used for entropy rounds and for the CDI advance count, and `cdi_cnt` was assigned unconditionally from the low bits of `cnt`. During an advance operation that cycles through the two CDI variants, after the first CDI completes `cnt` becomes 1 and `cdi_sel_o` becomes 1 for the second KDF; the old index then evaluates `cnt[1]`, which is 0 for the normal count range, so the second KMAC transaction receives the first CDI's just-updated key state (the first KDF result) instead of the second CDI's current/root key. This violates the requirement to process all CDI variants sequentially with the appropriate internal key state. In addition, because `cdi_cnt` unconditionally followed `cnt`, the shared counter could drive the CDI select during phases with no active operation request; that value must be gated.",
+      "fix_hint": "Change the KMAC key output to index the key state by the actual CDI select: use `key_state_q[cdi_sel_o][i]` rather than `key_state_q[cnt[cdi_sel_o]][i]`. Also derive `cdi_cnt` only when an operation request is active, for example `assign cdi_cnt = op_req ? cnt[CdiWidth-1:0] : '0;`, so the entropy-round counter cannot influence CDI selection outside active KMAC operations."
+    }
+  ]
+}

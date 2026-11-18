@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          573,
+          574
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "Writes to MINSTRET and MINSTRETH update a temporary counter copy instead of the registered next-state counter. The written value is discarded, so later CSR reads return the old value, observed as zero for the high half.",
+      "fix_hint": "Route both legal low- and high-half CSR writes to the retired-counter next-state storage that is committed by the sequential logic."
+    }
+  ]
+}

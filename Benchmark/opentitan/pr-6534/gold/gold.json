@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/aes/rtl/aes_control.sv",
+          "lines": [
+            [
+              191,
+              191
+            ],
+            [
+              751,
+              760
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/aes/rtl/aes_core.sv",
+          "lines": [
+            [
+              838,
+              839
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, a fatal alert (alert_fatal_i / alert_fatal_o) did not clear the AES status and trigger registers. aes_control continued to drive idle, stall, output_lost, output_valid, input_ready, and the trigger write-enables from the normal FSM/status-tracking paths even when alert_fatal_i was asserted, so software could observe internal state (e.g. idle, input_ready, stall, pending triggers) after a fatal alert. In aes_core, the recoverable shadow-register-error status bit was also not cleared on a fatal alert, violating the spec requirement that a fatal alert clear all status and trigger bits.",
+      "fix_hint": "Create internal status/trigger signals in aes_control and gate the final hw2reg status/trigger outputs with alert_fatal_i: when a fatal alert is asserted, assert the write-enables and drive the data values to zero so the register bits are cleared. Also make the recoverable alert status bit in aes_core self-clearing on alert_fatal_o by ORing alert_fatal_o into its write-enable and gating its data with ~alert_fatal_o."
+    }
+  ]
+}

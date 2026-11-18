@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          401,
+          401
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When a PTW access raises ptw_access_exception, the old data-side MMU hardcodes LD_ACCESS_FAULT and reports ptw_bad_paddr in tval. The corrected exception must select ST_ACCESS_FAULT or LD_ACCESS_FAULT according to lsu_is_store_q and report the original virtual address lsu_vaddr_n in tval.",
+      "fix_hint": "In data_interface, handle ptw_access_exception by selecting ST_ACCESS_FAULT for stores and LD_ACCESS_FAULT for loads using lsu_is_store_q. Set tval to the fixed implementation's XLEN-wide zero-extended lsu_vaddr_n, replacing ptw_bad_paddr."
+    }
+  ]
+}

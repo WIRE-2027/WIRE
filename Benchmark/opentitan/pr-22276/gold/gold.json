@@ -1,0 +1,149 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              286,
+              286
+            ],
+            [
+              289,
+              289
+            ],
+            [
+              294,
+              294
+            ],
+            [
+              358,
+              358
+            ],
+            [
+              394,
+              394
+            ],
+            [
+              398,
+              398
+            ],
+            [
+              543,
+              543
+            ],
+            [
+              561,
+              561
+            ],
+            [
+              564,
+              564
+            ],
+            [
+              566,
+              566
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip_templates/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              286,
+              286
+            ],
+            [
+              289,
+              289
+            ],
+            [
+              294,
+              294
+            ],
+            [
+              358,
+              358
+            ],
+            [
+              394,
+              394
+            ],
+            [
+              398,
+              398
+            ],
+            [
+              543,
+              543
+            ],
+            [
+              561,
+              561
+            ],
+            [
+              564,
+              564
+            ],
+            [
+              566,
+              566
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              286,
+              286
+            ],
+            [
+              289,
+              289
+            ],
+            [
+              294,
+              294
+            ],
+            [
+              358,
+              358
+            ],
+            [
+              394,
+              394
+            ],
+            [
+              398,
+              398
+            ],
+            [
+              543,
+              543
+            ],
+            [
+              561,
+              561
+            ],
+            [
+              564,
+              564
+            ],
+            [
+              566,
+              566
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge flash_phy_rd read pipeline, a new read request and a new flash read could be accepted while the mask calculation for a previously accepted descrambled read was still outstanding. The ready/request paths (rdy_o and req_o) did not wait for the mask-calculation request to be acknowledged, even though the pipeline state (rd_attrs, alloc_q) is overwritten on every accepted read and calc_addr_o is derived from rd_attrs.addr. Consequently, when back-to-back descrambled reads were issued, the mask result could be paired with the wrong read, or the next read could start before the current mask had been captured in the mask FIFO, causing lost or corrupted read responses.",
+      "fix_hint": "Add mask-calculation backpressure to the read request interface: define a completion pulse for the mask calculation (calc_req_done = calc_req_o & calc_ack_i) and gate both rdy_o and req_o with (calc_req_o ? calc_req_done : 1'b1) so that no new request or flash read is accepted until an outstanding descrambling mask request has completed. Also use stable accepted-request pulses (rd_start and calc_req_start) for the rd_busy and calc_req_o state updates, and write the mask FIFO using calc_req_done so the mask is stored only when the calculation has actually finished. Apply the same fix to all generated/template copies of flash_phy_rd.sv."
+    }
+  ]
+}

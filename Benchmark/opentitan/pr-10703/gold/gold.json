@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          174,
+          174
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, the slow-domain configuration register slow_main_pd_no is initialized to 1'b0 in its reset block. Per the reset-state requirements, the main power keep-alive control must be asserted after reset so that the main power domain is not requested to power down. Resetting slow_main_pd_no to 1'b0 therefore drives the output to the wrong inactive/unsafe state after rst_slow_ni is released, until a subsequent configuration synchronization updates it.",
+      "fix_hint": "Initialize slow_main_pd_no to 1'b1 in the slow-domain reset block so that after reset the main power keep-alive control is asserted and matches the safe inactive power-management state. Keep the existing configuration synchronization update path that transfers main_pd_ni on slow_cdc_sync."
+    }
+  ]
+}

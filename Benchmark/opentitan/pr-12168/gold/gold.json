@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          175,
+          176
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old code, host_scramble_en and host_ecc_en are derived only from region_cfg.scramble_en and region_cfg.ecc_en using a loose mubi true test. The region configuration's enable bit (region_cfg.en) is ignored. As a result, a host read targeting a disabled or non-matching memory-protection region can still have scrambling/ECC applied if the region's scramble_en/ecc_en bits are set. This violates the specification, which requires that a host read with no matching region, or with a matching region that is not enabled, be treated as non-scrambled and non-ECC. The observable failure is that host direct reads can use different attributes than controller accesses or than the intended memory-protection region configuration.",
+      "fix_hint": "Include the region enable bit when computing the host read attributes. Combine region_cfg.en with region_cfg.scramble_en and region_cfg.ecc_en using a mubi AND operation, then test the resulting mubi value with the strict true test. This ensures disabled regions are treated as non-scrambled and non-ECC."
+    }
+  ]
+}

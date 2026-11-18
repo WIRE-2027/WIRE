@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_bucket_ht.sv",
+          "lines": [
+            [
+              99,
+              99
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In entropy_src_bucket_ht.sv, test_fail_pulse_o is derived from the secondary test-event counter using `(test_cnt > '0)` instead of directly from the per-bucket threshold-exceed flags. The test_cnt counter is updated only on a later valid-symbol cycle after a bucket has already crossed the threshold, so when the last symbol of a window pushes a bucket over thresh_i, test_cnt has not yet been incremented by the time window_wrap_pulse_i arrives. As a result, the window-boundary failure pulse remains low even though `|bin_cnt_exceeds_thresh` is true, violating the spec requirement that a bucket-test failure be asserted at the window boundary whenever any bucket count exceeds the threshold.",
+      "fix_hint": "Drive test_fail_pulse_o from the combinational OR of the bin threshold-compare results: use `active_i && window_wrap_pulse_i && (|bin_cnt_exceeds_thresh)`. The delayed test_cnt comparison should not be used for the failure pulse; if test_cnt becomes unused after this change, the secondary counter can be removed."
+    }
+  ]
+}

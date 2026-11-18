@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1198,
+          1199
+        ],
+        [
+          1201,
+          1201
+        ],
+        [
+          1205,
+          1206
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge kmac.sv, both `alert_test` and `alerts` concatenations placed the recoverable-operation alert at bit [1] and the fatal-fault alert at bit [0]. The alert sender generate loop instantiates `prim_alert_sender` with `IsFatal(i)`, so index 1 is the fatal sender and index 0 is the recoverable sender. As a result, fatal alert requests/tests were routed to the recoverable alert sender and recoverable alert requests/tests were routed to the fatal alert sender, causing the wrong alert channel to be exercised and the fatal/recoverable alert outputs to be swapped.",
+      "fix_hint": "Align the alert vector bit ordering with the `IsFatal(i)` parameter used in the `gen_alert_tx` loop. Place `alert_fatal` and the `fatal_fault_err` alert-test bit at index [1], and place `alert_recov_operation` and the `recov_operation_err` alert-test bit at index [0], so the fatal sender receives fatal requests/tests and the recoverable sender receives recoverable requests/tests."
+    }
+  ]
+}

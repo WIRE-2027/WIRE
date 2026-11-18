@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          574,
+          574
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the prefix selection logic, the application-specific prefix was driven only during the StAppMsg state. For all other application-active states (StAppCfg, StAppOutLen, StAppProcess, StAppWait), the case fell through to the default software register prefix. If an application message is short enough that the FSM leaves StAppMsg before the downstream SHA3 engine has fully consumed the prefix, sha3_prefix_o changes from the selected application prefix to the software-configured prefix while the operation is still active. This causes an inconsistent prefix to be presented to the SHA3 engine and can corrupt the resulting digest. The application configuration must remain selected for the entire application-owned operation.",
+      "fix_hint": "Extend the state-based prefix mux so that the application prefix selection is active across all application operation states, not only StAppMsg. In particular, StAppCfg, StAppMsg, StAppOutLen, StAppProcess, and StAppWait should all select the application prefix according to AppCfg[app_id].PrefixMode, while the software register prefix should remain the default only for non-application/software-owned operation."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          189,
+          189
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The decoder always_comb block does not assign a default value to the intermediate tinst signal. When the hypervisor extension is enabled, tinst is only assigned in selected decode branches, while other instruction paths can leave it without a defined combinational value. Since tinst is later forwarded into instruction_o.ex.tinst, this incomplete assignment can create an unintended combinational dependency or loop in some tool flows and can propagate stale or undefined trap-instruction metadata.",
+      "fix_hint": "Assign tinst a default value at the beginning of the decoder always_comb block before the opcode-specific decode logic. This ensures tinst is driven on every combinational path, eliminating the unintended loop or undefined dependency while preserving branch-specific tinst overrides."
+    }
+  ]
+}

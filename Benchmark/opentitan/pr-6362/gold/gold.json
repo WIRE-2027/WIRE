@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          332,
+          332
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StIdle state, the transition to StAppCfg was gated on both an application request (arb_valid) and the sideloaded key being valid (keymgr_key_i.valid). This is incorrect because the key-valid requirement does not apply to all application operations: SHA3 application operations do not need a valid sideloaded key, while KMAC operations already check key validity later in StAppCfg. With the old condition, an application request arriving while the sideloaded key was invalid would leave the FSM in StIdle, preventing SHA3 application operations from starting and also preventing the intended key-not-valid error path from being reached for KMAC operations.",
+      "fix_hint": "Remove the keymgr_key_i.valid qualification from the StIdle to StAppCfg transition so that any application request can be granted ownership. Keep the key-valid check in StAppCfg, where it only applies when the selected application mode is KMAC and otherwise falls through to the error state/operation start as appropriate."
+    }
+  ]
+}

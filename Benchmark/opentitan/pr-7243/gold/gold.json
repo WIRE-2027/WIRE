@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          42,
+          42
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In lc_ctrl_state_transition, the counter update block is gated only on fsm_state_i being CntIncrSt or CntProgSt. For a SCRAP transition, the counter is forced to LcCnt16 and programmed during the counter-increment phase, but later when the actual state transition is programmed in TransProgSt, the counter update block is not active. Since next_lc_cnt_o defaults to lc_cnt_i outside that block, the second OTP programming pass can carry the un-forced current counter value (e.g. 8) instead of LcCnt16. This breaks the SCRAP transition because the state-programming pass also programs the counter with the wrong value. The counter overflow error is likewise not evaluated during the later transition-processing phases.",
+      "fix_hint": "Expand the fsm_state_i guard for the counter-handling block to include all active transition-processing states: CntIncrSt, CntProgSt, TransCheckSt, TokenCheck0St, TokenCheck1St, and TransProgSt. This keeps next_lc_cnt_o assigned to the incremented/SCRAP-forced counter value throughout the whole transition sequence and also evaluates counter overflow in those states."
+    }
+  ]
+}

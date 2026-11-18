@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          161,
+          161
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The SFENCE.VMA decoder does not validate that the rd field (bits [11:7]) must be zero per the RISC-V privileged specification. When a SFENCE.VMA instruction has a non-zero rd field (e.g., rd=1), the decoder incorrectly treats it as a valid SFENCE.VMA instead of raising an illegal instruction exception. This allows malformed instructions to execute without trapping, causing divergence from the ISA specification and co-simulation mismatches with reference models like Spike.",
+      "fix_hint": "When privilege checks pass, preserve the earlier `illegal_instr` result instead of forcing it to zero, so the existing nonzero-rd encoding check remains effective."
+    }
+  ]
+}

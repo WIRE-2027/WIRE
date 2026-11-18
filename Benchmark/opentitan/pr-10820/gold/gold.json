@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          291,
+          293
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In tlul_adapter_sram.sv, the combinational d_data response-data mux selected error_blanking_data only when vld_rd_rsp was asserted. vld_rd_rsp requires rspfifo_rvalid, which is generated only after memory read data returns. For an erroneous read request, such as one failing command integrity checking, the request is not forwarded to memory, so no read data returns and rspfifo_rvalid remains low. As a result, the error response for such a read had d_error asserted but d_data driven to 0 instead of the configured error blanking data, violating the spec requirement that error responses carry the instruction-fetch-selected error data pattern.",
+      "fix_hint": "Rework the d_data selection so that error_blanking_data is the default response data whenever there is no valid read data, and rspfifo_rdata.data is used only for a valid non-error read response. In particular, select rspfifo_rdata.data only when vld_rd_rsp is true and d_error is false; otherwise drive error_blanking_data."
+    }
+  ]
+}

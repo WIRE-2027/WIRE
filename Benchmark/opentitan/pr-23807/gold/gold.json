@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          291,
+          291
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the StRcvdDataEnd state, when a valid non-isochronous OUT packet is received on a stalled endpoint, the module requests a STALL handshake but does not assert rollback_data. As a result, out_ep_rollback_o remains low, so the transaction is not reported as discarded to the endpoint interface and downstream byte-counting/resource-release logic is not reset. The spec requires that a valid OUT packet discarded because the endpoint is stalled assert a rollback indication, assert no completion, and not update the data toggle.",
+      "fix_hint": "Assert rollback_data in the endpoint-stalled branch of the non-isochronous OUT transaction handling, alongside the existing STALL handshake request, so the rejected packet is internally rolled back and downstream logic correctly discards the received data and resets its state."
+    }
+  ]
+}

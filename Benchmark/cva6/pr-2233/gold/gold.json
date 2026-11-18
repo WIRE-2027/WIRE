@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1283,
+          1283
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When U-mode is not implemented (CVA6Cfg.RVU is false), the mstatus.TW (Timeout Wait) field is not normalized to zero during MSTATUS writes. As a result, TW can retain a written value even though the RISC-V privileged specification requires this field to be read-only zero when U-mode is not supported. The existing !CVA6Cfg.RVU branch clears mstatus_d.mprv but does not clear mstatus_d.tw.",
+      "fix_hint": "In the MSTATUS write-normalization logic, force mstatus_d.tw to riscv::Off when CVA6Cfg.RVU is false, alongside the existing mprv normalization. This ensures that TW reads back as zero and cannot retain unsupported state when U-mode is not implemented."
+    }
+  ]
+}

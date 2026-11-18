@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          907,
+          911
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In the Bitmanip immediate decoding path for OpcodeOpImm with funct3=3'b001 and funct7=7'b0110000, the decoder distinguishes SEXTB, SEXTH, CPOP, CLZ, and CTZ using only the low bits of the immediate sub-encoding. It does not validate the full instruction sub-encoding required by the RISC-V Bitmanip specification, so reserved encodings with unmatched upper immediate bits can alias to valid Bitmanip operations instead of being reported as illegal instructions.",
+      "fix_hint": "Match the complete five-bit sub-encoding in bits [24:20] for SEXTB, SEXTH, CPOP, CLZ, and CTZ, so reserved encodings cannot alias these operations. The unmatched-encoding fallback is a separate correction."
+    },
+    {
+      "bug_lineno": [
+        [
+          912,
+          912
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the RVB-enabled OpcodeOpImm path with funct3=3'b001 and funct7=7'b0110000, the operation-selection chain has no final illegal-instruction fallback. A selector such as 5'b00011 matches none of the operations, but illegal_instr_bm remains zero and the instruction is accepted with the default SLL operation. This persists after widening the encoding comparisons to five bits.",
+      "fix_hint": "Add a final else that sets illegal_instr_bm to 1 inside the funct7=7'b0110000 branch, immediately before the closing end on original line 912."
+    }
+  ]
+}

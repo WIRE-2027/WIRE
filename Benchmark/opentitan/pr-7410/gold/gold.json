@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          401,
+          401
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old code, when a fatal macro or check error was latched, the internal escalation enable assignment used a bitwise OR between the synchronized external escalation signal and lc_ctrl_pkg::On. Since lc_tx_t uses a multi-bit redundant encoding, ORing the external value with On can produce an invalid non-canonical encoding instead of the exact On encoding. The subsequent equality check against lc_ctrl_pkg::On then fails, so lc_escalate_en_any is not set and the locally triggered escalation is not propagated to the partitions, OTP arbitration gating, or entropy request gating. Thus an internal fatal error does not reliably move the controllers into the intended terminal escalation state.",
+      "fix_hint": "When an internal fatal error is present, directly force the escalation enable to the canonical On value: assign lc_escalate_en[k] = lc_ctrl_pkg::On. Do not OR in the synchronized external escalation signal, because it corrupts the redundant lifecycle encoding and defeats the equality-based escalation detection."
+    }
+  ]
+}

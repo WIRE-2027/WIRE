@@ -1,0 +1,90 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          44,
+          44
+        ],
+        [
+          68,
+          68
+        ],
+        [
+          73,
+          73
+        ],
+        [
+          86,
+          86
+        ],
+        [
+          142,
+          142
+        ],
+        [
+          162,
+          162
+        ],
+        [
+          175,
+          175
+        ],
+        [
+          322,
+          322
+        ],
+        [
+          331,
+          331
+        ],
+        [
+          341,
+          341
+        ],
+        [
+          345,
+          345
+        ],
+        [
+          364,
+          364
+        ],
+        [
+          406,
+          412
+        ],
+        [
+          448,
+          450
+        ],
+        [
+          452,
+          454
+        ],
+        [
+          461,
+          462
+        ],
+        [
+          465,
+          473
+        ],
+        [
+          475,
+          475
+        ],
+        [
+          529,
+          529
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In CPHA=1 mode the FSM intentionally delays byte_starting, byte_ending, and bit_shifting pulses by one state transition using the *_cpha0_q registers. However the non-delayed command-side signals used with those delayed pulses were not delayed: speed_o was tied to cmd_speed_q, rd_en_internal was gated by cmd_rd_en_q, cmd_len was not latched, and the single shared byte_cntr was loaded/decremented on new_command/byte_ending regardless of CPHA. In back-to-back or keep-active operation a new segment can be accepted at the same boundary where the previous CPHA=1 segment still has delayed transfer pulses, so those delayed pulses are evaluated with the next segment's speed, read-enable, length, or byte count. This can suppress or misattribute the final receive-byte request, corrupt the byte counter, and produce incorrect last_read/last_write or SD output-enable timing on the last bit.",
+      "fix_hint": "Maintain explicit delayed copies of the CPHA=1-side control values (speed_cpha1, segment_rd_en_cpha1, new_command_cpha1) and latch the command length into cmd_len_q. Use separate byte counters for CPHA=0 and CPHA=1 so the delayed CPHA=1 byte_ending decrements the previous segment count before the next command is loaded. Drive speed_o, sd_en_o, rd_en_internal, and last_read/last_write from the appropriate delayed or early copies, using byte_cntr_early/late for the last-byte markers."
+    }
+  ]
+}

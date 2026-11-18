@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          208,
+          208
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the LCI FSM escalation override, the terminal-error error code assignment was gated on `state_q != ErrorSt` instead of `error_q == NoError`. If escalation becomes active while the FSM is in WriteSt or WriteWaitSt after an OTP error has already been latched, the escalation block overwrites the recorded `error_q` with `FsmStateError`. The spec requires escalation to retain an already-recorded error code and only set the illegal-control-state error when no error has been recorded. This causes `error_o` to report the wrong persistent error code, losing the original OTP programming error.",
+      "fix_hint": "Change the escalation condition for setting `error_d = FsmStateError` to test `error_q == NoError` rather than `state_q != ErrorSt`. This preserves any previously latched OTP error while still setting the illegal-control-state error when escalation occurs with a clean error register."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          432,
+          432
+        ],
+        [
+          437,
+          437
+        ],
+        [
+          440,
+          440
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge FSM, the final escalation/error priority block misrouted FSM state. The global escalation branch (esc_scrap_state0_i || esc_scrap_state1_i) did not assign fsm_state_d, so asserting global escalation did not move the FSM to EscalateSt. The local state-invalid/token-if error else-if branch assigned fsm_state_d = InvalidSt but then overwrote it with fsm_state_d = EscalateSt, so local errors erroneously entered EscalateSt instead of InvalidSt. In addition, if the FSM was already in EscalateSt, the local-error branch could still fire, which was not protected by escalation priority. This broke the required behavior that global escalation takes priority and that invalid state errors lead to InvalidSt.",
+      "fix_hint": "Restructure the priority logic so global escalation is the top-priority branch and explicitly sets fsm_state_d = EscalateSt. Keep the InvalidSt assignment for local state-invalid and token_if_fsm_err conditions only when fsm_state_q is not already EscalateSt, and remove the stray fsm_state_d = EscalateSt from that invalid-error branch."
+    }
+  ]
+}

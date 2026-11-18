@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          161,
+          165
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the FPGA-optimized BHT implementation, the per-instruction prediction readout is incorrectly gated by a comparison between row_index and the loop iterator. As a result, only the slot whose loop index matches row_index updates its RAM read address and prediction outputs, while the other instruction slots may keep stale or default prediction values instead of reflecting the current BHT RAM contents. This can produce incorrect branch prediction outputs for fetched instruction slots and reduce front-end performance.",
+      "fix_hint": "In the FPGA BHT combinational readout path, drive the RAM read address and prediction valid/taken outputs for every instruction slot from the corresponding RAM read data. Do not gate the per-slot prediction output assignment on row_index matching the loop iterator."
+    }
+  ]
+}

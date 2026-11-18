@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          94,
+          94
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The branch unit raises an instruction address misaligned exception for any branch or jump with a misaligned target address, regardless of whether a conditional branch is actually taken. According to the RISC-V specification, this exception should only be generated for taken branches or unconditional jumps. The condition `if (branch_valid_i && target_address[0] != 1'b0)` does not check the branch comparison result or instruction type, causing spurious exceptions on not-taken conditional branches.",
+      "fix_hint": "Modify the exception condition in the `exception_handling` block to also require that the instruction is either an unconditional jump (JAL, JALR) or a conditional branch that is taken (branch_comp_res_i == 1). This ensures the exception is only raised when the branch is actually taken, aligning with the RISC-V specification."
+    }
+  ]
+}

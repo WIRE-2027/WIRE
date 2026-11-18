@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          567,
+          567
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the standard-speed output-enable combinational logic, sd_en_o[0] is unconditionally assigned 1'b1 whenever any chip-select is asserted. This ignores whether the current segment is actually transmitting. For receive-only or dummy standard-speed segments, the SPI host therefore continues to drive serial data line 0, contrary to the specification that all serial-data output enables be off for receive-only/dummy segments and that standard-speed output enables be active only for transmit-only or bidirectional segments.",
+      "fix_hint": "Gate the standard-speed sd_en_o[0] assertion with the registered transmit-direction indication cmd_wr_en_q, matching the existing dual/quad speed behavior. This keeps SD0 driven only when the command segment is transmit-only or bidirectional."
+    }
+  ]
+}

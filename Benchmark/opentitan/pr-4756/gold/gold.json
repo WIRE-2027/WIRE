@@ -1,0 +1,48 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          63,
+          63
+        ],
+        [
+          76,
+          83
+        ],
+        [
+          93,
+          93
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The old alert validity logic computed alerts_vld as the XOR of the positive and negative sensor lines. This treated any non-complementary pair (both lines high or both lines low) as inactive, and could miss events when the two lines do not assert at exactly the same time. It also latched diff_err on non-differential states until reset and used it in valid_alert, so a transient or invalid state could keep the alert path asserted after the underlying condition was removed. The spec requires each channel to be active whenever the positive line is high or the negative line is low, including invalid differential states, and to be evaluated independently.",
+      "fix_hint": "Compute alerts_vld as ast_alert_i.alerts_p | ~ast_alert_i.alerts_n, remove the permanent diff_err latch, and use alerts_vld[i] directly as valid_alert[i] so the active state is combinatorial and tracks the live sensor line levels."
+    },
+    {
+      "bug_lineno": [
+        [
+          105,
+          105
+        ],
+        [
+          110,
+          110
+        ],
+        [
+          118,
+          122
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In immediate acknowledge mode, the old code did not wait for the alert receiver to acknowledge the alert request. The prim_alert_sender's alert_ack_o was left unconnected, and ast_alert_o.alerts_ack[i] was asserted from the raw sensor pair (ast_alert_i.alerts_p[i] & alerts_vld[i]) instead of from a receiver-ack-qualified pulse. The shared alerts_clr[i] signal was only computed for software acknowledge mode, so immediate mode had no path to generate the sensor-source acknowledge on the request/ack handshake. This violates the spec requirement that in immediate mode the sensor-source acknowledge be generated when the alert receiver acknowledges the request, while software mode should ack on software clear.",
+      "fix_hint": "Connect prim_alert_sender's alert_ack_o to an alert_ack net. Make alerts_clr[i] a mux: in software mode keep reg2hw.alert_state[i].q & reg2hw.alert_state[i].qe, and in immediate mode use alert_req & alert_ack. Drive all ast_alert_o.alerts_ack[i] from alerts_clr[i]."
+    }
+  ]
+}

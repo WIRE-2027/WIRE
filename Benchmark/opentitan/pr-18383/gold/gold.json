@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          484,
+          484
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, whenever the SecVolatileRawUnlockEn feature is enabled and a transition command is issued, trans_success_q is unconditionally cleared. This includes the volatile RAW unlock transition itself. For a volatile RAW unlock, the success indication can be generated in the same cycle as the transition command, so the clear overrides the sticky set and STATUS.transition_successful remains 0, making the success status unreadable. The spec requires the transition success indicator to be sticky and to be cleared only when a subsequent non-volatile transition command is started after a volatile RAW unlock.",
+      "fix_hint": "Gate the clear of trans_success_q so that it does not happen for the volatile RAW unlock command itself. The clearing condition should only apply to non-volatile transition commands, e.g. by adding !volatile_raw_unlock_q to the condition: SecVolatileRawUnlockEn && transition_cmd && !volatile_raw_unlock_q. This lets the volatile RAW unlock success be captured and remain sticky until a later real transition clears it."
+    }
+  ]
+}

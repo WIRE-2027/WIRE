@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          461,
+          462
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In usbuart_core.sv, the output-enable signal cio_oe from usbdev_iomux is assigned to cio_usb_dp_o and cio_usb_dn_o, which are the USB data output ports. These ports are already driven by the usbdev_iomux instance outputs .cio_usb_dp_o and .cio_usb_dn_o, creating an illegal multi-driver conflict and preventing the module's actual output-enable ports cio_usb_dp_en_o and cio_usb_dn_en_o from being driven. The intended output enables are therefore not propagated to the chip I/O pads, while the data outputs are incorrectly forced to follow the enable signal.",
+      "fix_hint": "Drive the output-enable ports instead of the data output ports: assign cio_usb_dp_en_o = cio_oe and cio_usb_dn_en_o = cio_oe. This removes the conflicting driver on the data output ports and correctly forwards the USB transmit output-enable to the chip I/O enable signals."
+    }
+  ]
+}

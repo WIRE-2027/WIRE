@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr_dpe/rtl/keymgr_dpe.sv",
+          "lines": [
+            [
+              579,
+              579
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/keymgr_dpe/rtl/keymgr_dpe_ctrl.sv",
+          "lines": [
+            [
+              624,
+              624
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In keymgr_dpe.sv, invalid_data[OpAdvance] was computed only from ~key_vld and ~adv_dvalid[active_key_slot.boot_stage]. The controller's broader advance-invalidity conditions (policy disallows child, max boot stage reached, source slot invalid, or retain_parent/destination rule violated) were used to reject the operation but were not forwarded to the KMAC input validity path. As a result, an advance request that was invalid for one of those reasons while the selected slot secret and stage-specific message data happened to be individually valid could send the real advance message payload to KMAC instead of randomized/invalid data, even though the operation should be rejected.",
+      "fix_hint": "Expose the controller's request-independent advance-invalidity condition as invalid_advance_o from invalid_allow_child, invalid_max_boot_stage, invalid_src_slot, and invalid_retain_parent, and OR it into invalid_data[OpAdvance] in the top module so that any invalid advance command also marks the KMAC message payload invalid/randomized."
+    }
+  ]
+}

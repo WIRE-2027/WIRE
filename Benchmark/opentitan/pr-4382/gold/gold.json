@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          289,
+          290
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The otp_size_o ternary in otp_ctrl_part_unbuf selects the OTP read size with inverted branches. When otp_addr_sel == DigestAddr it requests a 32-bit read, but the spec requires digest reads to use the full OTP block size. When otp_addr_sel == DataAddr it requests the full block size, but data reads must be 32-bit. This causes incorrect OTP read sizes for both digest initialization and normal bus read transactions.",
+      "fix_hint": "Swap the two otp_size_o expressions so that the DigestAddr case uses OtpSizeWidth'(unsigned'(ScrmblBlockWidth / OtpWidth - 1)) and the DataAddr case uses OtpSizeWidth'(unsigned'(32 / OtpWidth - 1)). This makes digest reads use the full OTP block size and data reads use the 32-bit word size as required."
+    }
+  ]
+}

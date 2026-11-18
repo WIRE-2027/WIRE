@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          280,
+          280
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the CSBSwitch state, when the configuration-switch wait counter is not yet zero, the FSM incorrectly transitions to WaitIdle instead of remaining in CSBSwitch. This sends the countdown through WaitIdle, which reloads wait_cntr with csnidle on entry and later uses next_state_after_idle. If command_valid_i has already been deasserted after the accepted command, next_state_after_idle is Idle, so the pending command can be lost/not started. It also adds an extra undesired idle delay. The correct behavior is to stay in CSBSwitch while wait_cntr_q is nonzero and only move to WaitLead when the wait expires.",
+      "fix_hint": "In the CSBSwitch FSM branch, keep the next state as CSBSwitch while wait_cntr_q is nonzero so the configuration-switch delay counts down in CSBSwitch itself, then transition directly to WaitLead when wait_cntr_q reaches zero."
+    },
+    {
+      "bug_lineno": [
+        [
+          446,
+          447
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The last-byte indication logic is incorrect with the 0-based byte counter used by the design. The byte counter is loaded with the encoded segment length, so the final byte is indicated by a counter value of 0. For last_read_o, the old comparison used byte_cntr_q == 1, so the final read request at the end of the last byte was never marked as last. For last_write_o, the old expression used byte_cntr_q == 0, but the write request for a new byte can be generated in the same cycle that byte_cntr is being updated from the previous byte's end; at the first byte of a multi-byte segment byte_cntr_q is also still stale/zero, causing a premature last-write indication. The fix uses byte_cntr_q == 0 for the read side and byte_cntr_d == 0 for the write side so the last-read and last-write pulses align with the actual final byte.",
+      "fix_hint": "Update last_read_o to compare the current byte count to 0 when rd_en_o is asserted, and update last_write_o to compare the next byte count byte_cntr_d to 0 when wr_en_o is asserted. This handles both the zero-based final-byte encoding and the overlapped byte-ending/byte-starting timing."
+    }
+  ]
+}

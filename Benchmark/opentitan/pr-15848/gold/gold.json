@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          557,
+          559
+        ],
+        [
+          603,
+          605
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The reseed and generate command FIFO clear signals are gated by edn_enable, so when the EDN is disabled the clear inputs are forced to 0. As a result, a software-requested command FIFO reset or a main_sm_done_pulse cannot clear the FIFOs while the module is disabled. Stale reseed/generate commands can remain in the FIFOs and be sent out after the module is re-enabled, which can cause unwanted commands or a stuck CSRNG interface. This violates the requirement that all pending command paths be cleared while the module is disabled.",
+      "fix_hint": "Remove the edn_enable gating from sfifo_rescmd_clr and sfifo_gencmd_clr so the command FIFOs are cleared directly by cmd_fifo_rst_fo and main_sm_done_pulse regardless of the EDN enable state."
+    }
+  ]
+}

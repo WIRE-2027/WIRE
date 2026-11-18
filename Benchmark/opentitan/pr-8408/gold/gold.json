@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          973,
+          973
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the FSM combinational block defaults `latch_locality` to 0 but never asserts it in the `StAddr` state. As a result, the `locality` and `invalid_locality` registers are never updated when the TPM address is received. The locality nibble remains stuck at 0 and `invalid_locality` remains 0, so accesses to non-zero or unsupported localities are decoded incorrectly: locality-dependent hardware registers such as TPM_ACCESS_x and TPM_STS_x return data for the wrong locality, and unsupported-locality reads do not take the intended invalid-locality behavior (return 0xFF or software-handled path). This also allows `is_hw_reg` to be set for unsupported localities because the `!invalid_locality` condition incorrectly passes.",
+      "fix_hint": "In `StAddr` of the `next_state` block, assert `latch_locality` when `cmdaddr_bitcnt == 5'h13`, i.e. when address bit [12] has been received and the full locality nibble addr[15:12] is available. This must happen before the WAIT-byte generation and before the end-of-address hw-register/read decision so that `locality` and `invalid_locality` are correctly latched for the rest of the transaction."
+    }
+  ]
+}

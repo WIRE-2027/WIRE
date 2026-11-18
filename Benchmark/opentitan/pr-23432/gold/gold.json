@@ -1,0 +1,50 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          236,
+          238
+        ],
+        [
+          326,
+          326
+        ],
+        [
+          330,
+          331
+        ],
+        [
+          333,
+          333
+        ],
+        [
+          356,
+          360
+        ],
+        [
+          366,
+          366
+        ],
+        [
+          379,
+          379
+        ],
+        [
+          437,
+          437
+        ],
+        [
+          445,
+          445
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In HMAC mode, the old FSM did not correctly implement the stop/continue context-switch flow described in the specification. A stop request was not latched and did not cause the FSM to stop consuming message data at an inner-round block boundary, wait for SHA completion, and then return to StIdle through StDone. Instead, the FSM could remain in StMsg or proceed toward pushing the inner digest, so software could not cleanly save/restore context or start a new HMAC operation. The block-boundary detector txcnt_eq_blksz was also incorrect for non-first block boundaries: it only checked whether the low block-size bits equaled the block-size constant, so not every non-zero multiple of the block size was recognized. Additionally, the continue command was handled only inside StMsg, and round_q was not reset to Inner when entering StIdle, so after the FSM was fixed to return to Idle there was no valid resume path for a saved HMAC context.",
+      "fix_hint": "Latch the stop request until sha_hash_done_i is seen. Make txcnt_eq_blksz assert whenever txcount is a non-zero multiple of the block size. In the inner StMsg phase, when a stop is pending at a block boundary, stop consuming FIFO data and move to StWaitResp. After SHA completion in the inner round with a stop pending, go to StDone instead of StPushToMsgFifo, then return to StIdle. Assert idle whenever a stop is pending at a block boundary in any FSM state. In StIdle, unconditionally reset round_q to Inner and add an HMAC continue branch that loads txcount and issues hash_continue to resume the message phase; remove the obsolete StMsg continue branch."
+    }
+  ]
+}

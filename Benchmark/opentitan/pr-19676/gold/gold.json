@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          679,
+          679
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The auto-request-mode generate/reseed counter u_prim_count_max_reqs_cntr is reset to all 1s, while the MAX_NUM_REQS_BETWEEN_RESEEDS register that defines the number of generate commands allowed between reseeds resets to 0. As a result, if software never writes the register, the counter starts with an effectively unlimited generate count instead of reflecting the configured default of 0. In auto request mode this causes generate commands to be issued before the required reseed, violating the configured maximum number of generates between reseeds and disagreeing with the register-visible reset value.",
+      "fix_hint": "Initialize the counter's ResetValue to the same value as the MAX_NUM_REQS_BETWEEN_RESEEDS register reset value, i.e. edn_reg_pkg::MaxNumReqsBetweenReseedsResval, so the counter and the configuration register agree after reset. This ensures auto request mode starts with the intended generate/reseed count behavior even when software does not explicitly write the register."
+    }
+  ]
+}

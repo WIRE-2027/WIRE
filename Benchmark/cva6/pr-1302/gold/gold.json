@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          81,
+          81
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When no input bit is set and the associativity is a power of two, the width-limited loop index wraps from the last way to zero. The exit comparison remains true forever, so the combinational function does not terminate.",
+      "fix_hint": "Use a loop-control type that can represent the terminal value equal to the associativity, preventing wraparound before the exit condition is reached."
+    }
+  ]
+}

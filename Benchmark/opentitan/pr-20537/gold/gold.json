@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          65,
+          65
+        ],
+        [
+          80,
+          80
+        ],
+        [
+          86,
+          86
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the outstanding transaction counter's next-state value is forced to 0 when hostif_control_abort_clear_i is asserted, but the register enable is only inc_cnt | dec_cnt. Therefore an abort acknowledgement that occurs in a cycle without a new grant and without a memory response does not update the counter, leaving stale outstanding-request tracking. This violates the abort-handling requirement to clear all outstanding transaction tracking: the counter can remain nonzero, keeping any_outstanding_reqs true, blocking new requests via max_outstanding_reqs_reached, preventing imbx_sram_all_vld_rcvd_o from being asserted, and allowing stale read responses to be forwarded as valid.",
+      "fix_hint": "Make the counter register update whenever the abort-clear signal is asserted by enabling it with update_cnt = inc_cnt | dec_cnt | hostif_control_abort_clear_i and using update_cnt as the flop enable. The existing d_i mux already drives outstanding_req_count_d to 0 during abort, so this causes the outstanding request count to be cleared on abort even when no request is accepted and no response arrives in that cycle."
+    }
+  ]
+}

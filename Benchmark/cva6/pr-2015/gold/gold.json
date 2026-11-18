@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1527,
+          1527
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "For a write to pmpaddr[i], the merge-pre guard combines pmpcfg[i+1].L with pmpcfg[i].A. It can reject a legal write when the upper entry is locked but not TOR, and allow a write when the upper entry is locked in TOR mode but the current entry is not TOR.",
+      "fix_hint": "Evaluate both the lock bit and TOR address mode on pmpcfg[i+1], while retaining the independent lock check for entry i."
+    }
+  ]
+}

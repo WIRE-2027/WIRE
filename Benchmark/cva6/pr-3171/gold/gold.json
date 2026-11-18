@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1261,
+          1263
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder for CPOPW, CLZW, and CTZW instructions (RV64 Zbb extension) only checks bits [21:20] of the instruction but fails to validate that bits [24:22] are zero as required by the RISC-V specification. This causes illegal instruction encodings with non-zero values in bits [24:22] to be incorrectly decoded and executed as valid CPOPW/CLZW/CTZW operations instead of raising an illegal instruction exception.",
+      "fix_hint": "Add a condition to check that instruction bits [24:22] are equal to 3'b000 before decoding CPOPW, CLZW, or CTZW. If bits [24:22] are non-zero, the instruction should be treated as illegal (set illegal_instr_bm = 1'b1). The fix should be applied in the OpcodeOpImm32 decoding block where funct3=3'b001 and instr[31:25]==7'b0110000."
+    }
+  ]
+}

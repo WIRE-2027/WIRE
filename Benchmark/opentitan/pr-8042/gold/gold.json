@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          370,
+          370
+        ],
+        [
+          450,
+          451
+        ],
+        [
+          699,
+          702
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, `inv_state` was assigned directly from `op_fault_err`, which includes asynchronous faults that may assert while no KMAC operation is completing. As a result, an idle fatal fault could drive the main control FSM from stable working states into `StCtrlWipe` immediately, and it also affected the initialization transition in `StCtrlRootKey`. In `StCtrlRootKey`, `init_o` was unconditionally asserted while the next-state decision used the unqualified `inv_state`, so lifecycle-disable or an asynchronous fault at initialization completion would still report initialization complete before wiping, instead of suppressing `init_o` and going to `StCtrlWipe`. Additionally, `op_update_sel` used `op_fault_err` and `op_err` without qualifying them with `op_ack|op_update`, so an idle fatal fault could select `KeyUpdateWipe` and wipe key material outside an operation, violating the spec behavior that idle faults do not change state or wipe until a subsequent operation is invoked.",
+      "fix_hint": "Qualify fault-based controls with operation completion: set `inv_state = op_ack & op_fault_err` so transitions to `StCtrlWipe` occur only when an operation completes with a fault. In `StCtrlRootKey`, compute `init_o = en_i & ~|async_fault` and branch to `StCtrlWipe` when `!init_o`, ensuring initialization is not reported complete when lifecycle enable is inactive or an async fault is present. Gate the `op_fault_err` and `op_err` branches in `op_update_sel` with `(op_ack | op_update)` so idle faults do not select Wipe or Idle key updates."
+    }
+  ]
+}

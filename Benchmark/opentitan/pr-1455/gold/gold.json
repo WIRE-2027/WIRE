@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          299,
+          299
+        ],
+        [
+          309,
+          309
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, message_length was updated using the post-prim_packer handshake and mask: it incremented only when reg_fifo_wvalid && fifo_wready && !hmac_fifo_wsel, and the byte count was derived from reg_fifo_wmask. Because prim_packer can hold partial byte-enabled writes until enough bytes form a full word or until hash_process flushes them, trailing partial writes were not counted when software expected the message length to reflect all bytes written. The root cause is that message-length accounting sampled the data and ready/valid condition after prim_packer instead of at the message-window write entering prim_packer.",
+      "fix_hint": "Move message-length accounting to the input side of prim_packer. Count bytes using the original TL-UL message write mask (msg_fifo_wmask) and enable the update with the packer input acceptance condition (msg_write && sha_en && packer_ready). This ensures every accepted byte-enabled write, including trailing partial writes, increments message_length immediately when it enters the packer, so the reported length is correct before hash_process."
+    }
+  ]
+}

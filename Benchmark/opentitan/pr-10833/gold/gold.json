@@ -1,0 +1,109 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev.sv",
+          "lines": [
+            [
+              139,
+              139
+            ],
+            [
+              588,
+              588
+            ],
+            [
+              1083,
+              1083
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev_linkstate.sv",
+          "lines": [
+            [
+              31,
+              31
+            ],
+            [
+              41,
+              41
+            ],
+            [
+              357,
+              357
+            ],
+            [
+              359,
+              359
+            ],
+            [
+              362,
+              362
+            ],
+            [
+              365,
+              367
+            ],
+            [
+              372,
+              372
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev_usbif.sv",
+          "lines": [
+            [
+              87,
+              87
+            ],
+            [
+              119,
+              119
+            ],
+            [
+              127,
+              127
+            ],
+            [
+              332,
+              332
+            ],
+            [
+              339,
+              339
+            ],
+            [
+              353,
+              354
+            ],
+            [
+              357,
+              357
+            ],
+            [
+              359,
+              361
+            ],
+            [
+              376,
+              376
+            ],
+            [
+              385,
+              385
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, usbdev_usbif only advanced the frame number and asserted frame_start_o when a real host SOF was received: frame_start_o was tied directly to sof_valid, and the frame register only changed inside the if (sof_valid) branch. There was no fallback when a host SOF was lost or corrupted, so the frame counter froze, no frame-start pulse was generated, and software or isochronous logic waiting for frame boundaries stalled until the next valid SOF arrived. In parallel, usbdev_linkstate detected host loss only with a free-running microsecond counter that directly asserted host_lost after 4.096 ms; it did not produce an intermediate missed-SOF pulse that could be used to synthesize a local frame boundary. The fix also needed to keep the SOF reference pulse host-only, because after introducing locally generated frame-start pulses, driving usb_ref_pulse_o from usb_event_frame would have produced false clock-calibration reference pulses.",
+      "fix_hint": "Add a host-SOF-only sof_valid_o pulse from usb_fs_nb_pe/usbdev_usbif. In usbdev_linkstate, generate sof_missed_o when no valid SOF has been observed for 1005 us, maintain a missed-SOF count for host_lost, and clear the counters on SOF, link inactive, or reset. In usbdev_usbif, use sof_missed_o as do_internal_sof to increment frame_q when no host SOF arrived, and derive frame_start_o from any frame value change. Drive usb_ref_pulse_o in usbdev.sv from usb_event_sof (host-generated only) instead of usb_event_frame, so internally generated SOFs do not create false reference pulses."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          504,
+          504
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In StRandEdn, the FSM is waiting for an EDN seed response while rand_valid_o may still be asserted with the previous random word. The old next-state/output logic handles only timer expiry and entropy_ack_i; if rand_consumed_i is asserted while waiting, control falls into the plain else branch that holds StRandEdn without asserting rand_valid_clear. As a result, rand_valid_o remains asserted even though the consumer has consumed the stale word, so the KMAC/SHA3 datapath can keep observing the same entropy while the EDN refresh is still pending. This violates the required behavior that a random-word consumption during an EDN seed refresh deasserts the random-word valid output while leaving the EDN request pending.",
+      "fix_hint": "In the StRandEdn state, add a rand_consumed_i branch that keeps st_d = StRandEdn and asserts rand_valid_clear = 1'b 1. This deasserts the stale random-word valid output while preserving the pending EDN request, so that valid is reasserted only after the EDN response and a fresh seed expansion completes."
+    }
+  ]
+}

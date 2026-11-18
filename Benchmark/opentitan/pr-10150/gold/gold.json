@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          262,
+          266
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The alert state asserts main_sm_alert_o while waiting indefinitely for enable_i to deassert, so the alert lasts for the full wait instead of one clock cycle.",
+      "fix_hint": "Separate the alert pulse generation from the alert hang state. Keep main_sm_alert_o asserted only in the AlertState entry phase and transition to AlertHang in the same cycle. In AlertHang, do not assert main_sm_alert_o and only return to Idle when enable_i is deasserted. Update the state enum and sparse-FSM encodings to include the new AlertHang state while preserving the required Hamming-distance properties."
+    }
+  ]
+}

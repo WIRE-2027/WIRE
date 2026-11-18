@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          503,
+          503
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the ClockLow state, when a repeated START is pending (pend_restart asserted), the old code still drives SDA with the next format byte's bit (fmt_byte_i[bit_index]). On the next state, SetupStart, both SDA and SCL are driven high in the same cycle, so SDA rises at the same time as SCL. This violates the I2C requirement that SDA only change while SCL is low and that SDA be stable/high before SCL rises for a repeated START. The root cause is that the SDA output selection in ClockLow does not consider the pending-restart condition.",
+      "fix_hint": "In ClockLow, select SDA as 1'b1 when pend_restart is asserted, and only use fmt_byte_i[bit_index] when no restart is pending. This forces SDA high during the low phase of SCL, so by the time SetupStart releases SCL, SDA is already stable high."
+    }
+  ]
+}

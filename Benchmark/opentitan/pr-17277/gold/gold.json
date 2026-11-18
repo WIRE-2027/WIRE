@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          209,
+          209
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In StSendData, when an isochronous IN transaction terminates, the FSM unconditionally asserted in_xact_end, signaling successful transaction completion even if the endpoint had no data available. Per the specification, an isochronous endpoint with no data must send a zero-length DATA0 packet and must not indicate a data completion. The old behavior therefore produced a spurious transaction-complete/packet-sent notification for every zero-length isochronous response.",
+      "fix_hint": "Gate the isochronous completion indication on whether the selected endpoint actually supplied data. When the isochronous data packet ends, assert in_xact_end only if in_ep_has_data_i for the current endpoint is set, so zero-length responses with no buffer/data do not report completion while real data payloads still do."
+    }
+  ]
+}

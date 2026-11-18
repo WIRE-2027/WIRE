@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          403,
+          403
+        ],
+        [
+          695,
+          695
+        ],
+        [
+          736,
+          736
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The decoder output is connected directly to the controller-facing `jump_set` signal. While a jump instruction is held by a stall, the decoder continues to assert that signal, so the controller can repeatedly redirect the PC for an instruction that is not advancing.",
+      "fix_hint": "Separate the decoder indication from the controller-facing jump request. Default the latter low and assert it from the executing FIRST_CYCLE jump path. The declaration/wiring, default and qualified assignment are parts of one correction."
+    }
+  ]
+}

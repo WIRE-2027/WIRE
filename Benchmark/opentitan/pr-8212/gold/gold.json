@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          160,
+          161
+        ],
+        [
+          168,
+          168
+        ],
+        [
+          177,
+          178
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old FSM, the response diff-pair next-state values were hard-coded to the active encoding (resp_pd=1'b1, resp_nd=1'b0) in Idle/Check/PingResp response paths, and to idle in the default path, rather than being derived from the registered previous output resp_pq. This breaks the required toggling/alternation when a new escalation or ping condition starts while the response pair is already active. For example, after a PingResp cycle the FSM returns to Idle with resp_pq=1; if esc_level is asserted in that Idle cycle, the Idle branch drives resp_pd=1 again, so the response pair holds the same active value for two consecutive cycles. The same hardcoding in Check and PingResp prevents correct toggling when a ping is interrupted by an escalation request. The response pair must flip every response cycle while active and return to idle only when no request is present.",
+      "fix_hint": "Use the registered response values as the toggle base for all response-generating states. In Idle when esc_level is seen, and in Check, PingResp, and EscResp, assign resp_pd = ~resp_pq and resp_nd = resp_pq so every response-state clock edge flips the differential pair. Keep the idle encoding as the default only when no request/response is driving the pair. This maintains the 1010 ping response and the continuous toggling required for escalation, avoiding repeated identical output values that can be misinterpreted as an integrity error."
+    }
+  ]
+}

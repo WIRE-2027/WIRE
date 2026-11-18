@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          281,
+          281
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In FastPwrStateActive, fetch_en_d is unconditionally driven to lc_ctrl_pkg::On. When reset_req or low_power_entry_i causes the FSM to leave the active state and enter FastPwrStateDisClks, fetch_en_d is not deasserted. Since fetch_en_q is otherwise only updated from fetch_en_d and no other state writes it to Off, processor fetch enable remains asserted after the transition out of active. This violates the spec requirement that processor fetch be disabled immediately when a reset request or low-power entry request is asserted while in the active condition.",
+      "fix_hint": "In the FastPwrStateActive branch, when reset_req or low_power_entry_i is taken, additionally drive fetch_en_d to lc_ctrl_pkg::Off alongside reset_cause_d and state_d. More generally, ensure fetch_en is only On while in the active state and is forced Off when leaving active for reset or low-power shutdown."
+    }
+  ]
+}

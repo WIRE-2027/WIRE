@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          662,
+          668
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the DBG_TAKEN_IF state, the debug_cause_o is assigned based on the current values of trigger_match_i, debug_req_i, and do_single_step_d. However, debug_req_i may be deasserted by the time the FSM reaches DBG_TAKEN_IF (one cycle after the decision to enter debug mode), causing the recorded cause to incorrectly fall through to DBG_CAUSE_STEP instead of DBG_CAUSE_HALTREQ. This results in a mismatch between the DCSR.cause value read by software and the architectural expectation.",
+      "fix_hint": "Sample or latch the debug cause signals (debug_req_i, trigger_match_i, do_single_step_d) at the point where the decision to enter debug mode is made, and use the latched values in DBG_TAKEN_IF to assign debug_cause_o. This ensures the cause reflects the state that triggered the debug entry, not the state one cycle later."
+    }
+  ]
+}

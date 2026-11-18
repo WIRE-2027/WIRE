@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          80,
+          81
+        ],
+        [
+          87,
+          87
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, `edn_req` was generated combinationally as `(reseed_cnt == reseed_interval_i)`. This made the EDN request dependent on the current software-programmed `reseed_interval_i` while the request was still outstanding. If software changed `reseed_interval_i` after an EDN request had been raised but before the EDN acknowledgment/handshake completed, the equality could become false and `edn_req` would deassert, violating the request/acknowledge protocol. The old counter also used `set_i(reseed_req_i & ~edn_req)` with `set_cnt_i(reseed_interval_i)` to trigger a request, which coupled the external trigger to the changing interval value. The fix instead latches the requested EDN transaction until `edn_done` clears it, and derives the request from both the external reseed request and the interval counter without relying on loading/rewriting the counter.",
+      "fix_hint": "Keep the EDN request asserted until the reseed transaction completes. Add a sticky request latch (`edn_req_q`) that is set by either an external `reseed_req_i` or the interval counter match (`~first_use & (reseed_cnt == reseed_interval_i)`), and clear it on `edn_done`. Drive `edn_req` from the latched request so changing `reseed_interval_i` mid-transaction cannot drop an outstanding request. Also disable the counter load/set path (`set_i`/`set_cnt_i`) since the external request is now captured directly by the request latch."
+    }
+  ]
+}

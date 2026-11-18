@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          351,
+          351
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When decoding immediate shift instructions (funct3 == 3'b001) for slli, the decoder only checks instr[31:27] but does not verify instr[26:25] are zero. According to the RISC-V spec, slli requires bits [26:25] to be 0b00. This allows illegal encodings like 32'h02005913 (where instr[26:25] != 0) to be incorrectly decoded as valid slli instructions, causing them to execute without raising an illegal instruction exception.",
+      "fix_hint": "Add checks for instr[26:25] == 2'b00 in the slli decoding path (5'b0_0000 case under funct3 == 3'b001). If these bits are non-zero, set illegal_insn = 1'b1."
+    },
+    {
+      "bug_lineno": [
+        [
+          388,
+          388
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When decoding immediate shift instructions (funct3 == 3'b101) for srli and srai, the decoder only checks instr[31:27] but does not verify instr[26:25] are zero. According to the RISC-V spec, srli (5'b0_0000) and srai (5'b0_1000) require bits [26:25] to be 0b00. This allows illegal encodings where instr[26:25] != 0 to be incorrectly decoded as valid srli/srai instructions, causing them to execute without raising an illegal instruction exception.",
+      "fix_hint": "Add checks for instr[26:25] == 2'b00 in the srli and srai decoding paths (5'b0_0000 and 5'b0_1000 cases under funct3 == 3'b101). If these bits are non-zero, set illegal_insn = 1'b1."
+    }
+  ]
+}

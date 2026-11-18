@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_controller.sv",
+          "lines": [
+            [
+              404,
+              406
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_core.sv",
+          "lines": [
+            [
+              357,
+              357
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-fix design, `ctrl_busy_o` remains at its default value of 1'b1 while the controller is in RESET. After reset is deasserted, this value propagates through `core_busy_d` into `core_busy_q`, causing `clock_en` to become asserted even though `fetch_enable_i` has not yet been observed. As a result, the main internal clock runs unnecessarily during the disabled startup period. At the same time, the controller samples `fetch_enable_i` directly when deciding whether to transition from RESET to BOOT_SET, so startup depends on the fetch-enable pulse overlapping an active internal clock edge. A short pulse presented before the gated clock becomes active can therefore be missed, preventing the core from starting.",
+      "fix_hint": "In `ibex_core.sv`, capture `fetch_enable_i` in a sticky `fetch_enable_q` register clocked by the ungated `clk_i`, clear it on reset, and retain it once asserted. Qualify the normal `clock_en` expression with `fetch_enable_q` so that the internal core clock remains disabled until startup has been enabled. In `ibex_controller.sv`, remove the direct `fetch_enable_i` check from the RESET state and transition unconditionally to BOOT_SET on the first active controller clock edge after the core-level startup logic enables the clock."
+    }
+  ]
+}

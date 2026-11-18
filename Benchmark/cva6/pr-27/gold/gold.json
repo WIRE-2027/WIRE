@@ -1,0 +1,60 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          42,
+          43
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The input arbitration logic unconditionally asserts mul_valid_op and div_valid_op based solely on mult_valid_i and operator_i, without considering the flush_i signal. This allows new multiplication or division operations to be accepted and dispatched even when a flush is active, violating the requirement that flush must immediately abort all operations and clear state.",
+      "fix_hint": "Gate mul_valid_op and div_valid_op with an active-low flush condition (e.g., !flush_i) so that no new operation is accepted during a flush. Ensure the input handshake is suppressed when flush_i is asserted."
+    },
+    {
+      "bug_lineno": [
+        [
+          331,
+          331
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The DIVIDE-state control has no flush-priority branch. A flush can leave the divider executing or taking its normal completion transition instead of cancelling the operation. The repair must select IDLE and suppress divider handshakes; cancellation does not require clearing every datapath register.",
+      "fix_hint": "Add a flush-priority branch in DIVIDE that deasserts OutRdy_SO, OutVld_SO, ARegEn_S, BRegEn_S and LoadEn_S, and selects IDLE. Preserve the fixed implementation's ResRegEn_S behavior; operation cancellation is controlled by state and handshake validity."
+    },
+    {
+      "bug_lineno": [
+        [
+          333,
+          333
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The transition from DIVIDE to FINISH occurs when CntZero_S is true, regardless of the flush_i signal. During a flush, the FSM should immediately return to IDLE instead of proceeding to FINISH, which would otherwise assert OutVld_SO and produce an unwanted result output.",
+      "fix_hint": "Override the normal CntZero_S transition to FINISH when flush_i is asserted. Force State_SN to IDLE directly from DIVIDE if flush_i is active, bypassing the FINISH state entirely."
+    },
+    {
+      "bug_lineno": [
+        [
+          341,
+          341
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The FINISH state asserts OutVld_SO and waits for OutRdy_SI before returning to IDLE, but it has no handling for flush_i. If a flush occurs while the divider is in FINISH, the output valid remains asserted and the state does not immediately clear, violating the requirement that flush aborts all operations and clears output signals.",
+      "fix_hint": "Add a flush condition in the FINISH state that immediately clears OutVld_SO, resets State_SN to IDLE, and suppresses any output handshake when flush_i is asserted."
+    }
+  ]
+}

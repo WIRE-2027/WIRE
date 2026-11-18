@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_tpm.sv",
+          "lines": [
+            [
+              809,
+              809
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The hardware register read mux for TPM_HASH_START (address 0x020) incorrectly returns 0x00000000, so every byte lane is driven to 0x00. The spec requires TPM_HASH_START to return 0xFF bytes, so a read of this hardware-returned register observably returns the wrong data on MISO.",
+      "fix_hint": "Change the RegHashStart case in hw_reg_mux to drive all 32 bits high, i.e. use 32'hFFFF_FFFF instead of 32'h0000_0000, so each selected byte lane returns 0xFF."
+    }
+  ]
+}

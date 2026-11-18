@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          518,
+          518
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The MMU latches the incoming misaligned exception valid bit without qualifying it with an active LSU request. If misaligned_ex_i.valid is asserted in a cycle where lsu_req_i is not active, that stale exception state can be captured and later reported as if it belonged to a real LSU transaction, causing a spurious misaligned exception.",
+      "fix_hint": "When updating the latched misaligned exception state, qualify misaligned_ex_i.valid with lsu_req_i so that misaligned exceptions are only captured for cycles containing an active LSU request."
+    },
+    {
+      "bug_lineno": [
+        [
+          541,
+          541
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The response-stage translation condition checks the current input misaligned_ex_i.valid even though the response-stage address, request valid state, and exception output correspond to the latched previous LSU transaction. In back-to-back or shifted request cycles, this can use the wrong transaction's misaligned-exception state to suppress or allow translation, producing incorrect exception/translation behavior.",
+      "fix_hint": "Use the latched misaligned_ex_q.valid value in the response-stage translation condition, so the decision about whether a misaligned exception occurred is aligned with the same LSU transaction as the response-stage address and exception output."
+    }
+  ]
+}

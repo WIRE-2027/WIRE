@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/hmac/rtl/hmac.sv",
+          "lines": [
+            [
+              663,
+              663
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/hmac/rtl/hmac_core.sv",
+          "lines": [
+            [
+              17,
+              17
+            ],
+            [
+              438,
+              438
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, hmac_core.idle_o was asserted only when the hmac_core FSM was in StIdle and no start/continue request was present. The hmac_core did not receive the stop command, so when software issued a stop during HMAC message processing, the core remained in StMsg after the current block boundary and its idle_o stayed deasserted. As a result, the top-level hmac idle_o also stayed low after a stop, preventing the module from being considered idle for clock gating and context save/restore.",
+      "fix_hint": "Pass reg_hash_stop_i into hmac_core and introduce a registered idle tracker. Deassert idleness on start/continue, assert it when the FSM is in StIdle, assert it when the FSM is in StMsg at a completed message block (txcnt_eq_blksz) with a pending stop request, and hold the previous idle state otherwise. This lets idle_o rise at the stop point even though the main FSM remains in StMsg for context switching."
+    }
+  ]
+}

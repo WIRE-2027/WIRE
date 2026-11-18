@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          197,
+          197
+        ],
+        [
+          200,
+          206
+        ],
+        [
+          209,
+          213
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the AccessLatency=1 generate block, the pre-fix response logic used the one-cycle flags rd_req_q/wr_req_q to decide when to combine the live register-interface response (rdata_i/error_i) with the held response (rdata_q/error_q). These flags clear in the cycle after a_ack even if the TL-UL D response is still backpressured. As a result, while a response is pending and rd_req_q/wr_req_q are both 0, a later assertion of error_i still forces rdata to all ones through the expression (error_i || error_q || wr_req_q), but the error expression ignores error_i because (rd_req_q || wr_req_q) is false. This creates an inconsistent D-channel response: D_DATA is squashed without D_ERROR being set, and the pending response is not held stable as required by the specification.",
+      "fix_hint": "Replace the phase detection based on rd_req_q/wr_req_q with a dedicated a_ack_q register that is high on the cycle after a_ack, indicating the AccessLatency=1 register-interface response cycle. Keep err_internal_q alongside it. In the combinational response generation, use a_ack_q to select the live rdata_i/error_i path (including err_internal_q and wr_req_q for error/write squashing), and otherwise select the registered rdata_q/error_q. Update rdata_q and error_q on every cycle so the response computed in the a_ack_q cycle is captured and held stable during D-channel backpressure, matching the behavior of the AccessLatency=0 path."
+    }
+  ]
+}

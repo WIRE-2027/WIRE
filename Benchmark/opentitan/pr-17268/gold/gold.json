@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          991,
+          991
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, sfifo_esrng_push was asserted whenever es_enable_fo[5], es_delayed_enable, and es_rng_src_valid were high, without checking rng_enable_q. Because rng_enable is now a registered output, there is a cycle after re-enable where es_delayed_enable is already true but rng_enable_q has not yet been asserted. In that cycle the module can still push AST-valid data into the raw-entropy input FIFO even though the RNG enable/ready output is low. This violates the specification that a raw entropy sample is accepted only when both RNG enable and RNG valid are asserted, and causes the RTL, AST push-pull agent, and scoreboard to become out of sync.",
+      "fix_hint": "Gate the input FIFO push with the registered ready output: sfifo_esrng_push should also require rng_enable_q so that data from the RNG interface is only pushed into sfifo_esrng while the module is actually indicating ready to the AST RNG source."
+    }
+  ]
+}

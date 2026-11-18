@@ -1,0 +1,31 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/cache_ctrl.sv",
+          "lines": [
+            [
+              265,
+              271
+            ],
+            [
+              320,
+              324
+            ],
+            [
+              414,
+              414
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The cache controller FSM does not consistently honor the kill/flush request signal `kill_req_i` across all states. In the WAIT_TAG, WAIT_TAG_SAVED, and WAIT_TAG_BYPASSED states the OLD code handles `kill_req_i` only through local branches that transition to IDLE and assert `data_rvalid_o`, while other states such as WAIT_REFILL_GNT, WAIT_CRITICAL_WORD, WAIT_REFILL_VALID, STORE_REQ, and WAIT_MSHR completely ignore `kill_req_i`. Consequently a killed load request may continue through the miss/refill/bypass path, later asserting `data_rvalid_o` and writing stale data with a stale transaction ID after a flush, corrupting downstream state.\n\n【审阅修订(zihan 2026-08-18):修正机理描述——原文称 WAIT_TAG/WAIT_TAG_SAVED 的本地 kill 分支\"位于主 hit/miss 逻辑之后、可能被同块后续赋值覆盖\",与修复前代码结构不符(该分支是 if (!kill_req_i) 的外层 else,kill 有效时 hit/miss 逻辑不会执行);真正的缺陷是 WAIT_REFILL_GNT / WAIT_CRITICAL_WORD / WAIT_REFILL_VALID / STORE_REQ / WAIT_MSHR 这 5 个状态完全忽略 kill_req_i。】",
+      "fix_hint": "Centralize kill handling in the cache controller FSM so that whenever `kill_req_i` is asserted the FSM unconditionally transitions to IDLE and acknowledges the killed request with `data_rvalid_o = 1'b1`, regardless of the current state. Remove the duplicated and conditional local kill branches in WAIT_TAG/WAIT_TAG_SAVED and WAIT_TAG_BYPASSED and place a single post-case kill override in `src/cache_ctrl.sv`."
+    }
+  ]
+}

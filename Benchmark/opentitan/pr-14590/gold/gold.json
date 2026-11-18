@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          353,
+          355
+        ],
+        [
+          479,
+          479
+        ],
+        [
+          482,
+          482
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The read-buffer address tracking output (readbuf_address_o) is updated with the wrong address and at the wrong time. In the old code, readbuf_addr was latched whenever addr_latch_en was asserted, which includes every byte shifted in during the address phase. This caused partial address bytes to be captured before the mailbox check could be fully evaluated. In the output phase, it latched addr_d, which is the next byte address rather than the most recently completed byte address, and the mailbox check also used the next/partial address via addr_in_mailbox. As a result, the last-read address could contain mailbox or partially-assembled addresses instead of only the last completed normal read-buffer byte address.",
+      "fix_hint": "Gate the readbuf_addr update so it only occurs during MainOutput, and latch addr_q (the current completed byte address) instead of addr_d (the next byte address). Evaluate the mailbox-region condition against addr_q as well, for which separate current-address and next-address mailbox comparison signals should be derived from addr_q and addr_d."
+    }
+  ]
+}

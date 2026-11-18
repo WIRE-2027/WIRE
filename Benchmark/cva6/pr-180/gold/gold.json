@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          301,
+          301
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The abstract command used to write A0 also relies on A0 as a debug-service address register, so the architectural write cannot be performed without losing one of the values.",
+      "fix_hint": "Use a preserved scratch location for the architectural A0 value during the debug-memory transfer."
+    },
+    {
+      "bug_lineno": [
+        [
+          327,
+          327
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The abstract command used to read A0 returns the temporary value held in A0 for debug-memory addressing instead of the halted hart's architectural value.",
+      "fix_hint": "Preserve the architectural A0 value separately, transfer it to the debugger data area, and restore debug-service temporaries."
+    }
+  ]
+}

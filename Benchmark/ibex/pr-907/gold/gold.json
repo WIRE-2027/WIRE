@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_fetch_fifo.sv",
+          "lines": [
+            [
+              169,
+              169
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_prefetch_buffer.sv",
+          "lines": [
+            [
+              85,
+              85
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The instruction prefetch path uses an overly conservative capacity check across the fetch FIFO and prefetch buffer. In ibex_fetch_fifo.sv, in_ready_o is computed from only valid_q[DEPTH-NUM_REQS], so it deasserts as soon as the lowest non-output FIFO entry becomes occupied. This implicitly reserves FIFO capacity for the maximum NUM_REQS future responses regardless of how many requests are actually outstanding. In ibex_prefetch_buffer.sv, this scalar ready indication directly gates valid_new_req. Consequently, when the FIFO contains buffered data but fewer than NUM_REQS responses are in flight, a new fetch request can be suppressed even though sufficient capacity exists to accommodate its future response. This loses prefetch opportunities and introduces avoidable instruction-fetch stalls. The root cause spans both modules: the fetch FIFO exposes insufficient occupancy information, and the prefetch buffer cannot combine actual buffered occupancy with actual outstanding-response reservations.",
+      "fix_hint": "Replace the scalar FIFO ready indication with a NUM_REQS-bit occupancy vector that exposes the valid state of the non-output FIFO entries. In the prefetch buffer, reverse the outstanding-request vector so that buffered occupancy and outstanding-response reservations are packed from opposite ends of the tracked capacity, then combine the two vectors with a bitwise OR. Assert fifo_ready whenever the combined vector is not all ones, and use this result to gate valid_new_req. This reserves one response slot for each request that is actually outstanding, allows a new request whenever at least one tracked slot remains available, and prevents the total buffered and reserved capacity from exceeding the FIFO limit."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          52,
+          55
+        ],
+        [
+          131,
+          134
+        ],
+        [
+          161,
+          163
+        ],
+        [
+          350,
+          350
+        ],
+        [
+          359,
+          359
+        ],
+        [
+          440,
+          440
+        ],
+        [
+          442,
+          443
+        ],
+        [
+          501,
+          501
+        ],
+        [
+          508,
+          508
+        ],
+        [
+          512,
+          512
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "At a back-to-back CSAAT segment boundary, a new segment is accepted in the same cycle that the previous segment is completing its final byte. The old code used the combinational segment signals `cmd_rd_en`, `cmd_wr_en`, and `cmd_speed`, which are muxed to the incoming command whenever `new_command` is asserted. This made operations that should retire the current segment use the following segment's direction and speed. As a result, the final byte-read pulse of an RX/bidirectional segment could be suppressed when the next segment is TX-only, or a spurious byte-read pulse could be generated when a TX-only segment is followed by an RX segment. It also caused `speed_o` and the serial-data output enables to switch to the new segment's settings one cycle too early, while the previous segment was still flushing its last byte. The fix disambiguates the two roles by separating the registered/current segment fields (`*_q`) from the next/incoming segment fields (`*_d`) and using the appropriate copy depending on whether the logic finalizes the current segment or starts the next one.",
+      "fix_hint": "Keep explicit `_d` and `_q` copies of the per-segment fields: `cmd_speed_d/q`, `cmd_wr_en_d/q`, and `cmd_rd_en_d/q`. Use the `*_q` values for operations that complete or observe the currently active segment, such as `rd_en_internal`, `speed_o`, `sd_en_o`, and shift geometry belonging to the active transfer. Use the `*_d` values for operations that initialize the immediately following segment, such as the byte-load pulse and dummy-direction detection when loading the bit counter. This prevents the incoming segment's parameters from taking effect before the previous segment has been fully retired."
+    }
+  ]
+}

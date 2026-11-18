@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          274,
+          274
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The instruction-fetch error check in tlul_adapter_sram flagged an InstrType request only when en_ifetch_i was exactly InstrDis. However, en_ifetch_i is a multi-bit enable-style signal: instruction fetch is enabled only when en_ifetch_i equals InstrEn, and any other value means instruction fetch is not enabled. With the old condition, an InstrType request with en_ifetch_i set to a non-InstrEn, non-InstrDis value (for example 3'b111) did not produce instr_error, so the invalid instruction fetch was not rejected and could be forwarded to the SRAM instead of returning an error response.",
+      "fix_hint": "Change the instruction-fetch error condition to flag InstrType requests whenever en_ifetch_i is not the explicit enabled encoding: assign instr_error = tl_i.a_user.tl_type == InstrType & en_ifetch_i != InstrEn; This treats every non-enabled encoding as disabled and matches the specification that instruction fetches are only valid when the enable input indicates they are enabled."
+    }
+  ]
+}

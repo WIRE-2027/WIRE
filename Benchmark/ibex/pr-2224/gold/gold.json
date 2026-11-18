@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          150,
+          151
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When RdataMuxCheck is enabled, the read data outputs for both ports use a hardcoded zero constant ('0) instead of the configurable WordZeroVal parameter when reading from register x0. This causes incorrect data to be returned for x0 reads when WordZeroVal is configured to a non-zero value, leading to ECC check failures when RegFileECC is enabled.",
+      "fix_hint": "Replace the hardcoded '0 constant with the WordZeroVal parameter in the conditional assignments for rdata_a_o and rdata_b_o within the gen_rdata_mux_check block."
+    },
+    {
+      "bug_lineno": [
+        [
+          154,
+          154
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When RdataMuxCheck is disabled, the read data output for port A uses a hardcoded zero constant ('0) instead of the configurable WordZeroVal parameter when reading from register x0. This causes incorrect data to be returned for x0 reads when WordZeroVal is configured to a non-zero value, leading to ECC check failures when RegFileECC is enabled.",
+      "fix_hint": "Replace the hardcoded '0 constant with the WordZeroVal parameter in the conditional assignment for rdata_a_o within the gen_no_rdata_mux_check block."
+    },
+    {
+      "bug_lineno": [
+        [
+          157,
+          157
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When RdataMuxCheck is disabled, the read data output for port B uses a hardcoded zero constant ('0) instead of the configurable WordZeroVal parameter when reading from register x0. This causes incorrect data to be returned for x0 reads when WordZeroVal is configured to a non-zero value, leading to ECC check failures when RegFileECC is enabled.",
+      "fix_hint": "Replace the hardcoded '0 constant with the WordZeroVal parameter in the conditional assignment for rdata_b_o within the gen_no_rdata_mux_check block."
+    }
+  ]
+}

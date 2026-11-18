@@ -1,0 +1,35 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/pwrmgr/rtl/pwrmgr.sv",
+          "lines": [
+            [
+              107,
+              108
+            ],
+            [
+              115,
+              115
+            ],
+            [
+              120,
+              120
+            ],
+            [
+              147,
+              147
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The escalation reset request from prim_esc_receiver was used directly as peri_reqs_raw.rstreqs[ResetEscIdx] without any latching or holding. The request is in the escalation clock domain and then passes through the always-on slow-clock CDC synchronizer. If the escalation request is asserted only briefly, it can be deasserted before the slow domain samples it, so the reset request is lost and the power manager never performs the required escalation reset. The old code also lacked the sticky state needed to guarantee that once an escalation request is seen it remains visible until the system reset.",
+      "fix_hint": "Add a sticky latch in the escalation clock/reset domain for the esc_req output. Capture esc_rst_req_d from prim_esc_receiver and set esc_rst_req_q high on any assertion; hold it high until reset, and use esc_rst_req_q (ORed with esc_timeout) in the reset request vector so the slow-clock CDC logic reliably observes the escalation request and cannot miss it."
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/usbdev/rtl/usb_fs_rx.sv",
+          "lines": [
+            [
+              516,
+              516
+            ],
+            [
+              526,
+              529
+            ],
+            [
+              604,
+              604
+            ],
+            [
+              618,
+              618
+            ],
+            [
+              628,
+              628
+            ],
+            [
+              637,
+              637
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The receiver's packet validity check accepted packets based only on PID validity, absence of bit-stuffing violations, and CRC status, without verifying that the packet length was legal for its type. As a result, token packets with more or fewer than 16 bits after the PID, data packets that were not byte-aligned or were shorter than 16 bits after the PID, and handshake packets with extra bits between the PID and EOP were all reported as valid. This allowed malformed packets to be treated as valid USB transactions.",
+      "fix_hint": "Track the number of bits received after the PID with dedicated counters (rx_data_len16_q and rx_data_len_q). Derive per-packet-type length qualifiers: valid_token_len requires exactly 16 bits, valid_data_len requires at least 16 bits and byte alignment, and valid_handshake_len requires zero additional bits. AND these qualifiers into valid_packet_o for the corresponding packet types, and clear the counters on reset, link reset, and packet start."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/usbdev/rtl/usb_fs_nb_pe.sv",
+          "lines": [
+            [
+              91,
+              91
+            ],
+            [
+              143,
+              143
+            ],
+            [
+              161,
+              161
+            ],
+            [
+              295,
+              295
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usb_fs_rx.sv",
+          "lines": [
+            [
+              46,
+              46
+            ],
+            [
+              524,
+              524
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev.sv",
+          "lines": [
+            [
+              654,
+              654
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev_linkstate.sv",
+          "lines": [
+            [
+              197,
+              197
+            ],
+            [
+              370,
+              370
+            ],
+            [
+              383,
+              383
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usbdev_usbif.sv",
+          "lines": [
+            [
+              304,
+              304
+            ],
+            [
+              386,
+              386
+            ],
+            [
+              406,
+              406
+            ],
+            [
+              408,
+              408
+            ],
+            [
+              432,
+              432
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The old design exposed a single sof_valid_o signal defined as rx_pkt_end & rx_pkt_valid & (rx_pid == UsbPidSof). Because rx_pkt_valid requires correct CRC-5 and no bit-stuffing violation, any SOF packet with a valid PID but a corrupted CRC or bit-stuffing was completely discarded. The link-state FSM, host-loss counters, SOF reference pulse, frame update logic, and event_sof generation all used this over-strict signal, so such a corrupted SOF could not maintain synchronization, prevent host-lost detection, or advance the local frame reference.",
+      "fix_hint": "Separate SOF detection from SOF validity. Expose valid_pid_o from usb_fs_rx and use it in usb_fs_nb_pe to generate sof_detected_o for any SOF with a valid PID, while keeping sof_valid_o for SOF packets that also have correct CRC-5 and no bit-stuffing violation. Connect synchronization-oriented consumers, including link-state transition, host-loss counters, SOF reference pulse, and frame-start/increment logic, to sof_detected_o. Use sof_valid only for capturing the received frame index; when a detected-but-invalid SOF arrives, increment the local frame number instead of loading the unreliable frame index."
+    }
+  ]
+}

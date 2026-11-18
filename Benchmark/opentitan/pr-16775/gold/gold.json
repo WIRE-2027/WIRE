@@ -1,0 +1,66 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          108,
+          108
+        ],
+        [
+          265,
+          265
+        ],
+        [
+          267,
+          267
+        ],
+        [
+          269,
+          269
+        ],
+        [
+          271,
+          273
+        ],
+        [
+          474,
+          474
+        ],
+        [
+          609,
+          609
+        ],
+        [
+          807,
+          807
+        ],
+        [
+          823,
+          823
+        ],
+        [
+          851,
+          851
+        ],
+        [
+          853,
+          853
+        ],
+        [
+          1029,
+          1029
+        ],
+        [
+          1036,
+          1036
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In host mode, the FSM did not properly distinguish a first START from a repeated START. The old no_stop/restart logic treated any START after a previous logged start as a restart, but the Active state always released SCL immediately when fmt_flag_start_before_i was set and went directly to SetupStart. For a repeated START, this skipped the normal ClockLow low phase, so SCL was released from the previous ACK/bit low state before the programmed low time had elapsed, producing a short SCL low pulse and a setup/timing violation before the repeated START. The fix introduces trans_started to know whether a transaction has already started, and a registered pending-restart request (req_restart/pend_restart) so that a restart can first go through the normal ClockLow period and only then enter SetupStart. The command-complete event was also updated to be emitted from log_start && pend_restart so it correctly marks the repeated START boundary instead of using the old combinational restart/no_stop condition.",
+      "fix_hint": "Replace no_stop/restart with trans_started and a registered pending-restart request. In Active, when fmt_flag_start_before_i is set but trans_started is true, keep SCL low, assert req_restart, and enter ClockLow instead of SetupStart. After the ClockLow period has elapsed, use pend_restart to branch to SetupStart for the repeated START; otherwise continue to ClockPulse. Clear pend_restart when the START is logged, clear trans_started on STOP or host disable, and assert event_cmd_complete_o only from log_start && pend_restart."
+    }
+  ]
+}

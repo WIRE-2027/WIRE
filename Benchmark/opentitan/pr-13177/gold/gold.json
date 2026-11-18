@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip_templates/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              344,
+              344
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              344,
+              344
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The crashdump latching state is a one-shot mechanism: on the first latch_crashdump_i assertion, crashump_latched_q is set and remains set until reset. The old code does not re-arm or clear this latch when software writes a class clear register. As a result, after a crashdump snapshot has been captured, it stays frozen on crashdump_o even when the escalation is cleared by writing to classa_clr_shadowed/classb_clr_shadowed/classc_clr_shadowed/classd_clr_shadowed. The specification requires that any class-clear indication re-arms the crashdump mechanism, discards the latched snapshot, and returns the output to live mode so a later latch request can capture a new snapshot. The fix adds priority handling for |reg2hw_wrap.class_clr in the p_crashdump sequential block, clearing crashump_latched_q and crashdump_q before the latch request is considered.",
+      "fix_hint": "In the p_crashdump always_ff block, when any bit of reg2hw_wrap.class_clr is asserted, deassert crashump_latched_q and clear crashdump_q, giving class-clear priority over a simultaneously asserted latch_crashdump_i. Use this as the first branch (if/else if) so that a class clear re-arms the mechanism and the crashdump output returns to the live crashdump_d value. Apply the same change in both the template and top_earlgrey autogen versions of alert_handler_reg_wrap.sv."
+    }
+  ]
+}

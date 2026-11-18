@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          226,
+          226
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The DTLB instance i_dtlb connects its lu_asid_i lookup input to itlb_lu_asid instead of dtlb_lu_asid. As a result, data-side TLB lookups use the instruction-side ASID rather than the ASID associated with the current load/store translation context. When the instruction and data lookup ASIDs differ, the DTLB can miss an otherwise valid entry or match an entry from the wrong address space, causing incorrect data address translation behavior.",
+      "fix_hint": "Connect the i_dtlb.lu_asid_i port to dtlb_lu_asid instead of itlb_lu_asid. The DTLB lookup ASID should come from the load/store translation path, while the ITLB should continue to use itlb_lu_asid for instruction fetch translations."
+    }
+  ]
+}

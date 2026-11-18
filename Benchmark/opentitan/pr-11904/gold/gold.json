@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          28,
+          37
+        ],
+        [
+          40,
+          40
+        ],
+        [
+          42,
+          42
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The pre-merge filter-match interrupt path synchronized each aon_filter_match_i bit with an independent prim_pulse_sync and used the resulting per-filter pulses directly as intr_events. A pulse synchronizer only transfers a single pulse and has no staging or hold mechanism in the always-on clock domain to keep accumulating pending filter matches while the destination clock is not consuming them. Therefore, filter-match events arriving before an earlier event has been accepted can be lost, and the per-filter source identity of concurrently pending events is not preserved. This violates the requirement to capture, hold, and concurrently present all pending filter-match events so that the per-source sticky status bits and the combined interrupt state are set correctly.",
+      "fix_hint": "Replace the per-bit pulse synchronizers with a request/acknowledge CDC structure. Stage incoming aon_filter_match_i bits in staging_filter_match in the always-on clock domain, load them into aon_req_hold when no request is outstanding, and synchronize the request with prim_sync_reqack. Use the synchronized single filter_match_event as the event pulse and expand it back to per-filter events by ANDing it with the held aon_req_hold mask in intr_events. Clear aon_req_hold only after the destination acknowledges so that multiple events and their filter-source identities are preserved."
+    }
+  ]
+}

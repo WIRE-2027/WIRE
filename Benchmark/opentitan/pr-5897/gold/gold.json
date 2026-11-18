@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          417,
+          417
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the pre-merge code, the StCtrlWipe state sets op_accept = 1'b1 but does not assert invalid_op. Since invalid_op is defaulted to 0, any operation completing while the module is in the life-cycle wipe state is not marked as invalid. As a result, error_o[ErrInvalidOp] stays deasserted and status_o reports OpDoneSuccess instead of OpDoneFail. This violates the specification that commands issued during Wipe/Invalid are illegal and must complete with an invalid-operation failure.",
+      "fix_hint": "Assert the invalid-operation indication in the StCtrlWipe state so that any transaction completion while wiping reports error_o[ErrInvalidOp] and the final operation status is Done with failure. This can be done by setting invalid_op = 1'b1 in the StCtrlWipe branch alongside op_accept."
+    }
+  ]
+}

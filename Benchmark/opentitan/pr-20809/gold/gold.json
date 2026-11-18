@@ -1,0 +1,52 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr_dpe/rtl/keymgr_dpe_ctrl.sv",
+          "lines": [
+            [
+              190,
+              193
+            ],
+            [
+              248,
+              248
+            ],
+            [
+              312,
+              312
+            ],
+            [
+              483,
+              483
+            ],
+            [
+              503,
+              503
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/keymgr_dpe/rtl/keymgr_dpe_op_state_ctrl.sv",
+          "lines": [
+            [
+              63,
+              63
+            ],
+            [
+              75,
+              75
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The disable operation was not sequenced as a real operation. In the main control FSM, an accepted disable command transitioned directly from Available to Disabled while op_start_i was still asserted, so the Disabled state treated the pending start as a new invalid request and the operation completed with OpDoneFail. The operation state controller had no disable request handling, so it produced no op_ack/op_update cycle for disable. As a result, the slot-update mux never selected a wipe phase and the internal DPE key slots were not erased. In addition, the only existing wipe-all slot phase was the full-wipe phase tied to wipe_key_o; the disable path needed a distinct internal-only wipe phase so that generated software and hardware keys are preserved when wiping internal key slots.",
+      "fix_hint": "Handle disable as a single-cycle operation in keymgr_dpe_op_state_ctrl: give dis_req_i priority over other requests, add a StDis state that asserts op_ack_o and op_update_o, and return to idle. In keymgr_dpe_ctrl, transition from Available to a new StCtrlDpeDisabling state that keeps op_req asserted until the operation controller acknowledges, then move to StCtrlDpeDisabled. On the disable op_update, select SlotWipeInternalOnly instead of SlotWipeAll, and keep wipe_key_o asserted only for SlotWipeAll so that software/hardware generated keys are not wiped during disablement."
+    }
+  ]
+}

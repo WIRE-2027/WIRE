@@ -1,0 +1,60 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          65,
+          65
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The compressed decoder unconditionally expands the C0 function-011 encoding as the RV64 C.LD integer load. On RV32, the same encoding represents C.FLW, so the old logic generates the wrong opcode and immediate layout.",
+      "fix_hint": "Make the OpcodeC0Ld expansion depend on XLEN: generate C.LD for RV64 and C.FLW with the RV32 floating-point load encoding for RV32."
+    },
+    {
+      "bug_lineno": [
+        [
+          80,
+          80
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The compressed decoder unconditionally expands the C0 function-111 encoding as the RV64 C.SD integer store. On RV32, the same encoding represents C.FSW, so the old logic generates the wrong opcode and immediate layout.",
+      "fix_hint": "Make the OpcodeC0Sd expansion depend on XLEN: generate C.SD for RV64 and C.FSW with the RV32 floating-point store encoding for RV32."
+    },
+    {
+      "bug_lineno": [
+        [
+          224,
+          225
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The compressed decoder unconditionally expands C2 function 011 (c.ldsp) as a 64-bit integer double-word load from stack pointer, ignoring the XLEN parameter. On RV32, this encoding represents a single-precision floating-point load (c.flwsp), causing incorrect opcode generation and illegal instruction exceptions.",
+      "fix_hint": "Add XLEN-dependent branching in the OpcodeC2Ldsp case to generate the correct load opcode (LoadFp for RV32, Load for RV64) and immediate formatting per the RISC-V specification."
+    },
+    {
+      "bug_lineno": [
+        [
+          265,
+          265
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The compressed decoder unconditionally expands C2 function 111 (c.sdsp) as a 64-bit integer double-word store to stack pointer, ignoring the XLEN parameter. On RV32, this encoding represents a single-precision floating-point store (c.fswsp), causing incorrect opcode generation and illegal instruction exceptions.",
+      "fix_hint": "Add XLEN-dependent branching in the OpcodeC2Sdsp case to generate the correct store opcode (StoreFp for RV32, Store for RV64) and immediate formatting per the RISC-V specification."
+    }
+  ]
+}

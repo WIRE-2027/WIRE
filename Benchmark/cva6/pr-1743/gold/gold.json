@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          572,
+          572
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When mcountinhibit[0] is set, the next mcycle value is taken from instret. Inhibition can therefore replace the cycle count with an unrelated retired-instruction count instead of preserving mcycle.",
+      "fix_hint": "Use the current cycle-counter state as the inhibited next value, leaving explicit CSR writes and normal increments unchanged."
+    }
+  ]
+}

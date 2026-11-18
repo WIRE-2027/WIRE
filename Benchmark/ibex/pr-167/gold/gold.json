@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          326,
+          326
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "When a debug halt request is asserted during normal execution (not EBREAK), the controller incorrectly transitions to DBG_TAKEN_ID state instead of DBG_TAKEN_IF. DBG_TAKEN_ID saves the PC from the ID stage (current instruction address) to dpc, but for halt requests the spec requires saving the next instruction's PC (from IF stage). This causes the same instruction to be re-executed after exiting debug mode via dret, as observed in the issue where instruction at PC 0x8000056a was executed twice.",
+      "fix_hint": "Change the transition from DECODE state when enter_debug_mode is asserted (and not stall/special_req) to go to DBG_TAKEN_IF instead of DBG_TAKEN_ID. DBG_TAKEN_IF correctly saves the IF stage PC (next instruction) to dpc for halt requests, while DBG_TAKEN_ID should only be used for EBREAK instructions."
+    }
+  ]
+}

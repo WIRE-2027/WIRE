@@ -1,0 +1,30 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          541,
+          543
+        ],
+        [
+          546,
+          546
+        ],
+        [
+          583,
+          585
+        ],
+        [
+          588,
+          589
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "When EDN is disabled while the main command flow is feeding a command back into the reseed or generate command FIFO, the old code immediately clears the pre-flop feedback signals (send_rescmd_d/send_gencmd_d) when edn_enable_fo[SendReseedCmd]/[SendGenCmd] drops. However, the FIFO push enables still used the registered send_rescmd_q/send_gencmd_q without qualifying them with the enable. During the cycle after disable, the registered feedback signal can still be high while auto_req_mode_busy has already been deasserted by the main state machine. The FIFO write then selects the software command/data bus (reseed_cmd_bus or generate_cmd_bus) instead of the intended feedback command from the FIFO, potentially pushing invalid or unknown data into the command FIFO. The same stale-push hazard also applies to boot_wr_cmd_genfifo.",
+      "fix_hint": "Move the enable qualification to the FIFO push path after the flopped feedback signal. Only allow send_rescmd_q and send_gencmd_q to push when edn_enable_fo[SendReseedCmd] and edn_enable_fo[SendGenCmd] are active, and similarly qualify boot_wr_cmd_genfifo. Do not force the pre-flop feedback registers to zero on disable; instead let the main state machine deassert them while the qualified push prevents a stale one-cycle write into the reseed and generate command FIFOs."
+    }
+  ]
+}

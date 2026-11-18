@@ -1,0 +1,41 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/hmac/rtl/hmac.sv",
+          "lines": [
+            [
+              514,
+              514
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/hmac/rtl/hmac_core.sv",
+          "lines": [
+            [
+              309,
+              309
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/hmac/rtl/sha2.sv",
+          "lines": [
+            [
+              318,
+              318
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge code, hmac.idle_o was hardwired to 1'b1 with a TBD comment, so the HMAC module always reported idle even while a hash/HMAC operation was active, message data was still in the FIFO, or the SHA-256 core was still processing. The specification requires idle_o to be asserted only when no operation is active, the message FIFO is empty, the HMAC sequencer is idle, and the SHA-2 engine is idle. The root cause is that the idle status was not actually generated: the top level did not combine the packer/FIFO/core statuses, and hmac_core and sha2 did not expose or compute their own idle conditions.",
+      "fix_hint": "Replace the constant idle_o assignment with a real idle condition. In hmac_core, compute idle as being in StIdle with no hash_start. In sha2, compute idle as both the FIFO and SHA state machines being idle with no hash_start. At the top level, assert idle_o only when the packer is not producing valid output, the message FIFO has no valid read data, hmac_core reports idle, and sha2 reports idle, and register the result so it resets to 1."
+    }
+  ]
+}

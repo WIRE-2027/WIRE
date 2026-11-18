@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_controller.sv",
+          "lines": [
+            [
+              669,
+              669
+            ],
+            [
+              700,
+              700
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_cs_registers.sv",
+          "lines": [
+            [
+              1653,
+              1653
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When the instruction cache is enabled by the CPU control CSR, `icache_enable_o` remains asserted while the core is entering and operating in Debug Mode. Debug modules may execute dynamically changing code from the debug memory region, so caching these fetches can cause later debug commands to execute stale instructions. The CSR block does not qualify the stored cache-enable value with the registered Debug Mode state, and the controller provides no same-cycle indication for the transition cycle before that state is registered.",
+      "fix_hint": "Generate a combinational Debug Mode entry indication in each controller path that takes debug (`DBG_TAKEN_IF` and `DBG_TAKEN_ID`), propagate it through the hierarchy without adding a cycle of latency, and force the effective instruction-cache enable low whenever either the registered Debug Mode state or the entry indication is asserted. Mask only the exported enable; preserve the stored CSR field so that the configured cache setting can become effective again after leaving Debug Mode."
+    }
+  ]
+}

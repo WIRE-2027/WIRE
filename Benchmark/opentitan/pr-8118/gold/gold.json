@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          571,
+          571
+        ],
+        [
+          702,
+          702
+        ],
+        [
+          704,
+          704
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge code, StCtrlInvalid set the same `disabled` flag used by StCtrlDisabled, and `op_update_sel` gave the `disabled` condition priority over the `op_fault_err` condition. As a result, when an operation in StCtrlDisabled encountered a fatal fault, the update selector chose KeyUpdateKmac instead of KeyUpdateWipe, so an operational fault would not immediately begin wiping the key material. This violates the spec requirement that an operational fault starts the wiping sequence and transitions to Invalid. The fix separates the Invalid state from the Disabled state: Invalid keeps the always-KMAC-randomizing behavior, while a fault in Disabled is allowed to take precedence and select KeyUpdateWipe.",
+      "fix_hint": "Use a distinct `invalid` indication for the StCtrlInvalid state instead of reusing `disabled`, and adjust `op_update_sel` so the already-invalid state keeps selecting KeyUpdateKmac while the fault-wipe check is placed ahead of the disabled-state handling. This lets Disabled-state faults trigger KeyUpdateWipe immediately while preserving continuous randomization in Invalid."
+    }
+  ]
+}

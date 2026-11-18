@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          490,
+          497
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The obsolete assertion treats a grant observed while the LSU is in WAIT_RVALID as requiring response valid in the same cycle. In this state the original request has already been granted and the response may arrive later, so valid memory-interface timing can trigger a false assertion failure.",
+      "fix_hint": "Check that a response-valid event occurs only while the LSU is in a state that expects a response, without requiring request grant and response valid to coincide in the same cycle."
+    }
+  ]
+}

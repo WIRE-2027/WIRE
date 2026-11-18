@@ -1,0 +1,103 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/dv/sv/cip_lib/seq_lib/cip_tl_seq_item.sv",
+          "lines": [
+            [
+              42,
+              42
+            ],
+            [
+              65,
+              65
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/tlul/rtl/tlul_pkg.sv",
+          "lines": [
+            [
+              46,
+              46
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/tlul/rtl/tlul_rsp_intg_gen.sv",
+          "lines": [
+            [
+              39,
+              39
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "Data integrity was generated using the command/response SECDED encoder prim_secded_64_57_enc and with tlul_pkg::DataMaxWidth set to 57. This treats the 32-bit data word as a 57-bit payload and produces a 64-bit protected code word, but TL-UL data integrity protects exactly the 32-bit data word using the 39/32 SECDED code. As a result, cip_tl_seq_item::compute_a_user, cip_tl_seq_item::compute_d_user, and tlul_rsp_intg_gen produce data integrity values that do not match the bus/data-integrity checker expectations, causing invalid or mismatched data sidebands.",
+      "fix_hint": "Set DataMaxWidth to 32 so DataFullWidth becomes 39, and replace all data-integrity encoding calls from prim_secded_64_57_enc to prim_secded_39_32_enc in both DV sequence-item data paths and in tlul_rsp_intg_gen."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/tlul/rtl/tlul_cmd_intg_chk.sv",
+          "lines": [
+            [
+              20,
+              20
+            ],
+            [
+              30,
+              30
+            ],
+            [
+              32,
+              32
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In tlul_cmd_intg_chk, err_o was only driven as tl_i.a_valid & |err, where err came from the command-integrity decoder. The checker never decoded or compared a_user.data_intg against a_data, so write requests carrying corrupted data or data-integrity bits did not raise an integrity error. TL-UL requires write-opcode requests (PutFullData and PutPartialData) to be checked against the full write-data bus, while non-write requests must not use the data-integrity check.",
+      "fix_hint": "Instantiate prim_secded_39_32_dec over {a_user.data_intg, a_data}, compute a write-transaction qualifier from a_valid and a_opcode being PutFullData or PutPartialData, and OR wr_txn & |data_err into err_o alongside the existing command-integrity error."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/tlul/rtl/tlul_cmd_intg_gen.sv",
+          "lines": [
+            [
+              11,
+              11
+            ],
+            [
+              27,
+              27
+            ],
+            [
+              29,
+              29
+            ],
+            [
+              30,
+              30
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In tlul_cmd_intg_gen, the output assignment only copied tl_i and overwrote a_user.cmd_intg. It did not compute or drive a_user.data_intg, and it did not mask a_data to the active byte lanes. A host that does not natively generate data integrity therefore still presents an invalid or missing data-integrity sideband, and data on inactive mask lanes does not match the data covered by the generated integrity value. The fix adds an EnableDataIntgGen option; when enabled it builds data_final by zeroing bytes whose a_mask bit is 0, encodes data_final with prim_secded_39_32_enc, and drives tl_o.a_data and tl_o.a_user.data_intg from those values. When disabled, data and data_intg pass through unchanged.",
+      "fix_hint": "Parameterize tlul_cmd_intg_gen with EnableDataIntgGen, generate the masked write-data vector from a_mask and a_data, compute data_intg with prim_secded_39_32_enc, and assign tl_o.a_data and tl_o.a_user.data_intg from those signals in the always_comb output assignment."
+    }
+  ]
+}

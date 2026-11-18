@@ -1,0 +1,62 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          63,
+          63
+        ],
+        [
+          82,
+          82
+        ],
+        [
+          101,
+          101
+        ],
+        [
+          120,
+          120
+        ],
+        [
+          176,
+          176
+        ],
+        [
+          184,
+          184
+        ],
+        [
+          195,
+          195
+        ],
+        [
+          203,
+          203
+        ],
+        [
+          214,
+          214
+        ],
+        [
+          222,
+          222
+        ],
+        [
+          233,
+          233
+        ],
+        [
+          241,
+          241
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In padring.sv, the shared IOB0-3 muxing logic identifies the dedicated SPI pads using the wrong enumeration constants: DioSpiHost0Sd2, DioSpiHost0Sd3, DioSpiDeviceSd2, and DioSpiDeviceSd3. These constants are from the DIO signal enumeration space, not the physical pad enumeration space (dio_pad_e). They are used both in the dedicated-pad generate-loop comparisons and as indices into the physical pad arrays dio_in_o/dio_in_raw_o. As a result, the special shared-mode output muxes may be attached to the wrong dedicated pad, and the IOB0-3 input muxes may observe the wrong dedicated pad's normal/raw input, violating the fixed shared-pair mapping described in Section 5 of the padring specification.",
+      "fix_hint": "Replace all uses of the DIO signal enumeration constants with the physical pad enumeration constants in padring.sv: use DioPadSpiHostD2, DioPadSpiHostD3, DioPadSpiDevD2, and DioPadSpiDevD3 in the dedicated-pad generate conditions, in the muxed input source indices, and in the generate block names. This ensures all comparisons and array indices use the same dio_pad_e index space as dio_in_o, dio_in_raw_o, dio_out_i, and dio_oe_i, restoring the correct shared IOB0-3 pad connections."
+    }
+  ]
+}

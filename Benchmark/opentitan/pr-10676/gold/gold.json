@@ -1,0 +1,69 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/aes/rtl/aes_control_fsm.sv",
+          "lines": [
+            [
+              188,
+              188
+            ],
+            [
+              794,
+              794
+            ],
+            [
+              798,
+              807
+            ],
+            [
+              814,
+              816
+            ],
+            [
+              820,
+              820
+            ],
+            [
+              822,
+              822
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/aes/rtl/aes_core.sv",
+          "lines": [
+            [
+              78,
+              78
+            ],
+            [
+              837,
+              837
+            ],
+            [
+              843,
+              844
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/aes/rtl/aes_pkg.sv",
+          "lines": [
+            [
+              9,
+              9
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "Before the fix, fatal alerts unconditionally cleared all status and trigger bits. In aes_control_fsm, alert_fatal_i directly forced idle, stall, output_lost, output_valid, and input_ready to 0 while forcing their write-enables high, and also forced the start, key/IV/data-in clear, data-out clear, and PRNG-reseed trigger write-enables. In aes_core, alert_fatal_o forced the recoverable control-update error status bit to be cleared by driving hw2reg.status.alert_recov_ctrl_update_err.d to 0 when a fatal alert occurred. This destroys valuable debug/status information whenever any fatal alert is asserted, including the recoverable control-update error indication, and it is not configurable. The root cause is that fatal-alert-driven status/trigger clearing was hard-coded rather than being controlled by a compile-time option.",
+      "fix_hint": "Add a package-level parameter such as ClearStatusOnFatalAlert with a default of 1'b0, and create a local clear_on_fatal signal equal to that parameter ANDed with the fatal-alert indicator. Use clear_on_fatal in aes_control_fsm for all status and trigger forced-clearing assignments, and in aes_core for gating the recoverable control-update error status bit's d/de signals. This keeps the old clearing behavior only when explicitly enabled, while preserving status and trigger state by default for debugging."
+    }
+  ]
+}

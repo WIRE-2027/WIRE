@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          996,
+          996
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The vectored-mode trap vector address calculation is triggered when either mtvec[0] or stvec[0] is set, regardless of the actual trap target privilege level. This causes a trap to machine mode to incorrectly use vectored addressing when only stvec is in vectored mode, or vice versa, violating the RISC-V ISA requirement that mtvec and stvec modes are independent.",
+      "fix_hint": "Gate the vectored-mode condition with the trap target privilege level: use mtvec[0] only when trapping to M-mode and stvec[0] only when trapping to S-mode. Replace the OR of both mode bits with a mux selected by trap_to_priv_lvl."
+    }
+  ]
+}

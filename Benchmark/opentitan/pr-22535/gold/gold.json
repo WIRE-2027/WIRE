@@ -1,0 +1,31 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_kmac_if.sv",
+          "lines": [
+            [
+              96,
+              96
+            ],
+            [
+              286,
+              286
+            ],
+            [
+              310,
+              310
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In keymgr_kmac_if, the decoy values generated when no real digest or data is being presented were not properly diversified. For data_o, the old DecoyOutputCopies parameter included a factor of Shares and the idle/decoy assignment replicated only entropy_i[0], so both share halves of data_o became identical copies of the same entropy share. In the masked share representation this makes the effective decoy value zero when observed on the sideload/data paths. In addition, the decoy_data used for kmac_data_o.data was driven directly from raw entropy_i[1] without an extra permutation, so the KMAC decoy stream was not independently randomized from the share values used elsewhere. These weaknesses affect invalid operations, idle behavior, and any clearing/decoy path that must present randomized, non-correlated share data.",
+      "fix_hint": "Diversify the decoy values per share and per destination. For data_o, compute the number of copies per share as (AppDigestW / RandWidth) rather than multiplying by Shares, and drive the upper share output from entropy_i[1] and the lower share output from entropy_i[0]. For the KMAC data path, generate decoy_data from a separately permuted version of entropy_i[1] (for example perm_data(entropy_i[1], RndCnstRandPerm)) so that the decoy stream is not merely the raw entropy share and is non-deterministic relative to the other share."
+    }
+  ]
+}

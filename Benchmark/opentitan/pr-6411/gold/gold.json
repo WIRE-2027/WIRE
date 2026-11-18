@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          135,
+          135
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the old code, sfifo_cmd_push was asserted whenever cs_enable_i and cmd_stage_vld_i were high, without checking the command FIFO full/ready condition. Since cmd_stage_rdy_o is derived from !sfifo_cmd_full, the FIFO could be written even when it was full. This violates the backpressure requirement in the spec, can overfill the command FIFO, and triggers the built-in write-when-full error condition sfifo_cmd_err[0].",
+      "fix_hint": "Gate the command FIFO push with the ready signal so that a command word is only written when the command stage can accept it. The push condition should include cmd_stage_rdy_o alongside cs_enable_i and cmd_stage_vld_i, e.g. sfifo_cmd_push = cs_enable_i && cmd_stage_rdy_o && cmd_stage_vld_i."
+    }
+  ]
+}

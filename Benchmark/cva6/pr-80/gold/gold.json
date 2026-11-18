@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          334,
+          334
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The sign extension pipeline register uses load_data_q (previous cycle state) for signed_d but load_data_d (next cycle state) for idx_d, causing a mismatch where the sign bit selection index is computed from the incoming load's operator and offset while the signed/unsigned flag still reflects the previous load's operator. When back-to-back loads of different signedness occur, the stale signed_q causes incorrect sign extension on the second load, leading to wrong data and downstream illegal instruction traps.",
+      "fix_hint": "Compute signed_d and idx_d from the same pipeline stage source. Either change signed_d to use load_data_d.operator (matching idx_d) or change idx_d to use load_data_q.operator (matching signed_d), ensuring the sign flag and index are derived from the same load instruction's attributes."
+    }
+  ]
+}

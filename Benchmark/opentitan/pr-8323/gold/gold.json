@@ -1,0 +1,59 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr.sv",
+          "lines": [
+            [
+              282,
+              282
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_cfg_en.sv",
+          "lines": [
+            [
+              45,
+              45
+            ],
+            [
+              58,
+              58
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In keymgr_cfg_en, the stored init_q could be set even when en_i was low because the init_i branch did not also require en_i. Also, the stored out_q was cleared only on vld_clr (init_q && clr_i) instead of on out_clr, which already honors the NonInitClr parameter. With NonInitClr=1, a clear before initialization therefore suppressed out_o only combinationally; once clr_i was removed, out_q was still set and out_o would re-assert. The top-level cfg_regwen instance used NonInitClr=1 but drove init_i from the key manager init signal, so once the latched clear behavior is corrected, cfg_regwen must be decoupled from init to remain usable before and during pre-init operations.",
+      "fix_hint": "In keymgr_cfg_en, make the init_q update conditional on en_i by using init_i && en_i, and make out_q clear on out_clr rather than vld_clr so the NonInitClr mode also affects the stored flag. In keymgr.sv, tie u_cfgen.init_i to 1'b1 so cfg_regwen is qualified only by the life-cycle enable and can be restored after commands issued before key manager initialization."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr.sv",
+          "lines": [
+            [
+              305,
+              305
+            ],
+            [
+              311,
+              311
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The u_sw_binding_regwen instance was configured with NonInitClr(1'b0), so a software clear of sw_binding_regwen before key manager initialization had no lasting effect and could not lock the software binding registers before the initialization/advance command. In addition, the set input was derived from a local qualifier, reg2hw.control.operation.q == OpAdvance ANDed with sw_binding_unlock, instead of using the controller's dedicated successful-advance unlock output directly. This makes restoration of the binding regwen depend on the software operation field still matching OpAdvance at the unlock time, which is the wrong condition for the hardware unlock event.",
+      "fix_hint": "Set NonInitClr(1'b1) on u_sw_binding_regwen so a pre-init clear request latches the locked state. Drive set_i directly from sw_binding_unlock, the controller signal that already indicates a successful advance, instead of gating it with reg2hw.control.operation.q == OpAdvance."
+    }
+  ]
+}

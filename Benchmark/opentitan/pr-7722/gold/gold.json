@@ -1,0 +1,27 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_ctrl.sv",
+          "lines": [
+            [
+              396,
+              396
+            ],
+            [
+              406,
+              406
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge keymgr_ctrl FSM, lifecycle deassertion (en_i=0) is not checked during the initialization sequence states StCtrlEntropyReseed and StCtrlRandom. When prng_reseed_ack_i or random_ack is asserted, the FSM unconditionally advances to the next initialization state instead of aborting initialization and entering the wipe/invalid path. Per the spec, if lifecycle enable is deasserted before initialization is complete, the module must stop, wipe the secret key state with entropy, and enter Invalid. The missing en_i guard allows lifecycle disable during the reset-to-init transition to be ignored at these stages, potentially continuing initialization instead of selecting wipe and invalidation when the relevant acknowledgement arrives.",
+      "fix_hint": "Guard the next-state transitions in StCtrlEntropyReseed and StCtrlRandom with en_i: when en_i is low, transition to StCtrlWipe; only continue to StCtrlRandom/StCtrlRootKey when en_i remains asserted. This applies the same lifecycle invalidation response that is already used in the operational states."
+    }
+  ]
+}

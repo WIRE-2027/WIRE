@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          266,
+          266
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the readback check path in StPassThru, the alert output was asserted only when a readback mismatch was detected AND error_i was low. However, error_i indicates an incoming transaction error and may be asserted independently of the readback check, including when there is no active TL-UL transaction. As a result, a genuine readback mismatch could be silently missed whenever error_i happened to be high, violating the requirement that a readback mismatch must assert alert_o.",
+      "fix_hint": "Remove the `!error_i` term from the alert condition so that the readback mismatch is reported as an alert regardless of the state of `error_i`. The readback check should depend only on `rdback_chk_ok`."
+    }
+  ]
+}

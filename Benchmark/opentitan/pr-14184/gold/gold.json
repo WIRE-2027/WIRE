@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          387,
+          387
+        ],
+        [
+          389,
+          389
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StMessage state, when the end-of-message condition is recognized (process_latched set, or process_i asserted in the same cycle), the old FSM moved to StPad without overriding the default hold_msg=0. Because sel_mux is still MuxFifo during this cycle, msg_ready_o could be asserted whenever keccak_ready_i was high, allowing a message beat to be accepted after process had been seen. Additionally, the transition condition only checked process_latched, so a fresh process_i pulse in StMessage was not acted upon until the next cycle, leaving an extra cycle where msg_ready_o could be asserted. This violates the requirement that the module stop accepting message data after process.",
+      "fix_hint": "In the StMessage state's process-handling branch, respond to both process_latched and process_i, and set hold_msg=1 when transitioning to StPad. This suppresses msg_ready_o as soon as process is recognized and ensures no message beat is accepted after the process boundary."
+    }
+  ]
+}

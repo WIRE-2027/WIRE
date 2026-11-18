@@ -1,0 +1,82 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip_templates/alert_handler/rtl/alert_handler.sv",
+          "lines": [
+            [
+              77,
+              77
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip_templates/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              17,
+              17
+            ],
+            [
+              316,
+              316
+            ],
+            [
+              335,
+              335
+            ],
+            [
+              344,
+              348
+            ],
+            [
+              356,
+              356
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/alert_handler/rtl/alert_handler.sv",
+          "lines": [
+            [
+              77,
+              77
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              17,
+              17
+            ],
+            [
+              316,
+              316
+            ],
+            [
+              335,
+              335
+            ],
+            [
+              344,
+              348
+            ],
+            [
+              356,
+              356
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The crashdump latching state was managed with a single latched bit in alert_handler_reg_wrap. The top module ORed all per-class latch_crashdump signals before passing them to the reg_wrap, so the wrapper could not distinguish which class actually caused the crashdump to be latched. In the old logic, any accepted class clear (|reg2hw_wrap.class_clr) cleared the single crashdump latch and zeroed the stored snapshot, regardless of whether that class had escalated or caused the latch. This allowed software to re-arm the crashdump latching mechanism by clearing a class that had not escalated, and allowed a later escalation to overwrite the original captured crashdump state. It also meant that if an unclearable class had escalated, clearing some other class would still release the latch, violating the requirement that the crashdump snapshot remain held until the escalating class(es) are cleared.",
+      "fix_hint": "Propagate the per-class latch_crashdump vector from alert_handler to alert_handler_reg_wrap instead of reducing it with an OR. Replace the single crashdump-latched register with a per-class vector, set the corresponding bit when that class asserts its latch_crashdump, and clear only the bit for the class whose class_clr is accepted. Capture the crashdump snapshot only when no class latch flag is set, and hold the crashdump output while any class latch flag remains set. This preserves the original snapshot until all classes that triggered latching have actually been cleared."
+    }
+  ]
+}

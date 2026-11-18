@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          325,
+          325
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The CSR_MCOUNTEREN case in the read logic incorrectly uses DbgTriggerEn to determine if the access is illegal. According to the RISC-V specification, mcounteren is a standard machine-mode CSR that should be accessible regardless of whether debug triggers are enabled. The illegal_csr signal should be 1'b0 (not illegal) for this CSR, as it is a valid machine-mode register. The current code incorrectly marks it as illegal when DbgTriggerEn is 0, which prevents software from accessing this register in normal operation.",
+      "fix_hint": "Remove the illegal_csr assignment for CSR_MCOUNTEREN or set it to 1'b0 unconditionally. The DbgTriggerEn parameter should not affect the legality of accessing mcounteren. The fix should ensure that mcounteren is always treated as a legal CSR access in machine mode."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "input": {
+    "repo": "lowRISC/opentitan",
+    "pr_id": 23182,
+    "lang": "sv",
+    "rtl_files": [
+      "hw/ip/rv_core_ibex/rtl/rv_core_addr_trans.sv"
+    ],
+    "specs": [
+      {
+        "file": "hw/ip/rv_core_ibex/rtl/rv_core_addr_trans.sv",
+        "spec": "# Behavioral Specification: Simple Address Translation\n\n## Overview\n\nThis module performs configurable address translation for an address stream. It is a purely combinational remapping function with no stored state, no status output, and no error reporting. It simply takes an incoming address, checks it against a set of programmable address regions, and produces either the unchanged incoming address or a remapped address.\n\nThe address width and the number of regions are parameterizable at design time. All regions behave identically.\n\n## Region Configuration\n\nEach region is described by:\n\n- an enable indication,\n- a NAPOT-encoded matching region value,\n- a remap address.\n\nThe NAPOT-encoded matching region value describes a naturally aligned power-of-two address range. The low-order 1 bits in the value encode the size of the range, while the remaining bits encode the base address of the range.\n\nFor example, a matching value that describes a 4-byte region at address `0x8940` covers addresses `0x8940` through `0x8943`. A matching value that describes a 1 MiB region at address `0x8000_0000` covers addresses `0x8000_0000` through `0x800F_FFFF`.\n\nOnly regions with their enable indication asserted shall be considered for matching. A disabled region shall be ignored entirely.\n\n## Matching Behavior\n\nFor each enabled region, the module shall determine whether the incoming address lies within the region’s encoded power-of-two address range.\n\nIf an incoming address is within an enabled region’s range, that region matches.\n\nIf multiple enabled regions match the same incoming address, the region with the lowest index shall take priority. All other matching regions shall be ignored.\n\n## Remapping Behavior\n\nWhen a region matches, the module shall produce a remapped output address as follows:\n\n- preserve the low-order offset bits of the incoming address; these bits select the offset within the matched region,\n- take the high-order region-selection bits from the remap address,\n- combine these two parts to form the output address.\n\nIn other words, the output address is the original offset within the matched region placed at the base supplied by the remap address. If the remap address contains non-zero low-order offset bits, those bits have no effect on the output.\n\n## Pass-Through Behavior\n\nIf no enabled region matches the incoming address, the output address shall equal the incoming address unchanged.\n\n## Additional Behavioral Characteristics\n\n- The output address is always the same width as the incoming address.\n- The translation decision depends only on the current incoming address and the current region configuration.\n- The module has no memory of previous addresses or translations.\n- The module does not indicate whether a translation occurred.\n- The module does not perform access permission checks and does not generate faults or errors.\n- A change to the region configuration or to the incoming address shall be reflected in the output immediately; no enable, handshake, or update sequence is required by this module itself."
+      }
+    ],
+    "commit_id": "628dfc95164df9516c3285a18d30e122bfc5961c",
+    "timestamp": "2024-05-20T06:11:40+00:00",
+    "is_multi_file": false
+  }
+}

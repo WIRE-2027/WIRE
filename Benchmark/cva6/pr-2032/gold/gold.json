@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          780,
+          780
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The ZEXTH instruction (funct7=7'b000_0100, funct3=3'b100) is decoded unconditionally for RV32 and RV64 without checking that bits [24:20] of the instruction are zero. According to the RISC-V Zbb specification, ZEXT.H requires bits [24:20] to be zero; non-zero values in this field are reserved and should cause an illegal instruction exception. The decoder accepts any value in bits [24:20], allowing undefined instruction encodings to execute as ZEXTH.",
+      "fix_hint": "In the OpcodeOp decode, accept ZEXTH only for RV32 when instruction bits [24:20] are zero; set illegal_instr_bm for RV64 use of this encoding or for a nonzero reserved field."
+    },
+    {
+      "bug_lineno": [
+        [
+          848,
+          848
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The ZEXTH instruction is missing from the RV64 32-bit word operations (OpcodeOp32) block. For RV64, the ZEXT.H instruction (funct7=7'b000_0100, funct3=3'b100) should be decoded as a valid instruction in the OpcodeOp32 case, but it is not present. This causes the instruction to be incorrectly flagged as illegal on RV64 systems.",
+      "fix_hint": "Add the ZEXTH decoding entry ({7'b000_0100, 3'b100}) to the RVB case inside the OpcodeOp32 block, mapping it to the appropriate operation code (ariane_pkg::ZEXTH). Ensure that bits [24:20] are also checked to be zero for this RV64 variant."
+    }
+  ]
+}

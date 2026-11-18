@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          281,
+          281
+        ],
+        [
+          282,
+          282
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The command-error output was purely combinational, derived directly from the current operation enables. If the enables were multi-hot for only one cycle or for a short glitch/fault window, cmd_error_o would assert only during that window and then deassert. The spec requires a detected command error to be latched and held until reset so that the error is persistently reported and random decoy data remains substituted for the rest of the transaction. Because the same cmd_error_o signal also gates the decoy-data mux, the transient behavior could both lose the sticky error indication and stop using decoy data prematurely.",
+      "fix_hint": "Add a sticky one-hot-error register, e.g. one_hot_err_q/one_hot_err_d, that is set whenever more than one operation enable is simultaneously asserted, and drive cmd_error_o from this latched value instead of from the combinational enable comparison. Reset the latch only on reset, not on transaction cleanup, so the command error persists until reset as required."
+    }
+  ]
+}

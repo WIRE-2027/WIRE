@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          335,
+          335
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, the FifoLoadFromFifo state's wait branch (!shaf_rvalid) unconditionally remained in FifoLoadFromFifo and ignored msg_feed_complete. After a stop command, the message feed can be complete before the padding buffer presents another shaf_rvalid block. In that case the FIFO FSM is stuck in FifoLoadFromFifo forever, hash_done_next is never asserted, and the module never reports completion or returns to the idle state. The fix adds a missing state transition out of FifoLoadFromFifo when msg_feed_complete is asserted.",
+      "fix_hint": "In the FifoLoadFromFifo state, when waiting for shaf_rvalid and msg_feed_complete is asserted, transition fifo_st_d to FifoIdle and assert hash_done_next. This allows the stop/process completion to be signalled without waiting indefinitely for a padding-buffer block that will not be produced."
+    }
+  ]
+}

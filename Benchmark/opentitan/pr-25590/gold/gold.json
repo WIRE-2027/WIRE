@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          340,
+          341
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the next-state logic of prim_sha2_pad, the final override unconditionally forced st_d to StFifoReceive whenever sha_en_i and hash_go were asserted. This allowed an active padding operation to be aborted: if the FSM was in StPad80, StPad00, StLenHi, or StLenLo and a hash_start_i or hash_continue_i request arrived, the state machine would transition back to StFifoReceive instead of completing the padding sequence. This violates the requirement that once padding has begun, the module must complete the current padding sequence before returning to idle.",
+      "fix_hint": "Restrict the hash_go override so that it can only move the FSM into StFifoReceive from StIdle or StFifoReceive itself. In particular, the final next-state override should keep sha_en_i disabling to StIdle, but only select StFifoReceive when hash_go is asserted and st_q is inside {StIdle, StFifoReceive}. This prevents padding states from being cancelled by new start/continue requests."
+    }
+  ]
+}

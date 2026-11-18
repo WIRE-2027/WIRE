@@ -1,0 +1,38 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          669,
+          672
+        ],
+        [
+          677,
+          677
+        ],
+        [
+          681,
+          681
+        ],
+        [
+          684,
+          684
+        ],
+        [
+          687,
+          687
+        ],
+        [
+          689,
+          689
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old code, addr_base for non-secret partitions was generated as a standalone 4-byte-aligned value, independent of the selected OTP access size. The 64-bit digest-offset detection for non-HW-digest partitions used the expression {dai_addr_i[OtpByteAddrWidth-1:2], 1'b0} == digest_addr_lut[part_idx], which only matched the exact 8-byte-aligned digest base. For a DAI address in the upper half of the 64-bit digest granule, such as the digest base plus 4 bytes, the access was not recognized as a 64-bit digest access: otp_size_o remained 32-bit and addr_base was not rounded down to the 8-byte digest boundary. As a result, direct DAI read/write access to a software-managed digest location could address the wrong OTP word and read/write the digest data to/from the wrong half of the 64-bit digest block.",
+      "fix_hint": "Generate addr_base together with otp_size_o in p_size_sel so that the address alignment always matches the selected access size: 32-bit accesses align to 4 bytes, 64-bit secret/digest accesses align to 8 bytes, and digest calculation uses the partition offset. Update the non-HW-digest digest-offset recognition to compare the 8-byte-aligned address, e.g. {dai_addr_i[OtpByteAddrWidth-1:3], 2'b0} == digest_addr_lut[part_idx], and in that branch set addr_base to {dai_addr_i[OtpByteAddrWidth-1:3], 3'h0} so any address within the 64-bit digest granule is treated as a 64-bit access aligned to the digest base."
+    }
+  ]
+}

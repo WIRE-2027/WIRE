@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          710,
+          710
+        ],
+        [
+          2183,
+          2183
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The entropy-valid and observe-FIFO-ready interrupt events are not qualified by the module enable. In the old code, `event_es_entropy_valid` is asserted directly from `pfifo_swread_not_empty`, and `observe_fifo_thresh_met` is asserted whenever firmware-override mode is active and the observe FIFO depth is at or above the programmed threshold. When the module is disabled, the internal FIFOs are cleared only after the enable signal propagates, so their status signals can remain high for a few cycles. This allows a previously cleared interrupt to reassert during the disable delay, even though the module is no longer enabled. The same missing enable qualification affects both software entropy-available and observe-FIFO-ready interrupt generation.",
+      "fix_hint": "Gate both interrupt event sources with synchronized copies of the module enable. For `event_es_entropy_valid`, AND the software-read FIFO not-empty signal with an enable copy such as `es_enable_q_fo[1]`. For `observe_fifo_thresh_met`, AND the observe-FIFO threshold/depth comparison with an enable copy such as `es_enable_q_fo[23]` so no observe-FIFO-ready interrupt can be generated after the module is disabled."
+    }
+  ]
+}

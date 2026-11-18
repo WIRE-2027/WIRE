@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1103,
+          1103
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When MSECCFG.MML is set and RLB is clear, the PMP configuration write-enable path does not check whether the proposed pmpcfg value creates an M-mode-only executable region or a locked executable shared region. The prohibited write is therefore accepted even though Smepmp requires it to leave pmpcfg unchanged.",
+      "fix_hint": "Derive a suppression predicate from MML, RLB, and the proposed PMP configuration, then include its negation in pmp_cfg_we so prohibited executable-region writes are ignored."
+    }
+  ]
+}

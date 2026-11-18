@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          161,
+          161
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The SFENCE.VMA branch reuses an earlier generic SYSTEM encoding result that checks both rd and rs1. SFENCE.VMA requires rd to be zero but allows rs1 and rs2 operands, so preserving the generic result incorrectly rejects valid instructions with nonzero rs1.",
+      "fix_hint": "Compute SFENCE.VMA legality from its own rules: require a permitted privilege level and `rd == 0`, while allowing nonzero rs1 and rs2 operands."
+    }
+  ]
+}

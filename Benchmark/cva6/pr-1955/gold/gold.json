@@ -1,0 +1,74 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          294,
+          295
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The HFENCE decode is an independent `if (CVA6Cfg.RVH)` after the SFENCE.VMA match. A recognized SFENCE can therefore continue into the hypervisor decode/fallback chain instead of terminating the mutually exclusive SYSTEM decode, allowing the later logic to overwrite or miss the correct legality result.",
+      "fix_hint": "Make the RVH-dependent HFENCE decode an `else if` continuation of the SFENCE.VMA branch so only one SYSTEM instruction family handles the encoding."
+    },
+    {
+      "bug_lineno": [
+        [
+          317,
+          317
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "With RVH enabled, the default SYSTEM decode has no final illegal-instruction fallback after the HFENCE branches. An unsupported funct7 can leave illegal_instr deasserted.",
+      "fix_hint": "Make the HFENCE branches mutually exclusive and set illegal_instr in their final else."
+    },
+    {
+      "bug_lineno": [
+        [
+          318,
+          318
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The default SYSTEM decode has no final illegal fallback when the encoding is not SFENCE.VMA and the hypervisor extension is disabled. An unmatched HFENCE-style encoding can therefore leave the decoder's legal default in place instead of raising an illegal-instruction exception.",
+      "fix_hint": "Use one mutually exclusive SFENCE/HFENCE decode chain and set illegal_instr in its final fallback when no supported encoding matches."
+    },
+    {
+      "bug_lineno": [
+        [
+          376,
+          376
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "With RVH enabled, the hypervisor load/store funct7 case has no default branch. An unsupported encoding can leave illegal_instr deasserted.",
+      "fix_hint": "Add a default branch that sets illegal_instr in the hypervisor load/store funct7 case."
+    },
+    {
+      "bug_lineno": [
+        [
+          385,
+          385
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "For SYSTEM instructions with `funct3=3'b100`, the hypervisor load/store decode is skipped when RVH is disabled, but there is no fallback that marks the encoding illegal. Hypervisor-only instructions can therefore pass through a non-hypervisor configuration without an illegal-instruction exception.",
+      "fix_hint": "Add an `else` to the RVH-gated hypervisor load/store block that sets `illegal_instr` when the extension is disabled."
+    }
+  ]
+}

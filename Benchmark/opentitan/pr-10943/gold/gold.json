@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          409,
+          409
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the old code, the TL-UL memory grant path was not gated by local_esc. The local escalation condition (escalation, bus integrity error, initialization error, or latched fatal status) set sram_intg_error but did not stall/block the bus handshake, so memory accesses could still be granted during a terminal security blocking state. The specification requires memory bus accesses to be blocked once such a state is entered.",
+      "fix_hint": "Qualify tlul_gnt with the local escalation condition as well as init_req so that when local_esc is asserted the TL-UL adapter is stalled and no new SRAM transactions are granted. This matches the blocking behavior already provided for global escalation via key_valid."
+    }
+  ]
+}

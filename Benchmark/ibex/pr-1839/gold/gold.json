@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          389,
+          389
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When checking for PMP errors on the second half of an unaligned, uncompressed instruction, the code incorrectly tests bit 2 (if_instr_addr[2]) instead of bit 1 (if_instr_addr[1]). Bit 2 indicates 4-byte alignment, but for a 16-bit compressed instruction boundary check, bit 1 (2-byte alignment) is the correct indicator. This causes the PMP error check for the second fetch of a misaligned uncompressed instruction to be skipped when the instruction address is 4-byte aligned but the instruction spans a 2-byte boundary, leading to missed PMP violations on instruction fetches that straddle two PMP regions.",
+      "fix_hint": "Change the alignment check from if_instr_addr[2] to if_instr_addr[1] in the PMP error combination logic. The condition should test whether the instruction address is half-word aligned (bit 1 set) to determine if a second fetch is needed for an uncompressed instruction."
+    },
+    {
+      "bug_lineno": [
+        [
+          395,
+          395
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The same incorrect bit check (if_instr_addr[2] instead of if_instr_addr[1]) is used when computing the plus-2 error flag (if_instr_err_plus2). This flag indicates that an error occurred on the second half of an unaligned, uncompressed instruction. Using bit 2 causes the plus-2 error to be incorrectly suppressed or applied, resulting in wrong error reporting to the ID/EX stage and incorrect mtval values for exception handling when PMP errors occur on the second fetch of a misaligned instruction.",
+      "fix_hint": "Change the alignment check from if_instr_addr[2] to if_instr_addr[1] in the if_instr_err_plus2 assignment. This ensures the plus-2 error flag is correctly set when a PMP error occurs on the second half of an instruction that is half-word aligned but not word aligned."
+    }
+  ]
+}

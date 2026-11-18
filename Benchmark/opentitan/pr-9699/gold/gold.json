@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          79,
+          79
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The high-to-low met pulse expression is inverted. The old code computes `h2l_met_pulse[k] = ~h2l_met_d & h2l_met_q`, which generates a pulse when the debounced high-to-low met signal deasserts (falling edge of `h2l_met_d`), rather than when the debounce condition is first satisfied (rising edge of `h2l_met_d`). As a result, valid H2L debounce completions do not produce `h2l_met_pulse`, so the corresponding interrupt status update and aggregated interrupt are not generated as specified.",
+      "fix_hint": "Change the H2L met pulse assignment to detect the rising edge of `h2l_met_d`, matching the L2H behavior: `assign h2l_met_pulse[k] = h2l_met_d & ~h2l_met_q;`. This ensures a one-cycle pulse is generated exactly when the H2L debounce condition becomes met."
+    }
+  ]
+}

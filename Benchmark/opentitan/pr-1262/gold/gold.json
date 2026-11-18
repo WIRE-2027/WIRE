@@ -1,0 +1,61 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/alert_handler/rtl/alert_handler.sv",
+          "lines": [
+            [
+              126,
+              126
+            ],
+            [
+              143,
+              143
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/alert_handler/rtl/alert_handler_accu.sv",
+          "lines": [
+            [
+              16,
+              16
+            ],
+            [
+              23,
+              23
+            ],
+            [
+              25,
+              27
+            ],
+            [
+              29,
+              29
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/alert_handler/rtl/alert_handler_class.sv",
+          "lines": [
+            [
+              17,
+              17
+            ],
+            [
+              46,
+              47
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The class escalation enable signal class_en_i was ANDed into class_trig_o inside alert_handler_class. This class trigger signal both feeds the interrupt path (via hw2reg_wrap.class_trig / irq) and the per-class accumulator. As a result, when software disabled the class escalation enable bit, no class trigger was generated and the class interrupt was incorrectly suppressed. The spec requires class interrupts to fire regardless of whether class escalation is enabled; class_en should only gate accumulation and escalation triggering, not the interrupt/class trigger path.",
+      "fix_hint": "Remove class_en_i from alert_handler_class and delete it from the class_trig_o combinational OR reduction so class_trig_o is purely the enabled-alert class trigger. Add class_en_i as an input to alert_handler_accu and gate the accumulator input there with an internal trig_gated signal, using trig_gated for both the saturating counter increment and the accu_trig_o comparison. Update alert_handler.sv to wire class_en_i to the accumulator instances and remove the class_en_i connection from the alert_handler_class instance."
+    }
+  ]
+}

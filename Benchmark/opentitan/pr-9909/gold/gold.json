@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          167,
+          167
+        ],
+        [
+          197,
+          198
+        ],
+        [
+          449,
+          449
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In masked AES builds, the final cipher-output unmasking logic in aes_core.sv combines two masked shares into the unmasked state output. In the old code, the invalid-output mux selected '{default: '0} for every share, and the 128-bit clearing PRD was generated only from prd_clearing[0] as a single scalar value. This meant that before cipher_out_valid asserted, the unmask XOR was fed zero data instead of share-specific pseudo-random values, and the mux then switched both shares directly from deterministic zero to the real masked state_done in the valid cycle. The invalid-to-valid transition consequently starts from a deterministic value on both shares, contrary to the masked output handling contract.",
+      "fix_hint": "Change prd_clearing_128 to be an unpacked array indexed by NumShares and assign each share from the corresponding prd_clearing[s] chunks, similar to the existing prd_clearing_256 logic. In the masked output path, for each share s, mux state_done[s] against prd_clearing_128[s] depending on cipher_out_valid, so both shares are replaced with share-specific clearing PRD when the cipher output is invalid. Keep the IV/previous-input/data-in clear paths using the appropriate 128-bit PRD element."
+    }
+  ]
+}

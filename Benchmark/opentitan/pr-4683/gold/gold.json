@@ -1,0 +1,62 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_ctrl.sv",
+          "lines": [
+            [
+              117,
+              117
+            ],
+            [
+              270,
+              270
+            ],
+            [
+              295,
+              295
+            ],
+            [
+              318,
+              318
+            ],
+            [
+              426,
+              426
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In keymgr_ctrl.sv, `data_valid` was computed as `valid_data_chk(...) & !kmac_input_invalid_i & !kmac_op_err`. This mixes input-validity status into the output-validity signal. When a command has invalid input, `data_valid` goes low and `error_o[ErrInvalidOut] = op_done_o & op_accepted & ~data_valid` asserts the invalid-output error in addition to the invalid-input error. Thus an input error automatically produces an output error, preventing the two error classes from being reported independently. The same combined signal also gated advance working-state updates and generated-data valid output, so those uses need to require input validity without changing output-error reporting.",
+      "fix_hint": "Keep `data_valid` as the validity check of the returned KMAC digest only: `valid_data_chk` on both shares and `!kmac_op_err`. Create a separate `data_update = data_valid & !kmac_input_invalid_i` and use `data_update` for advance working-state updates and for `data_valid_o`/output enabling. Leave `ErrInvalidOut` based on `~data_valid` and `ErrInvalidIn` based on `kmac_input_invalid_i`, so invalid input does not automatically set invalid output."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_kmac_if.sv",
+          "lines": [
+            [
+              209,
+              209
+            ],
+            [
+              235,
+              235
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In keymgr_kmac_if.sv, the latched invalid-input status was cleared in the combinational block whenever `start && done_o` was true. Because `done_o` and `inputs_invalid_o` are combinational, the invalid-input flag dropped in the same cycle that completion was asserted. keymgr_ctrl captures `ErrInvalidIn` only when it sees `op_done_o & op_accepted & kmac_input_invalid_i`; by that cycle the flag had already been cleared, so invalid inputs could complete without an invalid-input error and the operation status could appear successful. The clear was tied to the completion cycle rather than to the subsequent deassertion of `start` after the control logic had captured the status.",
+      "fix_hint": "Move the clearing of `inputs_invalid_q` out of the `start && done_o` condition. In the `StClean` state, when `!start` indicates the controlling side has acknowledged completion, deassert `done_o` and assert a clear pulse (`clr_err`) so `inputs_invalid_d` is zeroed only at that point. This keeps `inputs_invalid_o` asserted through the `op_done`/error-capture window so keymgr_ctrl can record `ErrInvalidIn`, and resets the latch before the next operation begins."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          325,
+          325
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the kmac_errchk FSM state register is updated with st_d unconditionally via `PRIM_FLOP_SPARSE_FSM(u_state_regs, st_d, st, st_e, StIdle)`. When a Start command is issued with an invalid mode/strength combination and unsupported mode/strength combinations are disabled, `block_swcmd` is asserted so the command is not forwarded, but the FSM still transitions from StIdle to StMsgFeed because the next-state logic for StIdle advances on CmdStart without considering `block_swcmd`. This makes the internal errchk state inconsistent with the actual SHA3/Keccak datapath state, allowing subsequent commands such as Process to be accepted when the operation had not actually started.",
+      "fix_hint": "Gate the FSM state update with `block_swcmd`: when a software command is blocked, the FSM must hold its current state instead of advancing. This can be done by calculating a gated next state, e.g. `st_gated_d = block_swcmd ? st : st_d`, and feeding that into the sparse FSM flop. This ensures the errchk state remains in the prior legal phase whenever the command is not propagated, including the case where an invalid Start is blocked due to mode/strength configuration."
+    }
+  ]
+}

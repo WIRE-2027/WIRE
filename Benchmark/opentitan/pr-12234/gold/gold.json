@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          374,
+          374
+        ],
+        [
+          378,
+          378
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the address assembly logic, the early word-aligned and halfword-aligned address calculations use addr_q[31:8] as the high part of the next address. At the time addr_ready_in_word or addr_ready_in_halfword is asserted, addr_q has not yet latched the final incoming address byte, so only the lower 24 bits of addr_q contain previously latched address data. Bits [31:24] are still stale/uninitialized, causing the assembled SRAM/read address to be wrong and potentially causing an incorrect data region or mailbox selection. The correct source for the already-latched bytes is addr_q[23:0].",
+      "fix_hint": "Change both early address mux branches to use addr_q[23:0] instead of addr_q[31:8] when concatenating the previously latched address bytes with the partial byte currently being received from the serial-to-parallel converter. This preserves the three already-latched address bytes and keeps the early read request address consistent with the final full address."
+    }
+  ]
+}

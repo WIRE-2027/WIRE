@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          116,
+          116
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "`mfip_id` is represented as a five-bit cause value even though the priority encoder produces only the local fast-interrupt index 0–14. With the old one-bit prefix used later, this representation leaves the cause-number high bit clear and reports fast interrupts as causes 0–14 instead of 16–30.",
+      "fix_hint": "Represent `mfip_id` as a four-bit local index; add the fast-interrupt cause offset when constructing the final exception cause."
+    },
+    {
+      "bug_lineno": [
+        [
+          167,
+          182
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The priority encoder writes five-bit literals into `mfip_id`, treating the local 0–14 index as if it were already the complete interrupt cause number. This prevents the later cause construction from cleanly inserting the required cause-number bit that shifts fast interrupts into the 16–30 range.",
+      "fix_hint": "Encode the priority result as four-bit local indices (`4'd0` through `4'd14`) and form the architectural cause number in the exception-cause concatenation."
+    },
+    {
+      "bug_lineno": [
+        [
+          363,
+          363
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The fast-interrupt cause is built as `{1'b1, mfip_id}` with `mfip_id` equal to 0–14. The leading bit marks an interrupt, but the five-bit cause field remains 0–14, so vectored dispatch uses the wrong cause IDs instead of the required 16–30.",
+      "fix_hint": "Construct the six-bit cause as `{2'b11, mfip_id[3:0]}`: one bit marks an interrupt and the second sets cause bit 4, mapping local indices 0–14 to architectural causes 16–30."
+    }
+  ]
+}

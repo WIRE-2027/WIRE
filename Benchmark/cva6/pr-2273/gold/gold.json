@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          604,
+          604
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When address translation is enabled and the LSU detects an overflow/non-canonical translated virtual address for a load operation, the load path reports a load access fault. This misclassifies an address-translation-related failure that should be reported as a load page fault according to the RISC-V privileged architecture.",
+      "fix_hint": "In the LSU overflow exception path for load operations, assign the exception cause as riscv::LOAD_PAGE_FAULT instead of riscv::LD_ACCESS_FAULT while preserving the existing valid and tval handling."
+    },
+    {
+      "bug_lineno": [
+        [
+          615,
+          615
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When address translation is enabled and the LSU detects an overflow/non-canonical translated virtual address for a store operation, the store path reports a store access fault. This misclassifies an address-translation-related failure that should be reported as a store page fault according to the RISC-V privileged architecture.",
+      "fix_hint": "In the LSU overflow exception path for store operations, assign the exception cause as riscv::STORE_PAGE_FAULT instead of riscv::ST_ACCESS_FAULT while preserving the existing valid and tval handling."
+    }
+  ]
+}

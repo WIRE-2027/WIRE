@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          402,
+          402
+        ],
+        [
+          404,
+          411
+        ],
+        [
+          413,
+          414
+        ],
+        [
+          416,
+          418
+        ],
+        [
+          420,
+          426
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the DECODE state, the transition to FLUSH for handling exceptions (including LSU load/store faults) is gated by instr_valid_i. When an LSU exception arrives from the writeback stage and no new instruction is valid in the ID stage (instr_valid_i is low), the controller fails to enter FLUSH, causing the exception to be silently missed and the core to continue executing the next instruction instead of jumping to the exception handler.",
+      "fix_hint": "Remove the instr_valid_i qualification from the special_req_all check in the DECODE state so that the controller can transition to FLUSH even when no valid instruction is present in the ID stage. All relevant signals inside the block are already qualified by instr_valid_i, so the outer guard is redundant and harmful for writeback-stage exceptions."
+    }
+  ]
+}

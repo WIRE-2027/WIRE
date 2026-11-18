@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          354,
+          354
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the per-endpoint OUT data toggle registers were cleared whenever link_active_i was low, not only on link_reset_i. This causes the data toggles to be reset to DATA0 during a link-inactive/suspend event. After resume, the host may send the next data packet with DATA1 because it preserved the pre-suspend toggle state, while the device now expects DATA0. The device then treats it as a data-toggle mismatch, ACKs the packet, and rolls the data back, dropping the OUT packet. The data toggle should only be cleared by reset, USB link reset, or an explicit per-endpoint data_toggle_clear_i request, and must be retained across link-inactive/suspend states.",
+      "fix_hint": "Change the data_toggle_q reset/clear branch in usb_fs_nb_out_pe.sv to clear data_toggle_q only on !rst_ni or link_reset_i, and remove the || !link_active_i term. Leave link_active_i unused so link-inactive/suspend does not alter data toggle state. The existing combinational data_toggle_d logic should continue to handle setup_token_received, new_pkt_end, and data_toggle_clear_i updates."
+    }
+  ]
+}

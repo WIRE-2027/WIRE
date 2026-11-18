@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          97,
+          97
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The prescaler enable signal `prescale_en` in the wakeup timer was computed as `lc_cpu_en_i[0] == lc_ctrl_pkg::Off` and did not require `wkup_enable_q`. This caused the prescale counter to advance when the lifecycle qualifier was Off instead of On, and it could also advance while the wakeup timer was disabled. That corrupts the prescaler state and changes when the wakeup count increments and when the wakeup interrupt is generated.",
+      "fix_hint": "Change `prescale_en` so that the prescaler is clocked only when the wakeup timer is enabled and its lifecycle qualifier is in the On state, e.g. `wkup_enable_q & (lc_cpu_en_i[0] == lc_ctrl_pkg::On)`."
+    },
+    {
+      "bug_lineno": [
+        [
+          108,
+          108
+        ],
+        [
+          175,
+          175
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The wakeup count and watchdog count increment conditions used `lc_ctrl_pkg::Off` when checking their lifecycle enable qualifiers: `wkup_incr` checked `lc_cpu_en_i[1] == lc_ctrl_pkg::Off` and `wdog_incr` checked `lc_cpu_en_i[2] == lc_ctrl_pkg::Off`. This inverts the intended enable qualifier semantics, so the wakeup and watchdog counters advanced when their qualifier was Off and held when it was On, opposite to the spec requirement that a qualifier must be On for the associated counter to advance.",
+      "fix_hint": "Change the lifecycle qualifier comparisons in `wkup_incr` and `wdog_incr` to require `lc_ctrl_pkg::On` instead of `lc_ctrl_pkg::Off`, so the wakeup and watchdog counts only increment while their respective qualifiers are active."
+    }
+  ]
+}

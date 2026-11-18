@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          828,
+          828
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The write enable for PMP address registers (pmpaddr[i]) is incorrectly blocked when the adjacent higher-numbered region (pmpcfg[i+1]) uses TOR mode but does not have its lock bit set. According to the RISC-V Privileged Specification, writes to pmpaddr[i] must be blocked only if the adjacent higher-numbered region is both locked and uses TOR mode. The current implementation checks the adjacent region's TOR mode without qualifying it with the adjacent region's lock bit, causing legal writes to pmpaddr[i] to be denied.",
+      "fix_hint": "Update the write enable logic for pmpaddr[i] to also check the lock bit of pmpcfg[i+1] when the adjacent region uses TOR mode. The condition should deny writes if pmpcfg[i+1].lock == 1 and pmpcfg[i+1].mode == PMP_MODE_TOR, in addition to the existing check for pmpcfg[i].lock."
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1242,
+          1242
+        ],
+        [
+          1255,
+          1255
+        ],
+        [
+          1303,
+          1303
+        ],
+        [
+          1316,
+          1316
+        ],
+        [
+          1368,
+          1368
+        ],
+        [
+          1381,
+          1381
+        ],
+        [
+          1411,
+          1411
+        ],
+        [
+          1424,
+          1424
+        ],
+        [
+          1474,
+          1474
+        ],
+        [
+          1487,
+          1487
+        ],
+        [
+          1540,
+          1540
+        ],
+        [
+          1553,
+          1553
+        ],
+        [
+          1582,
+          1582
+        ],
+        [
+          1595,
+          1595
+        ],
+        [
+          1643,
+          1643
+        ],
+        [
+          1656,
+          1656
+        ],
+        [
+          1686,
+          1686
+        ],
+        [
+          1699,
+          1699
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The health-test watermark registers are updated only when their corresponding health-test fail pulse is asserted. Because fail pulses indicate threshold violations, passing windows never update the high/low watermark values. This contradicts the spec requirement that at the end of each window the module must record the test statistics and update the high-water-mark registers for diagnostic purposes, regardless of whether a failure occurred. The defect affects the FIPS and bypass watermark registers for repcnt, repcnts, adaptp hi/lo, bucket, markov hi/lo, and external health tests: all use `event_i = <test_fail_pulse> && <mode>` instead of the common window-done event. As a result, a health metric that stays within thresholds leaves the watermark at its reset value, hiding the actual observed statistic.",
+      "fix_hint": "Use the common health-test window-done pulse (`health_test_done_pulse`) as the sampling/update event for all health-test watermark registers, retaining the `es_bypass_mode` qualifier so FIPS and bypass watermarks are selected correctly. This causes every completed window to update the watermark registers with the actual test counters, while the fail pulses continue to drive total-fail and alert-fail counters."
+    }
+  ]
+}

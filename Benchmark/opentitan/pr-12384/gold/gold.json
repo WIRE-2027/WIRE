@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spid_readbuffer.sv",
+          "lines": [
+            [
+              149,
+              149
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The watermark event output is asserted whenever watermark_cross is true and watermark_crossed is false, without checking that the module is active. Since watermark_crossed is only latched inside the active-qualified always_ff block, an inactive cycle that happens to satisfy the address comparison (for example, while the module is idle and the address points to a mailbox region) can produce a false single-cycle watermark event. This violates the requirement that both event outputs be deasserted whenever the module is inactive.",
+      "fix_hint": "Qualify the watermark event output with the active signal so it can only pulse when the module is actually monitoring read-buffer accesses. The corrected expression should gate the existing sticky condition with active, such as: event_watermark_o = active && !watermark_crossed && watermark_cross;"
+    }
+  ]
+}

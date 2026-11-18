@@ -1,0 +1,78 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/hmac/rtl/hmac.sv",
+          "lines": [
+            [
+              170,
+              170
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/prim/rtl/prim_sha2.sv",
+          "lines": [
+            [
+              457,
+              457
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In hmac.sv, the DoneAwaitMessageComplete state used `sha_message_length[8:0] == '0` to decide that the current message block was complete when a Stop command was pending. This is only a 512-bit-boundary check and is based on the HMAC-level message length, not on the actual SHA-2 compression state. For SHA-384/SHA-512 (1024-bit blocks), this can become true when the message length is a multiple of 512 but not 1024, so the done-state FSM advances to DoneAwaitHashComplete before a complete block digest has been produced. This causes the Stop/save-context completion to occur after an incomplete block, producing a digest/save mismatch.",
+      "fix_hint": "Have prim_sha2 provide a dedicated `digest_on_blk_o` indication that is asserted only when a digest update for a complete block is being performed (update_digest, FIFO idle, and message length exactly aligned to the selected block size). Use that signal in hmac's done_state FSM instead of deriving the block-boundary condition from `sha_message_length[8:0]`."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim/rtl/prim_sha2_pad.sv",
+          "lines": [
+            [
+              63,
+              63
+            ],
+            [
+              222,
+              222
+            ],
+            [
+              354,
+              354
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In prim_sha2_pad, the Stop command was not handled by the padding state machine. The module only tracked a hash-process flag; there was no stop-pending flag and no transition out of StFifoReceive when a stop was requested at the current message length. Additionally, `msg_feed_complete_o` was asserted only when `hash_process_flag_q` was set, so a completed Stop operation would never report feed completion to prim_sha2. As a result, the SHA-2 core could not complete a Stop/context-save operation correctly.",
+      "fix_hint": "Add a stop-pending flag latched on hash_stop_i and cleared on disable/start/continue/hash_done. Compare tx_count against message_length_i to detect when all complete message words have been forwarded, and when a stop is pending, deassert the output handshakes and return to StIdle without generating padding. Extend `msg_feed_complete_o` to assert for both process and stop completion."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim/rtl/prim_sha2_pad.sv",
+          "lines": [
+            [
+              344,
+              346
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In prim_sha2_pad, `digest_mode_flag_d` was updated from `digest_mode_i` only on `hash_start_i`; `hash_continue_i` did not latch the digest mode. After a Stop completes, `hash_done_i` clears `digest_mode_flag_q` to SHA2_None. A subsequent Continue for restoring a saved context would therefore leave the pad holding SHA2_None, so padding generation would not use the correct SHA-2 block size, length-field width, or padding placement.",
+      "fix_hint": "Latch the digest mode on both hash-start and hash-continue commands by using `(hash_start_i || hash_continue_i)` as the update condition in the `digest_mode_flag_d` assignment, while still clearing it on hash_done and keeping it otherwise."
+    }
+  ]
+}

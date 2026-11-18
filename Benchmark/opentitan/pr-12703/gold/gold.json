@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/tlul/rtl/tlul_cmd_intg_gen.sv",
+          "lines": [
+            [
+              35,
+              37
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the data integrity generation path, the pre-merge code built `data_final` by masking `a_data` with `a_mask`, zeroing unselected byte lanes. This violates the spec requirement that the request data field be passed through unchanged and causes the generated data integrity code to be computed over the masked data instead of the actual `a_data` bytes. As a result, when `EnableDataIntgGen` is set, the module can alter unselected data bytes in the outgoing request and generate an integrity value that does not cover the true data field.",
+      "fix_hint": "Remove the per-byte masking in the `gen_data_intg` block and drive `data_final` directly from `tl_i.a_data`, so the full request data is passed through unchanged and the integrity encoder operates on the actual data field."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "core/compressed_decoder.sv",
+          "lines": [
+            [
+              230,
+              230
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In the C0 Zcb sub-decoder of core/compressed_decoder.sv, the c.sh branch expands every encoding with instr_i[12:10] == 3'b011 into a 32-bit store-halfword instruction. It does not check the reserved high immediate bit instr_i[6], which the Zcb specification requires to be 0. As a result, a 16-bit c.sh encoding with bit 6 set is treated as a valid compressed instruction and forwarded as sh, instead of being flagged as illegal.",
+      "fix_hint": "In core/compressed_decoder.sv, within the C0/Zcb c.sh branch, add a check that asserts illegal_instr_o when instr_i[6] == 1'b1. The existing final assignment already passes the original compressed word through when illegal_instr_o is set."
+    }
+  ]
+}

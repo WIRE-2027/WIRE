@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          556,
+          556
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StRandReady state, the FSM checks the live `mode_i` input instead of the latched `mode_q` when deciding whether to enter StRandEdn for an entropy refresh. The entropy mode is supposed to be captured when `entropy_ready_i` is asserted (`mode_latch`), and later changes to `mode_i` must not take effect until reset. If software changes the mode from software-seed mode to EDN mode while the FSM is in StRandReady, this erroneous condition can cause the FSM to move to StRandEdn and issue an EDN request even though the captured mode is software-seed mode, violating the no-source-mixing requirement.",
+      "fix_hint": "Use the latched mode `mode_q` in the StRandReady transition condition instead of the live input `mode_i`, so that refresh/EDN behavior is based on the mode captured at entropy-ready assertion. Specifically, change `(mode_i == EntropyModeEdn)` to `(mode_q == EntropyModeEdn)` in the state machine."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_core.sv",
+          "lines": [
+            [
+              686,
+              686
+            ],
+            [
+              1044,
+              1054
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_id_stage.sv",
+          "lines": [
+            [
+              984,
+              984
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_wb_stage.sv",
+          "lines": [
+            [
+              94,
+              94
+            ],
+            [
+              114,
+              114
+            ],
+            [
+              124,
+              124
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-fix design, `ibex_core.sv` drives the performance-counter retirement inputs `instr_ret_i` and `instr_ret_compressed_i` from `instr_id_done` and `instr_id_done_compressed` generated in the ID/EX stage. These signals indicate ID-stage completion or transfer rather than finalized architectural retirement. They do not exclude `EBREAK`, `ECALL`, decoded illegal instructions, illegal CSR accesses, or instruction-fetch errors, and, when the optional writeback stage is enabled, they can assert before a load/store response reveals an access error. Consequently, trapping or faulting instructions can incorrectly increment `minstret`, and a compressed-instruction retirement event can be reported for an instruction that did not actually retire.",
+      "fix_hint": "In `ibex_id_stage.sv`, generate a per-instruction performance-count eligibility signal that is deasserted for `EBREAK`, `ECALL`, decoded illegal instructions, illegal CSR accesses, and instruction-fetch errors. In the configuration with a writeback stage, propagate and capture this eligibility together with the compressed-instruction flag, then generate the final retirement indications only when the instruction completes in writeback and no LSU error response is present. In the configuration without a writeback stage, generate the retirement indications at the pass-through completion point using the same eligibility and LSU-error suppression rules. In `ibex_core.sv`, combine the load and store error indications for writeback filtering and connect the CSR performance-counter retirement inputs to the final writeback-stage retirement outputs instead of the ID-stage completion signals."
+    }
+  ]
+}

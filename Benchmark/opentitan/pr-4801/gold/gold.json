@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          281,
+          281
+        ],
+        [
+          300,
+          300
+        ],
+        [
+          308,
+          308
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The DAI read path treated a hardware digest location like an ordinary secret-partition location. In ReadSt and ReadWaitSt, the read-permission check only allowed the OTP transaction when the partition read_lock was Unlocked, so a digest read from a read-locked partition was rejected as an AccessError or escalated to FsmStateError if the lock changed during the wait. In addition, ReadWaitSt sent every successful secret-partition read through the descrambling state regardless of whether the address was the digest location. This violated the requirements that hardware digest locations remain readable even when the containing partition is read-locked and that digest values are returned without descrambling. Observable failure: reading a secret partition's digest through the DAI could either be denied or return descrambled data inconsistent with the digest CSR value.",
+      "fix_hint": "Treat the hardware digest address as a special read region in the DAI control flow. In ReadSt and ReadWaitSt, allow the read when read_lock is Unlocked OR when the target is the partition's digest location (PartInfo[part_idx].hw_digest && otp_addr_o == digest_addr_lut[part_idx]). In ReadWaitSt, only transition to DescrSt for secret non-digest addresses; if the address is the digest location, latch the raw OTP data and go directly to IdleSt without descrambling."
+    }
+  ]
+}

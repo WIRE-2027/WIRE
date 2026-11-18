@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          95,
+          95
+        ],
+        [
+          198,
+          198
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In full arbitration mode (DstWrReq), the StIdle state starts a hardware transaction whenever dst_update_i is asserted, without checking whether the incoming destination sample dst_ds_i actually differs from the last handshake-completed value in dst_qs_o. This violates the spec requirement that a hardware update indication which does not result in a value change must not start a transaction. As a result, a same-value or continuously asserted dst_update_i can repeatedly re-enter StWait and generate spurious hardware-update handshake events, leading to assertion failures.",
+      "fix_hint": "Qualify the incoming destination update indication with a value-change check before using it to start a transaction. Create a local signal such as dst_update = dst_update_i & (dst_qs_o != dst_ds_i) and use dst_update in the StIdle state transition instead of the raw dst_update_i. This suppresses handshake generation when the observed destination value is unchanged from the value already completed in the handshake, while still allowing genuine hardware changes to be reported."
+    }
+  ]
+}

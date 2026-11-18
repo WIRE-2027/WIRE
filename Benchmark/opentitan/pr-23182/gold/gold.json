@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          76,
+          77
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old address-output expression, when a region matches, the output is computed as `addr_i & sel_region.output_mask | sel_region.remap_addr`. Due to operator precedence this is equivalent to `(addr_i & sel_region.output_mask) | sel_region.remap_addr`, which ORs the entire remap address into the result. If the remap address has non-zero low-order offset bits, those bits incorrectly override the preserved offset bits from the incoming address, violating the spec requirement that the remap address's low-order offset bits have no effect on the output. This forces software to pre-zero the lower bits of the remap address to get correct translation.",
+      "fix_hint": "Mask off the low-order offset bits from the remap address before ORing it with the incoming address offset. The output should combine only the high-order region-selection bits of the remap address with the low-order offset bits of the incoming address, e.g. use `(addr_i & sel_region.output_mask) | (sel_region.remap_addr & ~sel_region.output_mask)` when `sel_match` is true."
+    }
+  ]
+}

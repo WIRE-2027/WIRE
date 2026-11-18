@@ -1,0 +1,40 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          203,
+          203
+        ],
+        [
+          206,
+          206
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the WAIT state's normal block-operation branch, the output handshake is not gated correctly. The stall indication is asserted whenever finish is false, even if the cipher core has not yet produced valid output, so STATUS.stall can be set while the cipher core is still busy. In addition, when cipher_out_valid_i is high, the controller unconditionally writes the output registers and transitions to IDLE even when finish is false. This means the controller can leave WAIT and report the operation complete while the cipher core is held stalled because cipher_out_ready_o remains low. The fix makes both the stall bit and the result-accept/IDLE transition depend on the full handshake condition: stall when valid output is present but finish is false, and accept/return to IDLE only when finish and valid output are both true.",
+      "fix_hint": "In aes_control.sv, in the WAIT state non-key-generation branch, change stall_o to be asserted only when the cipher output is valid and the output cannot yet be accepted, i.e. !finish & cipher_out_valid_i, and change the output acceptance branch from if (cipher_out_valid_i) to if (finish & cipher_out_valid_i). This prevents both false stall status and premature FSM exit while the cipher core is still holding a result."
+    },
+    {
+      "bug_lineno": [
+        [
+          97,
+          97
+        ],
+        [
+          267,
+          267
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In automatic mode, the finish condition only uses the registered output_valid_q, so after software reads all four output registers, the output path is not considered free until the next clock edge. If the cipher core produces a valid result in the same cycle that the last output register is read, the controller inserts an unnecessary stall cycle. The old data_out_read tracking was also cleared by data_out_we_o, which would create a combinational dependency between the read-completion flag and the output write enable if data_out_read were included in finish. The fix ORs data_out_read into the automatic-mode finish condition and reworks data_out_read_d to self-clear once all read bits are set, making data_out_read a one-cycle pulse independent of data_out_we_o. This lets a pending cipher result be accepted in the same cycle the final output register is read while preserving output_valid semantics when output data is written in that same cycle.",
+      "fix_hint": "Rework the data_out_read edge-detection logic so data_out_read is high for exactly one cycle after all four data_out_re_i reads have occurred, by clearing data_out_read_q when &data_out_read_q is true rather than on data_out_we_o. Then include data_out_read in the automatic-mode finish expression so back-pressure is released as soon as the final read happens, without a combinational loop through data_out_we_o."
+    }
+  ]
+}

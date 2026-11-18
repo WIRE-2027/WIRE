@@ -1,0 +1,38 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          279,
+          279
+        ],
+        [
+          292,
+          292
+        ],
+        [
+          365,
+          365
+        ],
+        [
+          445,
+          445
+        ],
+        [
+          509,
+          509
+        ],
+        [
+          515,
+          515
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The EDN request output was driven combinationally from the FSM. It was asserted only in FetchEntropySt and FetchNonceSt and deasserted by the default assignment whenever the FSM left those states. If the FSM moved to ErrorSt (for example due to escalation or an illegal state) while an EDN request was outstanding, edn_req_o dropped before edn_ack_i arrived. The EDN side could then assert its acknowledgment without a corresponding request, violating the EDN req/ack protocol and causing assertion failures in the downstream synchronization logic. The spec requires that an outstanding entropy request is allowed to remain asserted until acknowledged even in the terminal error state.",
+      "fix_hint": "Make the EDN request a registered control signal so it is independent of the current FSM state. Add an edn_req_q flop that is set when entering FetchEntropySt or FetchNonceSt and cleared only when edn_ack_i is seen or on reset. Drive edn_req_o from this register, and keep the request asserted until acknowledged even if the FSM jumps to ErrorSt or otherwise leaves the fetch state."
+    }
+  ]
+}

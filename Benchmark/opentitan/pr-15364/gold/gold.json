@@ -1,0 +1,39 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_core.sv",
+          "lines": [
+            [
+              438,
+              438
+            ],
+            [
+              482,
+              482
+            ],
+            [
+              499,
+              499
+            ],
+            [
+              514,
+              514
+            ],
+            [
+              2597,
+              2597
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In firmware-override entropy-insertion mode, when firmware deasserts fw_ov_sha3_start while the preconditioning/write-data path is still full, the design raises es_fw_ov_disable_alert as a recoverable alert. However, the old RTL only raised the alert; it did not also suppress the corrupted SHA-3 conditioner outputs that can result from this firmware misuse. The corruption can affect up to two conditioned seeds, and those corrupted seeds were still allowed through main_stage_push into the esfinal FIFO, where firmware or the hardware interface could consume them. The missing behavior is the cross-cycle control state needed to remember the corruption event and drop the following two conditioned outputs.",
+      "fix_hint": "Add a 2-bit corruption-tracking state, reset to zero, that is loaded to 2'b11 when es_fw_ov_disable_alert occurs in conditioned mode. While this state is non-zero and the module is not in bypass mode, gate main_stage_push so no seed is written to the esfinal FIFO. Advance the shift register on each raw main-stage push so exactly two corrupted conditioner outputs are discarded before normal pushing resumes."
+    }
+  ]
+}

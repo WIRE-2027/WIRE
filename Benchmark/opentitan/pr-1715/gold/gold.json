@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          175,
+          175
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the Phase3 state, when the counter reaches the configured phase cycle count, the FSM sets state_d to Terminal and cnt_clr to 1, but leaves cnt_en at its default asserted value for that state. The counter register update logic prioritizes (cnt_en && cnt_clr) as a load of 1, so on the clock edge entering Terminal the count is set to 1 instead of being cleared to 0. This violates the specification that entering Terminal clears the count and that Terminal's count output is zero; the output shows an extra count of 1 for one cycle in Terminal.",
+      "fix_hint": "When Phase3 completes and state_d is Terminal, force cnt_en to 0 so that only cnt_clr is active on the transition into Terminal. This makes the counter register take the cnt_clr path and clear cnt_q to 0 on the same edge that enters Terminal, matching the spec."
+    }
+  ]
+}

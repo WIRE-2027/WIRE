@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          328,
+          350
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder incorrectly handles load instructions with funct3 field (instr[14:12]) equal to 3'b111 as a custom 'reg-reg load' instruction, which is not part of the RISC-V specification. This encoding should be treated as illegal. Additionally, load instructions with funct3 = 3'b110 (LWU) are not properly flagged as illegal in RV32I. The buggy code allows non-standard load encodings to be decoded and executed, potentially causing incorrect memory access patterns or data corruption.",
+      "fix_hint": "Remove the entire 'reg-reg load' handling block (the if (instr[14:12] == 3'b111) begin ... end block). For load instructions, ensure that funct3 = 3'b110 (LWU) is treated as illegal by adding a check similar to the existing check for funct3 = 3'b011 (LD). The load size case statement should only handle standard encodings (00, 01, 10) and mark all others as illegal."
+    },
+    {
+      "bug_lineno": [
+        [
+          352,
+          358
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder fails to properly flag load instructions with funct3 = 3'b110 (LWU) as illegal in RV32I. While the code correctly marks funct3 = 3'b011 (LD) as illegal for RV64-only, it misses the LWU encoding. This allows a non-existent instruction to be decoded and potentially executed, violating the RISC-V specification for RV32I.",
+      "fix_hint": "Add a check for instr[14:12] == 3'b110 (LWU) similar to the existing check for instr[14:12] == 3'b011 (LD). Set illegal_insn = 1'b1 when this encoding is encountered. This ensures all non-standard load encodings are properly flagged as illegal."
+    }
+  ]
+}

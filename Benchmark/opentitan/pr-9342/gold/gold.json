@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/rstmgr/rtl/rstmgr_cnsty_chk.sv",
+          "lines": [
+            [
+              178,
+              178
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/rstmgr/rtl/rstmgr_leaf_rst.sv",
+          "lines": [
+            [
+              56,
+              60
+            ],
+            [
+              70,
+              70
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, rstmgr_leaf_rst cleared its latched software reset request as soon as the software request deasserted and the synchronized leaf_rst_sync went high, without waiting for rstmgr_cnsty_chk to accept the child reset assertion. This could remove the software reset source before the consistency checker observed it. As a result, when a software-triggered child reset asserted, the checker could see sync_child_rst asserted but src_valid low and no parent reset, enter WaitForParent, and eventually timeout and assert err_o. The checker also had no output to tell the leaf reset generator that the software reset request had been accepted and could be cleared.",
+      "fix_hint": "Add a software reset request clear output to rstmgr_cnsty_chk, asserted from WaitForSrcRelease, and use it as the only clear for the latched software reset request in rstmgr_leaf_rst. In addition, drive the checker's sw_rst_req_i with the latched request OR the original active-low request so that a software reset remains visible until the checker has validated it, and also remains visible if the original software request is still asserted after the latch is cleared."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "core/csr_regfile.sv",
+          "lines": [
+            [
+              241,
+              241
+            ]
+          ]
+        },
+        {
+          "file": "core/include/ariane_pkg.sv",
+          "lines": [
+            [
+              207,
+              207
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the old code, the machine vendor ID CSR (CSR_MVENDORID) in core/csr_regfile.sv was hard-wired to read zero ('0), and the package core/include/ariane_pkg.sv did not define the OpenHW Group JEDEC manufacturer ID constant. This caused the architectural mvendorid CSR to return 0x0 instead of the required 0x0602 OpenHW Group JEDEC ID, observable to software reading that CSR. The fix replaces the hard-wired zero with a newly defined package constant and assigns it to the CSR read data.",
+      "fix_hint": "Add a package-level localparam OPENHWGROUP_MVENDORID with value 0x0602 in core/include/ariane_pkg.sv, and use that parameter as the read data for riscv::CSR_MVENDORID in core/csr_regfile.sv instead of the hard-wired zero."
+    }
+  ]
+}

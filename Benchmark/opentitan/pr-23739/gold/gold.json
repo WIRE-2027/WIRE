@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          454,
+          454
+        ],
+        [
+          461,
+          461
+        ],
+        [
+          463,
+          464
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The fifo_full_seen tracking state is used to gate the FIFO-empty interrupt so that it is only raised after the FIFO has become full and then empty during the current message. In the old code, fifo_full_seen_d was assigned 1 with highest priority whenever fifo_full was high as a level. Consequently, if a Start, Continue, Process, or Stop command was accepted in the same cycle that the FIFO happened to be full, the intended clear of fifo_full_seen_q was overridden and the state stayed set after the command. This allowed a later FIFO-empty event to propagate through fifo_empty_gate and raise the FIFO-empty interrupt even though a Process or Stop command had been issued, which violates the requirement that FIFO-empty interrupts not be raised after finalize/pause commands. Additionally, using the fifo_full level instead of a rising edge made the tracking sticky and insensitive to whether the FIFO had become full again after the last command.",
+      "fix_hint": "Reorder fifo_full_seen_d so any Start/Continue/Process/Stop command clears the tracking state with highest priority, even when fifo_full is currently asserted. Change the set condition from the fifo_full level to a fifo_full rising-edge detect derived from a delayed fifo_full_q, so the tracking is set only when the FIFO actually becomes full after the last command. Keep the existing clear on the fifo_empty negative edge and the registered fifo_full_seen_q update."
+    }
+  ]
+}

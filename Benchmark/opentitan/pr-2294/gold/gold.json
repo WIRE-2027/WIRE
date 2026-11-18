@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          86,
+          86
+        ],
+        [
+          104,
+          104
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The escalation timer FSM incorrectly lets an active accumulation trigger start escalation even when a clear request (clr_i) is asserted. In Idle, the transition to Phase0 only requires accum_trig_i && en_i, so clr_i is ignored. In Timeout, the transition to Phase0 requires accum_trig_i without even checking en_i or clr_i. This violates the clear-request behavior and precedence: a clear request must prevent an accumulation trigger from starting escalation, while not suppressing an already-reached timeout expiry. The observable failure is that esc_trig_o pulses and the FSM enters Phase0 when clr_i is active, or in Timeout when en_i is deasserted, together with accum_trig_i.",
+      "fix_hint": "Gate the accumulation-trigger conditions in the Idle and Timeout FSM branches with the master enable and clear request: use accum_trig_i && en_i && !clr_i in Idle, and apply the same gating to the accum_trig_i term in Timeout. Leave the timeout-start condition in Idle and the timeout-expiry condition in Timeout ungated by clr_i, since a clear request should not prevent an interrupt timeout from starting or expiring when its own conditions are met."
+    }
+  ]
+}

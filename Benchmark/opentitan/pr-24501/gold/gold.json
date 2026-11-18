@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          618,
+          641
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The sd_en_o output-enable generation was gated by a clock-phase condition and otherwise held from a registered snapshot (sd_en_ff_q). Because sd_en_ff_q is updated every cycle from sd_en_o, including while all chip selects are deasserted where sd_en_o is forced to 0, the hold path could present a stale or zero output-enable value to sd_en_o when the SPI clock phase condition changed. This caused glitches or incorrectly deasserted data output enables during active SPI segments.",
+      "fix_hint": "Remove the sck/drive_posedge-qualified mux and the sd_en_ff_q feedback path. Compute sd_en_o combinationally whenever any chip select is asserted, using cmd_wr_en_q/cmd_wr_en_last_bit and speed_o directly, and force all enables to 0 only when all chip selects are deasserted. Unused signals such as drive_posedge and sd_en_ff_q may be deleted."
+    }
+  ]
+}

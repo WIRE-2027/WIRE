@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1034,
+          1034
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When CVA6Cfg.RVU is disabled, the general mstatus update logic does not force mstatus_d.mpp to Machine mode. A CSR write can therefore leave the unsupported User-mode encoding (0b00) in the WARL MPP field of a Machine-only configuration, causing a subsequent mstatus read to return an illegal value instead of the only supported value, Machine mode (0b11).",
+      "fix_hint": "When CVA6Cfg.RVU is disabled, unconditionally force mstatus_d.mpp to PRIV_LVL_M after the normal mstatus update logic so every CSR write path leaves the WARL field at its only legal value."
+    },
+    {
+      "bug_lineno": [
+        [
+          1256,
+          1258
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "During MRET execution, mstatus_d.mpp is unconditionally set to PRIV_LVL_U (User mode) without checking whether User mode is supported by CVA6Cfg.RVU. In a Machine-only configuration, MPP is a WARL field whose only legal value is Machine mode (0b11), so assigning User mode (0b00) leaves an illegal value that can be observed by a subsequent mstatus read.",
+      "fix_hint": "Conditionally set mstatus_d.mpp to PRIV_LVL_U only when CVA6Cfg.RVU is enabled; otherwise, set it to PRIV_LVL_M to ensure the WARL field always holds a legal value in Machine-mode-only configurations."
+    }
+  ]
+}

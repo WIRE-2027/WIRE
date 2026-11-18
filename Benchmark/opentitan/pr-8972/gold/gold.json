@@ -1,0 +1,30 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          73,
+          73
+        ],
+        [
+          96,
+          96
+        ],
+        [
+          108,
+          113
+        ],
+        [
+          140,
+          140
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The register TL-UL port's integrity-error output was left unconnected, so an integrity error on the register interface was dropped and never contributed to the bus-integrity-error status, the fatal alert, or local escalation. The memory-bus adapter error was used directly as a scalar condition in the status write-enable, alert request, and escalation logic; with the register-port error added as a second bit, those expressions must OR-reduce the aggregation vector so an error from either TL-UL port is observed. This violated the spec requirement that a bus integrity error on either bus interface must set the bus-integrity-error status, generate a fatal alert, and enter the local escalated state.",
+      "fix_hint": "Connect u_reg_regs.intg_err_o to one bit of the bus_integ_error aggregation vector, keep the SRAM adapter intg_error_o on the other bit, and OR-reduce bus_integ_error in the status write-enable, alert request, and local escalation expressions using |bus_integ_error so that an integrity error from either the register interface or the memory interface is recorded and escalates correctly."
+    }
+  ]
+}

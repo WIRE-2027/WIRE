@@ -1,0 +1,84 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_core.sv",
+          "lines": [
+            [
+              2196,
+              2196
+            ],
+            [
+              2220,
+              2220
+            ],
+            [
+              2223,
+              2223
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_main_sm.sv",
+          "lines": [
+            [
+              83,
+              83
+            ],
+            [
+              100,
+              100
+            ],
+            [
+              123,
+              124
+            ],
+            [
+              126,
+              127
+            ],
+            [
+              143,
+              143
+            ],
+            [
+              148,
+              148
+            ],
+            [
+              157,
+              157
+            ],
+            [
+              164,
+              164
+            ],
+            [
+              173,
+              173
+            ],
+            [
+              179,
+              179
+            ],
+            [
+              206,
+              206
+            ],
+            [
+              214,
+              214
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, the alert failure counters were cleared by `rst_alert_cntr_o` pulses generated in `entropy_src_main_sm` after a passing health-test window. Those pulses are derived from the delayed `ht_done_pulse_i` / `ht_fail_pulse_i` signals, so the clear pulse can coincide with a new `any_fail_pulse` from continuous tests such as repcnt/repcnts. Since the counter clear supersedes the increment in the same cycle, the failure is silently dropped and does not count toward the alert threshold. Additionally, `ht_failed_d` was unconditionally cleared when `es_enable_fo[6]` was low, which could erase a failure on the last symbol tested before disable before the main SM could consume it. The fix moves alert-counter clearing to the actual end of the health-test window, qualified by the real `ht_failed_d` status and a level-based `alert_cntr_clr_ok` signal from the main SM, and adjusts the `ht_failed_d` state update so failures are preserved while the delayed enable is still active.",
+      "fix_hint": "Replace the main SM's one-cycle `rst_alert_cntr_o` clear pulses with a level output `alert_cntr_clr_ok_o` asserted in the health-test-running/post-check states where clearing is permitted, and remove the `rst_alert_cntr_o` assertions from the passing-window transitions. In `entropy_src_core`, compute `alert_cntrs_clr` as `health_test_clr || (health_test_done_pulse && !ht_failed_d && alert_cntr_clr_ok)`, so counters are cleared only when the actual window completes without a failure. Update `ht_failed_d` so `any_fail_pulse` can still latch a failure while `es_delayed_enable` is high, and only clear `ht_failed_d` when both `es_enable_fo[6]` and `es_delayed_enable` are low, preserving a failure on the last symbol before disable."
+    }
+  ]
+}

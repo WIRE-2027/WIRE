@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          97,
+          98
+        ],
+        [
+          120,
+          121
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the pre-merge code, the staged and shadow register write/data enables were gated only by phase and, for the shadow register, by update-error. They were not gated by the storage-error condition. Once err_storage became asserted because the shadow copy mismatched the committed value, a subsequent software or hardware write could still update the staged register during phase 0 and the shadow register during phase 1. Since the committed register write enable is derived from the shadow write enable, a completing update sequence could also change the committed value. This violates the spec requirement that while a storage error is asserted, no further register updates shall take effect and the module shall not attempt to correct the mismatch by accepting writes.",
+      "fix_hint": "Add the storage-error condition to the enables that feed the staged and shadow registers so that once err_storage is asserted, all update paths into the staged, shadow, and consequently committed registers are disabled until reset. This makes the storage-error condition persistent and prevents any further write from modifying register state."
+    }
+  ]
+}

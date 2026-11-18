@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1163,
+          1163
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The PMPCFG sequential update rejects the unsupported NA4 mode but does not reject the reserved collective WARL permission combination `R=0, W=1`. The illegal permission encoding can therefore be committed into `pmpcfg_q`.",
+      "fix_hint": "Before committing `pmpcfg_d`, validate both the address mode and the R/W combination; retain the previous entry when a write requests `R=0, W=1`."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/otp_ctrl/rtl/otp_ctrl_dai.sv",
+          "lines": [
+            [
+              239,
+              239
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In otp_ctrl_dai.sv, cnt_q is only incremented during digest readout and is never cleared when a new DAI command is accepted. Because otp_addr_o is derived from addr_calc = {cnt_q, ...} + addr_base for every OTP access, a stale cnt_q left from a previous digest calculation shifts the address of subsequent reads, writes, or digest operations and causes accesses to target the wrong OTP location.",
+      "fix_hint": "Clear cnt_q when a command is accepted in IdleSt by asserting cnt_clr before dispatching to the command-specific states, ensuring every new DAI command starts with the address counter at zero."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/otp_ctrl/rtl/otp_ctrl_part_buf.sv",
+          "lines": [
+            [
+              425,
+              425
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In otp_ctrl_part_buf.sv, IntegDigSt unconditionally asserts cnt_en when scrmbl_ready_i is high. When the last data block is reached and the padding state IntegDigPadSt is entered, the counter still increments. As a result, scrmbl_data_o in the padding round points to the next block, which is the stored digest block, instead of repeating the last data block as required for digest padding. This corrupts the computed digest for partitions with an odd number of data blocks.",
+      "fix_hint": "Disable cnt_en when transitioning from IntegDigSt to IntegDigPadSt so cnt_q remains at the last valid content block and the padding round reuses that block instead of advancing to the digest block."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/otp_ctrl/rtl/otp_ctrl_part_buf.sv",
+          "lines": [
+            [
+              546,
+              546
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In otp_ctrl_part_buf.sv, scrmbl_data_o is driven from data_o, the hardware output-gated bus. While dout_gate_q is Locked, which is the case during initialization and before the first integrity check unlocks the partition, data_o is forced to DataDefault rather than the actual buffered partition contents. Consequently, descrambling, re-scrambling, and digest computations feed the wrong data into the scrambling datapath, causing integrity/check failures even though the OTP data was read correctly into the internal buffer.",
+      "fix_hint": "Drive scrmbl_data_o from the internal ECC buffer vector data instead of the gated output data_o. The internal data holds the real buffered contents and must be used whenever the scrambling/digest datapath consumes partition data, independent of dout_gate_q."
+    }
+  ]
+}

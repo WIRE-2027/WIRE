@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          225,
+          225
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The SFENCE.VMA instruction legality check incorrectly allows execution when Supervisor mode (RVS) is not supported. The condition `((CVA6Cfg.RVS && priv_lvl_i == riscv::PRIV_LVL_S) || ((!CVA6Cfg.RVS && !CVA6Cfg.RVU) || priv_lvl_i == riscv::PRIV_LVL_M))` evaluates to true when RVS is disabled and RVU is disabled (e.g., CV32A60X configuration), making SFENCE.VMA legal even though it is a supervisor-level instruction that should be illegal without S-mode support.",
+      "fix_hint": "Modify the SFENCE.VMA legality condition to require Supervisor mode support (CVA6Cfg.RVS) as a prerequisite. The instruction should only be legal when RVS is enabled and the current privilege level is S-mode or M-mode, with rd == 0. Otherwise, it should be decoded as an illegal instruction."
+    }
+  ]
+}

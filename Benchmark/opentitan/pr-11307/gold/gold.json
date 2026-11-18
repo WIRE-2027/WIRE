@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1325,
+          1325
+        ],
+        [
+          1335,
+          1335
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The alert-related status register bits are directly assigned from one-cycle alert pulse signals. `hw2reg.status.alert_recov_ctrl_update_err.d` is assigned from `alert_recov_operation`, and `hw2reg.status.alert_fatal_fault.d` is assigned from `alert_fatal`. Both of these source signals assert for only a single cycle, so the corresponding status bits return to zero on the next cycle instead of remaining set. This makes software unable to observe a recoverable shadow-register update error or a latched fatal alert through the status register.",
+      "fix_hint": "Latch the alert status values in dedicated flip-flops before driving the status-register write data. For the recoverable alert status, set the latch when `alert_recov_operation` is asserted and clear it when `err_processed` indicates software has acknowledged the error. For the fatal alert status, set the latch when `alert_fatal` is asserted and keep it set until hardware reset. Drive `hw2reg.status.alert_recov_ctrl_update_err.d` and `hw2reg.status.alert_fatal_fault.d` from these latched values."
+    }
+  ]
+}

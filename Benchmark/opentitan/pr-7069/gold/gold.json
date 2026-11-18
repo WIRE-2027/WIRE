@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          169,
+          169
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-fix code, tl_o.a_ready is qualified only by gnt_i, reqfifo_wready, and sramreqfifo_wready. For requests that fail internal validation, req_o is held low because req_o = tl_i.a_valid & reqfifo_wready & ~error_internal. If the SRAM-side grant signal gnt_i is generated combinationally from req_o, then gnt_i will never be asserted for such erroring requests, so a_ready remains low forever and the TL-UL request stalls. This violates the requirement that rejected or erroring requests must be accepted without requiring an SRAM access.",
+      "fix_hint": "Allow internally detected erroring requests to be accepted without waiting for the SRAM grant by making a_ready assert when error_internal is set, for example using (gnt_i | error_internal) & reqfifo_wready & sramreqfifo_wready. Keep req_o deasserted for erroring requests so no SRAM access is issued."
+    }
+  ]
+}

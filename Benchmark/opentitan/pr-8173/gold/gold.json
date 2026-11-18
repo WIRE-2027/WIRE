@@ -1,0 +1,50 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          165,
+          165
+        ],
+        [
+          186,
+          186
+        ],
+        [
+          205,
+          205
+        ],
+        [
+          212,
+          212
+        ],
+        [
+          222,
+          222
+        ],
+        [
+          229,
+          229
+        ],
+        [
+          239,
+          239
+        ],
+        [
+          246,
+          246
+        ],
+        [
+          255,
+          255
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, latch_crashdump_o was asserted in the combinational FSM transition branches that select the next escalation phase: entering Phase0 from Idle or Timeout, and entering Phase1/2/3 from the previous phase. Because these assignments are evaluated while state_q is still the previous state, latch_crashdump_o is asserted one cycle before esc_state_o and phase_oh reflect the newly entered phase. The crashdump capture therefore samples stale escalation state (Idle, Timeout, or the previous phase) instead of the active phase, violating the spec requirement that the crashdump capture request be asserted only while the active escalation phase matches crashdump_phase_i.",
+      "fix_hint": "Move each latch_crashdump_o assignment out of the FSM transition branches and into the steady-state body of the corresponding Phase0St/Phase1St/Phase2St/Phase3St case. This makes latch_crashdump_o assert only after the FSM has actually entered and reports the target phase, while the default assignment keeps it deasserted in Idle, Timeout, Terminal, and error states."
+    }
+  ]
+}

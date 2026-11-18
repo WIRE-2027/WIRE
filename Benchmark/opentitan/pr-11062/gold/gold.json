@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          74,
+          74
+        ],
+        [
+          117,
+          117
+        ],
+        [
+          119,
+          119
+        ],
+        [
+          131,
+          131
+        ],
+        [
+          153,
+          157
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the EDN request was computed combinationally as `edn_req = entropy_clearing_req | entropy_masking_req` and passed to the EDN CDC synchronizer. The synchronizer's `req_chk_i` input was gated by `(lc_escalate_en[0] == Off) & ~alert[1]`, so a fatal alert or life-cycle escalation could deassert `req_chk_i` while an EDN request was still pending. This allowed an in-flight request to be dropped before it received `edn_ack`, violating the EDN/push-pull handshake expectation and potentially leaving the EDN interface and CDC synchronizer in an inconsistent state.",
+      "fix_hint": "Keep the EDN request asserted until it is acknowledged instead of dropping it on alert/escalation. Add an internal request-hold register (`edn_req_hold_q`) that is set whenever any internal entropy request is active (`edn_req_int`) and cleared only when `edn_ack` is received, then drive `edn_req` from `edn_req_int | edn_req_hold_q`. Tie `req_chk_i` to 1'b1 so the synchronizer never invalidates an outstanding request. The EDN arbitration for clearing and masking ACKs can remain with clearing priority, and the now-unused escalation gating for EDN can be removed."
+    }
+  ]
+}

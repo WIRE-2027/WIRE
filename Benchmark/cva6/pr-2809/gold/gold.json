@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          306,
+          307
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the OpenPiton L1.5 cache adapter, invalidation valid/all fields for the I-cache and D-cache return packets are assigned outside the always_comb block that also assigns and reads other fields of the same packed return structs. In Verilator, this mixed partial-assignment pattern can trigger an ordering issue where invalidation information is not propagated consistently, causing coherence-network invalidation requests to be ignored and breaking AMO-related behavior in simulation.",
+      "fix_hint": "Assign the invalidation valid/all fields inside the same always_comb block that computes the return packet valid signals and return type fields, so the packed return struct fields are driven consistently within one procedural context."
+    },
+    {
+      "bug_lineno": [
+        [
+          373,
+          374
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The I-cache invalidation valid/all fields are driven by continuous assignments outside the return-packet combinational logic. Under the Verilator ordering issue described by the PR, this can make the I-cache invalidation fields inconsistent with the return valid computation, so I-cache invalidation requests may be dropped in simulation.",
+      "fix_hint": "Remove the separate continuous assignments for the I-cache invalidation valid/all fields and drive those fields from the return-packet always_comb block instead."
+    },
+    {
+      "bug_lineno": [
+        [
+          378,
+          379
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The D-cache invalidation valid/all fields are also driven by continuous assignments outside the return-packet combinational logic. With Verilator's packed-struct partial-assignment ordering issue, this can prevent D-cache invalidation requests from being observed correctly, which can break AMO behavior that relies on cache invalidation.",
+      "fix_hint": "Remove the separate continuous assignments for the D-cache invalidation valid/all fields and drive those fields from the return-packet always_comb block together with the rest of the return valid/type logic."
+    }
+  ]
+}

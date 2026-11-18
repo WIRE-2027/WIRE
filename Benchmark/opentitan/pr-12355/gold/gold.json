@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          182,
+          188
+        ],
+        [
+          196,
+          196
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "Before the fix, the beat counter `cnt` advanced whenever `tx_state != TxIdle || cpha_i == 1'b0`, regardless of `data_valid_i`. This caused the p2s logic to count dummy/non-byte cycles as serialized beats, so `cnt`, `last_beat`, and `data_sent_o` no longer aligned to actual byte boundaries and the byte-consumed indication could be asserted while no valid byte was being transmitted. In addition, `io_mode` was only updated from `io_mode_i` when `last_beat` was true; with `cnt` not advancing during invalid cycles, the registered `io_mode` could remain stale when `io_mode_i` changed before a new valid byte, causing the wrong serialization mode to be used.",
+      "fix_hint": "Gate the beat counter update with `data_valid_i` so `cnt` only advances while a byte is actually being serialized. Replace the last-beat-latched `io_mode` register with a direct use of `io_mode_i`, relying on the top-level to hold `io_mode_i` stable during a byte transfer. This keeps `cnt`, `last_beat`, `data_sent_o`, and output enables synchronized with valid data beats and the current IO mode."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          349,
+          349
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "For AMO instructions, the RVFI memory write-data field is incorrectly sourced from the LSU write data captured earlier in the pipeline, which corresponds to the original rs2 operand. However, the value actually written to memory by an AMO is the result of applying the AMO operation to the old memory value and rs2. As a result, the RVFI trace can report an incorrect mem_wdata value for AMO instructions.",
+      "fix_hint": "For AMO instructions, compute the RVFI mem_wdata value from the AMO operation type, the old memory value returned by the AMO load, and the rs2 operand stored in the tracking FIFO. Use this computed AMO write value for mem_wdata; keep the existing LSU write-data path for non-AMO stores."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          117,
+          117
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the Idle state of the ping/escalation FSM, a ping attempt was started whenever ping_req_i was high, rather than only on a rising edge of ping_req_i. If the requester kept ping_req_i asserted after ping_ok_o was pulsed, the FSM would immediately re-enter CheckPingResp0. However, esc_p is generated as a one-cycle pulse only when ping_req_d & ~ping_req_q, so with ping_req_q already high no new ping pulse is sent. The subsequent response check then sees a deasserted response and falsely asserts integ_fail_o, causing a spurious integrity failure instead of remaining idle until ping_req_i is deasserted and asserted again.",
+      "fix_hint": "Change the Idle-state ping initiation condition from the level-sensitive ping_req_i to a rising-edge detect of ping_req_i, i.e. ping_req_d & ~ping_req_q, so that the FSM only starts CheckPingResp0 when a new ping request is detected and a new ping pulse is generated."
+    }
+  ]
+}

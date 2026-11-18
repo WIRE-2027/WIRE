@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          382,
+          390
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the non-linear output path, the pre-SBox permutation used PRESENT block-cipher permutations that only handled 32-bit and 64-bit LFSRs and did not break the LFSR shifting pattern. With the LFSR advancing by one bit each cycle, the four-bit groups feeding neighboring SBoxes can line up in consecutive cycles, causing the same SBox output to appear in adjacent SBox positions one cycle apart and creating statistical defects in the non-linearized state output. The replacement builds the SBox input index map from a matrix fill/rotate/reverse scheme so that shifted versions of one SBox's input group do not coincide with another SBox's input group.",
+      "fix_hint": "Replace the fixed PRESENT-based aligned permutation with a parameterized matrix-based SBox-input index permutation: fill the state-bit indices into matrix columns, apply the documented column rotation and reversal operations, read out rows to form SBox input indices, and feed lfsr_q through PRINCE_SBOX4 using these indices. Keep the optional StatePerm applied after the SBox layer and add assertions/FPV checks to prove the permutation is a full permutation and that no shifted SBox input groups or adjacent bit positions remain aligned."
+    }
+  ]
+}

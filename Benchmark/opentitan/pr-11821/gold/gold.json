@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1333,
+          1333
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the old code, es_route_to_sw was asserted based only on the es_route configuration field (es_route_pfe). This meant the software entropy path was considered active even when the entropy data register was not enabled (entropy_data_reg_enable==0) or the OTP/fuse read enable was inactive. As a result, the final entropy FIFO was popped into the software read packer FIFO and the entropy-valid interrupt could be asserted even though software reads are disabled and the FIFO is never drained. This violates the spec requirement that software access be enabled only when both the fuse read enable and the entropy-data register enable are active, and that the software path remain quiet when access is disabled.",
+      "fix_hint": "Gate es_route_to_sw with es_data_reg_rd_en so the software route is only considered active when the entropy data register is fully enabled, including the fuse read enable, entropy_data_reg_enable, and module enable conditions. This prevents filling the software read packer FIFO and asserting the entropy-valid interrupt when software entropy read access is disabled."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_ctrl.sv",
+          "lines": [
+            [
+              237,
+              237
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The controller PRNG-enable expression includes the persistent Disabled and Invalid flags. It therefore continues enabling PRNG updates indefinitely after entering those states instead of removing the terminal-entry contribution after two subsequent reseed completions. With a nonzero finite reseed interval and returning entropy responses, those continued updates cause recurring automatic reseeds even when no other client requests PRNG activity.",
+      "fix_hint": "Add a bounded PRNG-enable counter/shift register, e.g. `prng_en_dis_inv_q[1:0]`, that is loaded when the main control FSM transitions into StCtrlDisabled or StCtrlInvalid, is shifted on each reseed-completion indication, and drives `prng_en_o` only while its low bit is set. Remove `disabled` and `invalid` from the unconditional `prng_en_o` expression, keep `random_req` and `wipe_req` as immediate enables, and default the set/load control to 0 in the main FSM so the counter is only armed on the relevant state entries."
+    }
+  ]
+}

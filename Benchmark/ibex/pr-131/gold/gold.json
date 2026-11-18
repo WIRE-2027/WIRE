@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          240,
+          240
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "When decoding JALR instructions in the first cycle (instr_new_i active), the jump_set_o signal is not asserted. This causes the PC mux to remain at PC_BOOT instead of transitioning to PC_JUMP, preventing the jump target from being properly loaded into the program counter. The missing jump_set_o = 1'b1 assignment in the JALR first-cycle block means the controller does not recognize that a jump is being taken, so it fails to redirect execution to the computed target address (rs1 + I-immediate).",
+      "fix_hint": "Add the assignment 'jump_set_o = 1'b1;' inside the JALR instruction's first-cycle block (when instr_new_i is active), similar to how it is already done for JAL instructions. This ensures the controller properly signals a jump is being taken and redirects the PC to the computed target."
+    },
+    {
+      "bug_lineno": [
+        [
+          553,
+          553
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the SYSTEM opcode decoding block for non-CSR instructions (funct3 == 000), the code assigns to 'illegal_insn_o' (the module output) instead of 'illegal_insn' (the internal signal) when checking that rs1 and rd must be zero. This creates a drive conflict because illegal_insn_o is driven by a continuous assignment at the end of the module (assign illegal_insn_o = illegal_insn | illegal_reg_rv32e), while also being driven procedurally in the always_comb block. This results in a compilation error and incorrect behavior where the illegal instruction detection for ECALL/EBREAK/MRET/DRET/WFI does not properly propagate through the intended logic path.",
+      "fix_hint": "Change 'illegal_insn_o = 1'b1;' to 'illegal_insn = 1'b1;' in the rs1/rd zero-check block within the SYSTEM opcode's funct3==000 case. This ensures the internal illegal_insn signal is set, which will then be properly combined with illegal_reg_rv32e in the final continuous assignment to illegal_insn_o."
+    }
+  ]
+}

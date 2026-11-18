@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1832,
+          1850
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When the Hypervisor extension is enabled, a trap targeting supervisor mode but not virtual supervisor mode (trap_to_priv_lvl == S and trap_to_v == 0) is skipped by the supervisor-trap update logic. The nested RVH/trap_to_v conditional only executes the VS trap path when trap_to_v is asserted, while the ordinary S/HS trap path is placed in the else branch of the RVH check and is therefore unreachable when RVH is enabled. As a result, the supervisor trap state such as status, cause, epc, and tval is not updated correctly for non-virtualized S-mode traps.",
+      "fix_hint": "Restructure the trap-to-supervisor conditional so that the VS trap update path is selected only when RVH is enabled and trap_to_v is asserted. For traps targeting supervisor mode with trap_to_v deasserted, allow the ordinary supervisor trap update path to execute even when RVH is enabled."
+    }
+  ]
+}

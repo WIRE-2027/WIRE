@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          85,
+          85
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "Signed-division preprocessing feeds `{~op_a_i, 1'b0}` to the leading-zero counter for a negative dividend. For `op_a_i = -1`, that expression becomes an all-zero input, taking the wrong normalization path and producing quotient 0 and remainder -1 for `-1 / 1`.",
+      "fix_hint": "Handle the signed `-1` dividend explicitly in the LZC input encoding so it is represented as a nonzero magnitude while preserving the existing preprocessing for other negative operands."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/ahb_lite_bus/rtl/ahb_lite_bus.sv",
+          "lines": [
+            [
+              108,
+              108
+            ]
+          ]
+        },
+        {
+          "file": "src/ahb_lite_bus/rtl/ahb_lite_bus_inf.sv",
+          "lines": [
+            [
+              46,
+              46
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The AHB-Lite bus module routed the address decoder's initiator-ready output (hinitiatorready_o) to the initiator interface's hready net. Because the Initiator_Interface_Ports modport also declared hready as an output, the ahb_lite_bus instance drove initiator_inst.hready, while the upstream ahb_lite_2to1_mux in caliptra_top.sv simultaneously drove the same net through its hready_o output. This created an illegal multi-driver structural error and connected the responder-to-initiator readiness signal to the wrong AHB-Lite semantic net.",
+      "fix_hint": "Change the initiator modport to expose hreadyout (not hready) as the responder-to-initiator ready output, and connect the decoder's hinitiatorready_o to ahb_lite_initiator.hreadyout in ahb_lite_bus.sv so that hready is driven only by the upstream mux and hreadyout carries the decoder's readiness back to it."
+    }
+  ]
+}

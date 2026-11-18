@@ -1,0 +1,80 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/edn/rtl/edn_ack_sm.sv",
+          "lines": [
+            [
+              17,
+              17
+            ],
+            [
+              39,
+              40
+            ],
+            [
+              42,
+              45
+            ],
+            [
+              50,
+              50
+            ],
+            [
+              55,
+              55
+            ],
+            [
+              58,
+              58
+            ],
+            [
+              60,
+              65
+            ],
+            [
+              68,
+              71
+            ],
+            [
+              73,
+              73
+            ],
+            [
+              75,
+              75
+            ],
+            [
+              85,
+              85
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/edn/rtl/edn_core.sv",
+          "lines": [
+            [
+              830,
+              830
+            ],
+            [
+              835,
+              835
+            ],
+            [
+              853,
+              853
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The old EDN acknowledge state machine had no explicit Disabled state and reset to Idle. In the AckPls state it unconditionally asserted ack_o before returning to Idle, so if enable_i was deasserted while an acknowledge was being generated, the acknowledge was still sent. At the same time, edn_core asserted packer_ep_clr whenever edn_enable was low (packer_ep_clr = !edn_enable_fo[24]), which cleared the endpoint packer/data path while the endpoint could still observe the acknowledge, allowing data to become zero or stale. The old design also lacked a controlled one-cycle FIFO clear when transitioning from disabled to enabled, and the FIPS output was tied to the raw enable level rather than to the endpoint FIFO clear, so FIPS behavior was coupled to the same unsafe disable/clear condition.",
+      "fix_hint": "Rework edn_ack_sm to include Disabled and EndPointClear states, reset to Disabled, and generate fifo_clr_o as a one-cycle clear when enable_i is first asserted. In Idle, accept a request only by popping fifo when fifo_not_empty_i is true and moving to DataWait; wait in DataWait for fifo_not_empty_i before entering AckPls. Add a global disable override outside the case block that forces state_d to Disabled and deasserts ack_o, fifo_pop_o, and fifo_clr_o whenever enable_i is low and the FSM is not in Error. In edn_core, connect packer_ep_clr to the new ack_sm fifo_clr_o output instead of deriving it from the enable level, and use packer_ep_clr to clear edn_fips_d on the same one-cycle clear."
+    }
+  ]
+}

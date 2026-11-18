@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          42,
+          42
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the SEQUENTIAL arbitration branch, `max_prio` is declared with width `PRIOW`, the same width as `threshold` and `prio`. It is initialized as `threshold + 1'b1` to implement the strictly-greater-than-threshold requirement. When the threshold equals `MAX_PRIO` and `MAX_PRIO + 1` cannot be represented in `PRIOW` bits (for example `MAX_PRIO=7`, `PRIOW=3`), the addition overflows/truncates and `max_prio` becomes 0. The subsequent eligibility check `prio[i] >= max_prio` therefore considers all enabled pending sources eligible, even though no source priority can be strictly greater than the maximum threshold. This can spuriously assert `irq` and select a nonzero interrupt ID when the threshold is set to disable all interrupts.",
+      "fix_hint": "Widen `max_prio` to use the `MAX_PRIOW` width, i.e. declare it as `logic [MAX_PRIOW-1:0] max_prio;`. This allows the value `threshold + 1'b1` to be represented up to `MAX_PRIO + 1` without truncation, preserving the strict greater-than comparison and matching the existing `MAX_PRIOW'(prio[i])` assignment."
+    }
+  ]
+}

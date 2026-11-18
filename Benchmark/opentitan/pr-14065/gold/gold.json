@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          383,
+          383
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StIdle state, the FSM only handles the case where module_active, data_valid_i, and cmd_info_d.valid are all true. If a complete byte is received but no valid command information entry matches, cmd_info_d.valid is 0, so the FSM remains in StIdle instead of moving to the dead-end StWait state. Because StIdle is re-evaluated for every data_valid_i assertion, later bytes in the same SPI transaction (such as address or payload bytes) can be mistaken for new opcodes and processed as valid commands, contrary to the specification that an unmatched byte should select no datapath and wait for reset.",
+      "fix_hint": "Add an else-if branch in the StIdle handling that, when module_active and data_valid_i are true but cmd_info_d.valid is false, transitions st_d to StWait. This makes the FSM enter the existing wait-for-reset state immediately after detecting an invalid opcode and prevents subsequent transaction bytes from being interpreted as valid commands."
+    }
+  ]
+}

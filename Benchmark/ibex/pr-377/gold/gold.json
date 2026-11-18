@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          365,
+          376
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the WAIT_RVALID_MIS state, when the first part of a misaligned access receives an error (pmp_err_q or data_err_i), the FSM asserts data_valid_o immediately and transitions to WAIT_RVALID_ERR or WAIT_GNT_ERR. This causes the core to take an exception before the second part of the misaligned transaction completes, leading to a synchronization mismatch between the LSU and the controller. The controller may process a new instruction while the LSU still has an outstanding transaction, resulting in incorrect address generation and illegal instruction exceptions.",
+      "fix_hint": "Modify the WAIT_RVALID_MIS state to defer asserting data_valid_o and data_or_pmp_err until the second part of the misaligned transaction also completes. Instead of immediately signaling the error, record the first-part error and transition to a state that waits for the second part's grant/rvalid before signaling the error to the core."
+    },
+    {
+      "bug_lineno": [
+        [
+          434,
+          442
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the WAIT_RVALID_DONE state, a data error on the first half of a misaligned access immediately asserts data_valid_o and reports the exception while the second half is still outstanding. The controller can advance before the LSU finishes that transaction, desynchronizing the pipeline and corrupting subsequent execution.",
+      "fix_hint": "Modify the WAIT_RVALID_DONE state to defer asserting data_valid_o and data_or_pmp_err until the second part's rvalid is received. Record the first-part error and transition to WAIT_RVALID_ERR without signaling the error to the core, then signal the error only when the second part completes."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_fwm_rxf_ctrl.sv",
+          "lines": [
+            [
+              39,
+              39
+            ],
+            [
+              69,
+              72
+            ],
+            [
+              160,
+              165
+            ],
+            [
+              169,
+              169
+            ],
+            [
+              228,
+              250
+            ],
+            [
+              256,
+              256
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/spi_device/rtl/spi_fwmode.sv",
+          "lines": [
+            [
+              218,
+              218
+            ],
+            [
+              223,
+              223
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, spi_fwm_rxf_ctrl handled a partial word after the wait timer expired by performing an SRAM read-modify-write. It transitioned from StWait to StRead, asserted a read request, waited in StModify for sram_rvalid, and only then issued a write while merging sram_rdata into the disabled byte lanes of sram_wdata. This violates the receive-path requirement to perform writes only, and when byte-by-byte transfers forced the partial-write path, the extra read request produced the arbiter data-flow assertion observed in the PR. The design also forced FwModeRxFifo's SRAM write mask to all 1s, so the partial-word write could not simply be emitted without a read: the RXF controller had no write-mask output and spi_fwmode did not wire one through.",
+      "fix_hint": "Eliminate the RMW FSM path. Remove StRead/StModify and the sram_wdata_sel merging logic; on timer expiry in StWait go directly to StWrite with a write request. Add an sram_wmask output driven from byte_enable via sram_strb2mask, with all-ones for full-word writes, connect it from u_rxf_ctrl in spi_fwmode, and delete the force of fwm_sram_wmask[FwModeRxFifo] to '1 so the arbiter receives the correct write strobes."
+    }
+  ]
+}

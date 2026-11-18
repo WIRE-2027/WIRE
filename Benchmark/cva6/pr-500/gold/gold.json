@@ -1,0 +1,44 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/frontend/frontend.sv",
+          "lines": [
+            [
+              421,
+              421
+            ]
+          ]
+        },
+        {
+          "file": "src/frontend/instr_queue.sv",
+          "lines": [
+            [
+              57,
+              57
+            ],
+            [
+              73,
+              73
+            ],
+            [
+              183,
+              183
+            ],
+            [
+              234,
+              234
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When an instruction-fetch exception is delivered, the instruction queue reports the wrong faulting virtual address in fetch_entry_o.ex.tval. In the old code, tval is always taken from pc_q, the program counter of the instruction currently being emitted. For a 32-bit instruction whose two halves come from different fetch words, the page fault can occur on the second fetch word, so pc_q (the instruction start address) no longer matches the virtual address of the portion that caused the fault. The queue had no record of which fetch address actually faulted; it only stored the exception type and reused the delivery PC, violating the requirement that tval contain the faulting fetch address.",
+      "fix_hint": "Propagate the faulting instruction-cache virtual address from the frontend (icache_vaddr_q) into the instruction queue as exception_addr_i, store it in each queued instruction entry (ex_vaddr), and drive fetch_entry_o.ex.tval from that stored fetch address instead of pc_q when an exception is reported."
+    }
+  ]
+}

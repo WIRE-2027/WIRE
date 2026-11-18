@@ -1,0 +1,58 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          175,
+          175
+        ],
+        [
+          179,
+          179
+        ],
+        [
+          196,
+          196
+        ],
+        [
+          201,
+          201
+        ],
+        [
+          237,
+          237
+        ],
+        [
+          329,
+          329
+        ],
+        [
+          332,
+          332
+        ],
+        [
+          351,
+          351
+        ],
+        [
+          354,
+          354
+        ],
+        [
+          372,
+          372
+        ],
+        [
+          375,
+          375
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, an accepted Advance command that completes with an invalid KMAC input does not commit the KMAC result into the internal key state because KeyUpdateKmac gates the key-state write with ~op_err. However, the FSM advance condition was only op_ack && advance_sel, so the working state still transitioned to the next key-manager state (e.g. StCtrlInit -> StCtrlCreatorRootKey, StCtrlCreatorRootKey -> StCtrlOwnerIntKey, StCtrlOwnerIntKey -> StCtrlOwnerKey) even though key_state_q was left unchanged. This leaves the new working state paired with the previous state's key material, which is inconsistent and violates the requirement that a command may advance only when the key state is successfully updated. The same fault exists in the three normal operational states that advance to a new key state.",
+      "fix_hint": "Introduce a key_update_vld signal that reflects whether the current update path actually overwrites key_state_d with the KMAC result. In KeyUpdateKmac, set key_update_vld = key_update & ~fault_err & ~op_err; in KeyUpdateInvalid, set key_update_vld = key_update. Then define next_state = op_ack && advance_sel && key_update_vld and use next_state for the advance-to-next-key-state transitions instead of op_ack && advance_sel. Keep the disable/fault transition to Disabled as invalid_state = op_ack && (disable_sel || fault_err). This ensures an invalid-input Advance cannot advance the working state without committing new key material."
+    }
+  ]
+}

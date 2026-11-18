@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/csrng/rtl/csrng_reg_top.sv",
+          "lines": [
+            [
+              2062,
+              2065
+            ]
+          ]
+        },
+        {
+          "file": "src/entropy_src/rtl/entropy_src_reg_top.sv",
+          "lines": [
+            [
+              3895,
+              3898
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The read-data return multiplexers in csrng_reg_top.sv and entropy_src_reg_top.sv each use a unique case with a default branch that drives reg_rdata_next to all ones. The same combinational blocks already initialize reg_rdata_next to zero before the case, so the default branch is redundant. For accesses where no addr_hit bit is asserted (unmapped or reserved address space), the default branch returns 0xFFFFFFFF instead of the required zero, and the presence of a catch-all default in a unique case causes synthesis/formality tools to flag potential case-item overlap.",
+      "fix_hint": "Remove the default branch from the unique case read-data mux in both csrng_reg_top.sv and entropy_src_reg_top.sv. Rely on the existing reg_rdata_next = '0 initialization at the start of the always_comb block to supply the default read value for unmapped or reserved addresses."
+    }
+  ]
+}

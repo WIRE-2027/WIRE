@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_host/rtl/spi_host_fsm.sv",
+          "lines": [
+            [
+              448,
+              448
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/spi_host/rtl/spi_host_shift_register.sv",
+          "lines": [
+            [
+              72,
+              72
+            ],
+            [
+              91,
+              91
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, spi_host_fsm produced a single cmd_end_o signal from the transmit-side condition `(byte_cntr_q == 'h1) & wr_en_o & sr_wr_ready_i` and passed it to spi_host_shift_register as cmd_end_i. The shift register used that same signal both as the receive last-byte flag stored in rx_buf and as the transmit flush to byte_select. This conflates two different events: the last read capture occurs at the receive byte boundary (`rd_en_o`/`sr_rd_ready_i`), while the last write/flush is associated with the transmit byte request (`wr_en_o`/`sr_wr_ready_i`). As a result, for read/bidirectional segments the receive last flag was derived from the wrong handshake and could be missing/wrong, and for transmit segments the flush indication was not an independent last-write indication, causing incorrect discard of the last byte in the byte-selection logic.",
+      "fix_hint": "Separate the two final-byte indications in spi_host_fsm: generate `last_read_o` from the read side (`rd_en_o` and `sr_rd_ready_i` at the last read byte) and `last_write_o` from the write side (`wr_en_o` and `sr_wr_ready_i` for the last write byte), using the appropriate counter comparisons. Pass these as independent ports to spi_host_shift_register and use `last_read_i` when latching `rx_buf` and `last_write_i` when driving `tx_flush_o`, so the receive-last and transmit-flush events are no longer coupled through the old `cmd_end` signal."
+    }
+  ]
+}

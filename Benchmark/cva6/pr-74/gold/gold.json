@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          250,
+          252
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The MSHR conflict check uses the live input tag with the saved request index and waits only for an exact address match. A pending store can therefore miss a same-index conflict with a cache line being evicted under another tag and proceed while the miss handler owns that index, corrupting data during back-to-back stores.",
+      "fix_hint": "Build the MSHR comparison address from the tag returned for the saved cache request, and make stores wait on any matching cache index while loads continue to require an exact line-address match."
+    }
+  ]
+}

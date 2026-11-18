@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          2250,
+          2250
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the CSR privilege-check logic, a lower-privilege CSR access made while executing in virtualized mode is classified as a virtual privilege violation only when the CSR's required privilege level is exactly HS. This misses supervisor-level CSRs, whose required privilege level is below HS, so accesses such as a VU-mode access to an S-level CSR can be reported as an ordinary illegal instruction instead of a virtual instruction exception.",
+      "fix_hint": "In the CSR privilege-check logic, replace the exact HS-level comparison with a comparison that also includes CSR privilege levels below HS. This makes supervisor-level CSR privilege violations in virtualized mode raise the virtual instruction exception path instead of the ordinary illegal-instruction path."
+    }
+  ]
+}

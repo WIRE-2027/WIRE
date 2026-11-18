@@ -1,0 +1,64 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/aes/rtl/aes_control.sv",
+          "lines": [
+            [
+              286,
+              288
+            ],
+            [
+              366,
+              366
+            ],
+            [
+              435,
+              435
+            ],
+            [
+              437,
+              437
+            ],
+            [
+              453,
+              453
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/aes/rtl/aes_reg_status.sv",
+          "lines": [
+            [
+              18,
+              18
+            ],
+            [
+              23,
+              23
+            ],
+            [
+              29,
+              29
+            ],
+            [
+              33,
+              33
+            ],
+            [
+              35,
+              35
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The register-status tracker `aes_reg_status` keeps a sticky write-set. Once all tracked word strobes have been seen, `all_written` stays true and a later partial write is ORed into the already-complete set, so `new_o` and `clean_o` remain asserted. The pre-merge AES control never arms the key tracker for a normal data-block load, and never arms the IV tracker after an internal CBC/CTR IV update. Therefore, after a key or IV has been completely written/used, a later software write to only some words does not mark the collection dirty: the key/IV is still reported ready/new, and automatic mode can start with a partially updated key or IV, for example when key words are interleaved with data words. In addition, the old `iv_load` was asserted on every non-keygen load, even in ECB mode where the IV is not consumed.",
+      "fix_hint": "Add the armed-restart state and `arm_i` input to `aes_reg_status`: when armed, the next write replaces the previous write-set with only the words written in that cycle, and if that set is incomplete `new`/`clean` go low. In `aes_control`, drive the key tracker's `use_i` from `key_init_load` on decryption-key-generation cycles and `arm_i` from `key_init_arm` on normal key-consuming loads; drive the IV tracker's `arm_i` when a CBC/CTR output write completes an internal IV update, and gate `iv_load` by the CBC/CTR modes so ECB does not consume the IV status."
+    }
+  ]
+}

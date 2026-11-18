@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          137,
+          138
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the generic_counter always_comb block, the else branch unconditionally resets generic_counter_d[i] to 'b0 when the event is not active or the counter is inhibited. This causes any counter to be cleared to zero in every cycle where the selected event does not occur, instead of retaining its accumulated value. The condition (!debug_mode_i) && (!we_i) is true during normal operation, so the counter is reset on every non-event cycle.",
+      "fix_hint": "Remove the else branch that assigns generic_counter_d[i] = 'b0. The counter should only be updated (incremented) when the event occurs and conditions are met; otherwise it should hold its current value by keeping generic_counter_d[i] equal to generic_counter_q[i] (already set by the initial assignment generic_counter_d = generic_counter_q)."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          556,
+          558
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When performance counters are disabled (PerfCounterEn=0), reads of the MCOUNTINHIBIT CSR incorrectly raise a CSR read access exception. The inhibit CSR should remain accessible and expose the implemented hardwired inhibit state instead of causing an illegal-instruction/access exception.",
+      "fix_hint": "In the CSR read process, do not raise read_access_exception for CSR_MCOUNTINHIBIT solely because PerfCounterEn is disabled. Return the MCOUNTINHIBIT read value, with unavailable counter-inhibit bits remaining hardwired to zero."
+    },
+    {
+      "bug_lineno": [
+        [
+          1497,
+          1497
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When performance counters are disabled (PerfCounterEn=0), writes to the MCOUNTINHIBIT CSR incorrectly raise a CSR update access exception. The write should not create or enable unavailable counters; instead, the inhibit state for unavailable performance counters should remain at its hardwired zero value.",
+      "fix_hint": "In the CSR write process, accept writes to CSR_MCOUNTINHIBIT without asserting update_access_exception when PerfCounterEn is disabled, and force the stored inhibit state to zero for the unavailable counters."
+    }
+  ]
+}

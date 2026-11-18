@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          92,
+          92
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the AckWait state, when enable_i is deasserted while waiting for FIFO data, the old code asserted ack_o before transitioning to Idle. This caused the module to acknowledge a request even though no FIFO entry was available and no fifo_pop_o was asserted. The specification requires that disabling the module while waiting cancels the pending request and returns to Idle without acknowledging or popping. This bug could cause a spurious acknowledgement of an empty FIFO, potentially releasing a zero seed.",
+      "fix_hint": "Remove the ack_o = 1'b1 assignment from the !enable_i branch in AckWait. The default value of ack_o is already 1'b0 at the beginning of the combinational block, so the branch should only set state_d to Idle and leave ack_o and fifo_pop_o deasserted."
+    }
+  ]
+}

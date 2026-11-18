@@ -1,0 +1,62 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          361,
+          363
+        ],
+        [
+          365,
+          366
+        ],
+        [
+          368,
+          375
+        ],
+        [
+          377,
+          378
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The `DBG_TAKEN_IF` state unconditionally redirects the PC, saves debug CSRs, and enters debug mode even if neither a single-step event nor a debug request is active when the state executes. A pulsed request can therefore leave the state without a valid cause while the controller still commits a debug entry.",
+      "fix_hint": "Gate the PC redirect, CSR save, cause selection, and debug-mode update in `DBG_TAKEN_IF` with an active single-step or debug-request condition."
+    },
+    {
+      "bug_lineno": [
+        [
+          392,
+          409
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In `DBG_TAKEN_ID`, the PC redirect is unconditional while the DPC/DCSR save is conditional on EBREAK or the current debug request. If a one-cycle request has deasserted, the controller can take the debug redirect without committing the corresponding architectural debug state.",
+      "fix_hint": "Use the same active EBREAK/debug-request guard for the redirect, CSR save, cause selection, and debug entry so the state cannot perform a partial debug transition."
+    },
+    {
+      "bug_lineno": [
+        [
+          411,
+          411
+        ],
+        [
+          413,
+          414
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "`debug_mode_d` is asserted outside the validity guard in `DBG_TAKEN_ID`. The core can therefore enter debug mode even when the request-dependent DPC and DCSR save block did not run, leaving the saved return state invalid.",
+      "fix_hint": "Move the debug-mode assertion inside the same EBREAK/debug-request guard as the PC redirect and debug CSR save."
+    }
+  ]
+}

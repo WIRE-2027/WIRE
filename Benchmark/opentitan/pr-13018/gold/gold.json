@@ -1,0 +1,58 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/keccak_round.sv",
+          "lines": [
+            [
+              287,
+              287
+            ],
+            [
+              289,
+              290
+            ],
+            [
+              292,
+              293
+            ],
+            [
+              295,
+              296
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In hw/ip/kmac/rtl/keccak_round.sv, the masked Keccak FSM's StPhase2Cycle2 state unconditionally asserted keccak_rand_consumed, set update_storage, and advanced to StPhase2Cycle3 without checking rand_valid_i. The Chi/Iota stage for the first lane halves consumes fresh randomness from rand_data_i; if rand_valid_i is low, the updated state is paired with stale or invalid entropy. This violates the spec requirement that masked operation must not advance past a masking wait point until the required fresh randomness is available, and can lead to undesired SCA leakage or incorrect masked datapath behavior.",
+      "fix_hint": "In StPhase2Cycle2, gate the randomness consumption, storage update, and transition to StPhase2Cycle3 on rand_valid_i. If rand_valid_i is not yet asserted, hold in StPhase2Cycle2 with cycle set to 1 and do not assert keccak_rand_consumed or update_storage; only proceed once the required fresh randomness is valid."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac_entropy.sv",
+          "lines": [
+            [
+              587,
+              587
+            ],
+            [
+              591,
+              591
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In hw/ip/kmac/rtl/kmac_entropy.sv, while in StRandEdn, the FSM unconditionally cleared rand_valid_o both when the last EDN seed word completed the reseed (lfsr_seed_done) and when rand_consumed_i arrived while still waiting for EDN entropy. This violates fast-process mode behavior: when fast_process is enabled and the block is not processing key material, rand_valid_o must remain asserted and must not be cleared in response to consumption events. The old behavior could drop rand_valid_o during an EDN reseed even though the consumer in fast-process/non-keyblock mode expects continuous valid randomness, causing a consumption event without valid random data.",
+      "fix_hint": "In StRandEdn, make rand_valid_clear conditional on ((fast_process_i && in_keyblock_i) || !fast_process_i), or equivalently only clear rand_valid when fast-process mode is disabled or when it is enabled while processing key material. Apply the same condition both on the reseed-completion path (lfsr_seed_done) and on the rand_consumed_i-while-waiting path so that fast-process non-keyblock operation keeps rand_valid_o asserted during EDN reseeds."
+    }
+  ]
+}

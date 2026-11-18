@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          46,
+          46
+        ],
+        [
+          56,
+          56
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In rv_plic_gateway, the pending (ip) and outstanding (ia) state updates used unconditional clear masks for claim/complete. The old ip equation lets a claim in the same cycle suppress a new valid source event even when ip is already 0, although the spec says a claim with no pending output is ignored. The old ia equation lets a completion clear ia whenever ia is set, even while ip is still pending, and makes complete win over a simultaneous new event so ia stays 0 while ip becomes 1. This loses the correct outstanding-state/event-precedence semantics and allows a later claim plus new source event to set ip before a valid completion.",
+      "fix_hint": "Make claim and complete conditional on the state they are allowed to affect: a claim should only clear ip when ip is actually asserted, and a completion should only clear ia when ia is asserted and ip has been deasserted. At the same time, give a new accepted source event priority over a simultaneous claim/complete that is otherwise ignored. In rv_plic_gateway this is done by changing the ip clear mask from an unconditional claim clear to a pending-qualified claim clear, and changing the ia clear mask from an unconditional completion clear to one qualified by outstanding and not-pending state."
+    }
+  ]
+}

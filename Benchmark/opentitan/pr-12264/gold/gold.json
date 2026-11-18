@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          100,
+          102
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge code, the combinational clock-enable assignments gate the normal clock-enable conditions with ~fsm_invalid_q. When the slow FSM enters its invalid terminal state, fsm_invalid_q is asserted, so core_clk_en_d, io_clk_en_d, and usb_clk_en_d are forced low. This contradicts the invalid-state requirement, which says the core, I/O, and USB clock enable requests shall be forced on in the invalid state. As a result, the high-speed clocks are turned off exactly when the fast FSM may need them to remain available, preventing the invalid state from being properly propagated or recovered via clocked logic.",
+      "fix_hint": "Change the clock-enable assignments so that the invalid flag forces the clock enables to be asserted instead of suppressing them. Replace the ~fsm_invalid_q AND term with fsm_invalid_q being ORed into each clock-enable expression, keeping the normal active/low-power clock selection when the FSM is not invalid."
+    }
+  ]
+}

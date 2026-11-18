@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          416,
+          416
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, addr_cnt_d is initialized to 30 for 4-byte addresses and 22 for 3-byte addresses when the read-command FSM leaves MainReset. This is one beat short of the actual address length, so the address counter reaches zero and MainAddress is allowed to advance to MByte/Dummy/Output one cycle before the final address beat is captured. As a result, the last address byte is not latched or merged, and the captured read address is shifted, causing the wrong SRAM/read-buffer location to be accessed.",
+      "fix_hint": "Initialize the address beat counter to the full number of address beats minus one when entering MainAddress: use 31 for Addr4B and 23 for 3-byte mode, so MainAddress remains active for one additional cycle and the final address beat is latched before the phase advances."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          565,
+          565
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The fpu_exception_o struct of type exception_t is only partially assigned: cause, valid, and tval are driven, but the remaining fields (tval2, tinst, gva) are left undriven. This causes those fields to propagate X values throughout simulation, violating the spec requirement that all fields of the exception output structure shall be driven to known values.",
+      "fix_hint": "Add default assignments for all undriven fields of fpu_exception_o (tval2, tinst, gva) to known values, either by assigning each field individually or by using a struct-wide default assignment such as '0 before the partial overrides."
+    }
+  ]
+}

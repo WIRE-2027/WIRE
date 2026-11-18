@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          411,
+          411
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "When RV32B is set to RV32BNone (B-extension disabled), the gorci instruction (opcode OP_IMM, funct3=101, instr[31:27]=5'b0_0101) is not properly flagged as illegal. The decoder logic for the 5'b0_0101 case in funct3=101 only handles the RV32BFull case (setting illegal_insn=0 for gorci) and the RV32BBalanced case for orc.b (instr[24:20]==5'b00111), but lacks an else branch to set illegal_insn=1 when RV32B is RV32BNone. This causes the instruction to be treated as legal, allowing it to execute and modify the register file and CSRs without raising an illegal instruction exception.",
+      "fix_hint": "Add an else branch to the condition checking RV32B for the 5'b0_0101 case in the funct3=101 decode block. When RV32B is RV32BNone and the instruction is not orc.b (instr[24:20] != 5'b00111), set illegal_insn=1'b1 to correctly flag the gorci instruction as illegal."
+    }
+  ]
+}

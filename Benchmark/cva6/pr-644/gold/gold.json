@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          112,
+          112
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The PTW hardwires the cache request's `kill_req` output to zero. If a flush arrives after a page-table request has been accepted, the PTW cannot tell the cache to discard that outstanding transaction, so stale walk traffic can survive the flush.",
+      "fix_hint": "Drive `req_port_o.kill_req` from the PTW's registered kill state so a flush can cancel an accepted page-table request."
+    },
+    {
+      "bug_lineno": [
+        [
+          370,
+          373
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "On a flush with a page-table request already granted or awaiting data, the PTW transitions to `WAIT_RVALID` and keeps the request alive. This delays flush completion and permits the stale translation access to continue instead of being cancelled.",
+      "fix_hint": "When a flush finds an accepted or pending cache transaction, latch the request tag, assert the registered kill request, and return the PTW state to IDLE rather than waiting for response valid."
+    }
+  ]
+}

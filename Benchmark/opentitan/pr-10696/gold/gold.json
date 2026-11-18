@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          189,
+          189
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the command validity check for Dual and Quad speed segments, the old code computed test_dir_inval as (direction != Bidir). This is the inverse of the specification: Dual and Quad segments are invalid only when they are bidirectional, while TX-only, RX-only, and dummy segments are valid. As a result, valid Dual/Quad non-bidirectional commands were incorrectly flagged as invalid, and invalid bidirectional Dual/Quad commands were incorrectly accepted.",
+      "fix_hint": "Change the Dual/Quad branch of the direction validity check so that test_dir_inval is asserted when the direction is Bidir, i.e. test_dir_inval = (reg2hw.command.direction.q == Bidir), matching the specification that only Standard-speed segments may be bidirectional."
+    }
+  ]
+}

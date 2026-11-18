@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip_templates/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              182,
+              182
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              182,
+              182
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In flash_phy_rd.sv, the read buffer re-allocation arbiter u_valid_random uses ready_i(req_o & no_match). req_o is the flash read-stage request, but it is not qualified by ack_i, which is the flash primitive's request-acceptance handshake. If ack_i is deasserted, req_o can remain high for multiple cycles, causing the arbiter to treat each cycle as a completed handshake and advance allocation/selection even though no flash request was actually accepted. This can skip or under-utilize valid read buffer entries, effectively reducing the number of usable buffers. The same incorrect ready_i expression appears in both the template and ip_autogen copies of the module.",
+      "fix_hint": "Qualify the arbiter ready input with the actual flash request acceptance handshake by changing ready_i from req_o & no_match to req_o & ack_i & no_match. This ensures buffer allocation/selection only advances when the flash macro truly accepts the request, preserving correct and fair buffer usage. Apply the same change in both hw/ip_templates/flash_ctrl/rtl/flash_phy_rd.sv and hw/top_earlgrey/ip_autogen/flash_ctrl/rtl/flash_phy_rd.sv."
+    }
+  ]
+}

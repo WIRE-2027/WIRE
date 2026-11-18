@@ -1,0 +1,31 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/hmac/rtl/hmac.sv",
+          "lines": [
+            [
+              104,
+              104
+            ],
+            [
+              180,
+              180
+            ],
+            [
+              294,
+              294
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, `msg_write` was asserted for every TL-UL write to the message-FIFO window (`msg_fifo_req & msg_fifo_we & ~hmac_fifo_wsel`) regardless of whether a hash operation was active. This let software push message data into the packer/message FIFO before `hash_start` or after `hash_process`, potentially filling/backpressuring the FIFO and locking the core. The root cause is the lack of an enable/window control gating software MSG_FIFO writes from hash start until process/flush completion.",
+      "fix_hint": "Add a `msg_allowed` flag, reset to 0, set when `hash_start` is accepted, and cleared when `packer_flush_done` signals the end of the message push window. Include this flag in the `msg_write` assignment alongside the existing FIFO window/we conditions so MSG_FIFO writes outside the active operation are dropped instead of being accepted and backpressuring the TL-UL path."
+    }
+  ]
+}

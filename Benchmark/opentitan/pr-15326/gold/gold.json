@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          103,
+          103
+        ],
+        [
+          112,
+          113
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, after an EN4B or EX4B command changes spi_cfg_addr_4b_en_o, there is no protection preventing the stale synchronized software setting (spi_reg_cfg_addr_4b_en_sync) from overwriting the effective mode at the next SPI transaction start. If the next CS assertion pulse arrives before the software configuration has been updated and synchronized, the old condition (spi_csb_asserted_pulse_i && spi_cfg_addr_4b_en_o != spi_reg_cfg_addr_4b_en_sync) is still true, so the effective output is forced back to the previous software value. For example, after EX4B clears the mode to 0, a quickly following transaction can incorrectly restore the mode to 1 until the software register update propagates. The root cause is the lack of an override-protection state that remembers a recent conflicting command and suppresses the start-of-transaction software update until the synchronized software setting matches the effective output.",
+      "fix_hint": "Add an override-protection (lock) flag in the SPI clock domain. Set it when a command event conflicts with the current synchronized software setting: EX4B when spi_reg_cfg_addr_4b_en_sync is 1, or EN4B when it is 0. Clear it once the synchronized software setting equals the effective output. Then gate the chip-select-assertion software update with the inverse of this lock flag, so a stale software value cannot overwrite a recent EN4B/EX4B command result before the CSR mirror has been updated."
+    }
+  ]
+}

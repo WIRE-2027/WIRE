@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          315,
+          315
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, reset_ongoing_q is set in FastPwrStateNvmShutDown to track that a reset-triggered power-up is in progress, but it is never cleared when the reset-triggered power-up completes. The only clearing mechanism is the chip-level reset of the FSM flops via rst_ni. As a result, after a reset shutdown and subsequent reset-triggered power-up, reset_ongoing_q remains asserted indefinitely. This causes later low-power entries to be misinterpreted as reset-derived wakeups: the FSM exits the low-power resting state on reset_ongoing_q alone, and the power-up acknowledge is incorrectly suppressed because ack_pwrup_d is gated by !reset_ongoing_q. This leaves the fast FSM and slow FSM inconsistent.",
+      "fix_hint": "Explicitly clear reset_ongoing_d when the power-up sequence completes and the FSM leaves FastPwrStateAckPwrUp for FastPwrStateRomCheck. This should be done in the same branch that deasserts ack_pwrup_d and asserts clr_cfg_lock_o, marking the end of a reset cycle as described in the power-up behavior."
+    }
+  ]
+}

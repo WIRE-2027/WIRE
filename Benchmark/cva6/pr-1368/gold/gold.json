@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          911,
+          911
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The PMPCFG CSR write logic does not hardwire reserved bits 5 and 6 to zero, allowing software to set them. This violates the RISC-V privileged specification and causes a discrepancy with spike where these bits always read as zero.",
+      "fix_hint": "In the CSR write logic for PMPCFG0-3, mask out bits 5 and 6 of each 8-bit PMP configuration byte before writing to pmpcfg_d. This ensures reserved bits are always zero regardless of the written value."
+    }
+  ]
+}

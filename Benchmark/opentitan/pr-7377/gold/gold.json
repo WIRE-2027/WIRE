@@ -1,0 +1,174 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          87,
+          87
+        ],
+        [
+          107,
+          107
+        ],
+        [
+          176,
+          176
+        ],
+        [
+          179,
+          179
+        ],
+        [
+          181,
+          181
+        ],
+        [
+          187,
+          187
+        ],
+        [
+          189,
+          189
+        ],
+        [
+          196,
+          196
+        ],
+        [
+          201,
+          201
+        ],
+        [
+          223,
+          223
+        ],
+        [
+          233,
+          233
+        ],
+        [
+          235,
+          235
+        ],
+        [
+          238,
+          238
+        ],
+        [
+          247,
+          247
+        ],
+        [
+          249,
+          249
+        ],
+        [
+          258,
+          258
+        ],
+        [
+          265,
+          265
+        ],
+        [
+          273,
+          273
+        ],
+        [
+          284,
+          284
+        ],
+        [
+          286,
+          287
+        ],
+        [
+          289,
+          290
+        ],
+        [
+          294,
+          294
+        ],
+        [
+          296,
+          297
+        ],
+        [
+          299,
+          299
+        ],
+        [
+          301,
+          301
+        ],
+        [
+          379,
+          379
+        ],
+        [
+          387,
+          387
+        ],
+        [
+          396,
+          397
+        ],
+        [
+          442,
+          442
+        ],
+        [
+          450,
+          451
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The FSM used a single state register pair (`spi_host_st_q` / `spi_host_st_d`) and gated the state-register update with `stall = rx_stall_o | tx_stall_o`. At the same time, `stall` is combinational logic derived from state-dependent strobes (`wr_en_internal` / `rd_en_internal`), which depend on the next-state value. This created a combinational loop and, more importantly, meant that when a TX or RX stall froze the state register, any transition computed in `spi_host_st_d` during that stall was discarded. As a result, a command accepted at a stalled byte boundary could be dropped and the FSM would not resume into the correct next state after the stall cleared.",
+      "fix_hint": "Split the FSM state into a stall-independent `prestall_st_q` copy and an `actual_st_q` copy. Compute `prestall_st_d` from `actual_st_q` in the normal case statement, hold it while `stall_q` is asserted, and when stall resolves update `actual_st_q` from `prestall_st_q`. Base `state_changing`, byte-start/byte-end/bit-shift strobes, lead/trail/idle start pulses, `csb_single_d`, and `sck_d` on the appropriate actual/prestall state copy so the FSM resumes correctly after a stall."
+    },
+    {
+      "bug_lineno": [
+        [
+          208,
+          210
+        ],
+        [
+          212,
+          212
+        ],
+        [
+          214,
+          214
+        ],
+        [
+          217,
+          217
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the `InternalClkHigh` end-of-segment path, the old branch `else if (command_i.segment.csaat) next = WaitTrail;` treated the chip-select-active-after-transfer flag as a request to end the transaction: when CSAAT was set the FSM went to `WaitTrail` and eventually deasserted CS. When CSAAT was clear it fell into the `IdleCSBActive` / immediate-continuation paths, leaving CS active. This was the opposite of the specified CSAAT behavior. The fix inverts the condition so that `!csaat` leads to `WaitTrail`, while `csaat=1` keeps CS active: no pending command goes to `IdleCSBActive`, a pending same-CSID command starts immediately, and a different-CSID command goes through `WaitTrail` for a proper switch sequence.",
+      "fix_hint": "In the `InternalClkHigh` state, when the final bit and byte have completed, send non-CSAAT segments to `WaitTrail`. For CSAAT segments, do not deassert CS; use the existing `IdleCSBActive` / same-CSID immediate-start / different-CSID switch paths, and write these next states to `prestall_st_d` as part of the stall-safe FSM update."
+    },
+    {
+      "bug_lineno": [
+        [
+          427,
+          427
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "`cmd_end_o` was continuously assigned as `(byte_cntr_q == 0)`. The byte counter is 0 while idle and is only loaded with `cmd_len` when a new command is accepted, so this combinational value could be high at the very beginning of a segment and at other times when no TX byte was being requested. This told the data path that the command had ended too early instead of indicating the final TX byte request. The fix moves the command-end pulse to the last-byte boundary by qualifying it with `byte_cntr_q == 1`, `wr_en_o`, and `sr_wr_ready_i`.",
+      "fix_hint": "Replace the free-running `cmd_end_o = (byte_cntr_q == 0)` assignment with a pulse when the last byte is actually being requested: assert `cmd_end_o` when `byte_cntr_q == 1`, `wr_en_o` is active, and `sr_wr_ready_i` is high."
+    }
+  ]
+}

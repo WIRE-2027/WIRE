@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          102,
+          102
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The misalignment predicate checks only target bit 0. In a configuration without RVC, a taken branch or jump to an address ending in binary 10 is accepted even though instructions require four-byte alignment.",
+      "fix_hint": "Make target alignment depend on RVC support: require bit 0 clear with RVC and both low bits clear without RVC."
+    }
+  ]
+}

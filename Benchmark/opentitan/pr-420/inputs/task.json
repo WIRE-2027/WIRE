@@ -1,0 +1,19 @@
+{
+  "input": {
+    "repo": "lowRISC/opentitan",
+    "pr_id": 420,
+    "lang": "sv",
+    "rtl_files": [
+      "hw/ip/rv_plic/rtl/rv_plic_target.sv"
+    ],
+    "specs": [
+      {
+        "file": "hw/ip/rv_plic/rtl/rv_plic_target.sv",
+        "spec": "# Specification: PLIC Target Interrupt Arbiter\n\n## Overview\n\nThis module performs per-target interrupt arbitration for a RISC-V Platform-Level Interrupt Controller (PLIC). It observes the current pending state, enable state, and priority of each interrupt source, along with the target’s priority threshold, and produces a single interrupt request indication and an interrupt source identifier.\n\nThe module does not detect interrupt edges, latch pending events, or implement claim/complete behavior. It only uses the pending state presented to it and decides whether an interrupt should be forwarded to the target.\n\n## Parameters\n\n- `N_SOURCE`: number of interrupt sources supported.\n- `MAX_PRIO`: maximum encodable priority value. Priority values and the threshold are in the range `0` to `MAX_PRIO`.\n\n## Inputs\n\nThe module accepts:\n\n- One pending bit per interrupt source.\n- One enable bit per interrupt source.\n- One priority value per interrupt source.\n- A single threshold value for the target.\n- A clock and a reset input.\n\n## Outputs\n\nThe module produces:\n\n- An interrupt request output, indicating that at least one eligible interrupt is pending.\n- An interrupt ID output, identifying the selected interrupt source.\n  - ID `0` means no interrupt is being requested.\n  - Source at bit position `k` has ID `k + 1`.\n\n## Functional Requirements\n\n### Interrupt Eligibility\n\nA source is eligible to cause an interrupt only if all of the following conditions are true:\n\n- Its pending bit is asserted.\n- Its enable bit is asserted.\n- Its priority value is strictly greater than the target threshold.\n\nAny source that does not meet all three conditions must be ignored.\n\n### Interrupt Selection\n\nWhen one or more eligible sources exist:\n\n- The module shall select the eligible source with the highest priority.\n- If multiple eligible sources have the same highest priority, the module shall select the source with the lowest ID.\n- The interrupt request output shall be asserted.\n- The interrupt ID output shall be set to the ID of the selected source.\n\nWhen no eligible source exists:\n\n- The interrupt request output shall be deasserted.\n- The interrupt ID output shall be `0`.\n\n### Output Updates\n\nThe interrupt request and ID outputs shall reflect the input conditions on the active clock edge. If the set of pending, enabled, or eligible sources changes, the outputs shall update on the next active clock edge to the newly selected source, or to `0` / deasserted if no eligible source remains.\n\nThe module shall not modify the pending bits, enable bits, priority values, or threshold value. It only observes them.\n\n### Reset Behavior\n\nWhen reset is asserted, the interrupt request output shall be deasserted and the interrupt ID output shall be `0`. Reset shall clear the outputs regardless of input conditions.\n\n## Edge Cases\n\n- If the threshold is set to `MAX_PRIO`, no priority can be strictly greater than the threshold, so no interrupt shall be requested.\n- A pending source with its enable bit cleared shall never be selected.\n- An enabled source whose pending bit is cleared shall never be selected.\n- A source whose priority is equal to the threshold shall not be selected; the priority must be strictly greater."
+      }
+    ],
+    "commit_id": "7a0b965ad48f890b016e8ee6c905980500c0bcef",
+    "timestamp": "2019-10-10T22:08:26+00:00",
+    "is_multi_file": false
+  }
+}

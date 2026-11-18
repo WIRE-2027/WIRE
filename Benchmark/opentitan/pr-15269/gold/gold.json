@@ -1,0 +1,30 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          356,
+          356
+        ],
+        [
+          528,
+          528
+        ],
+        [
+          546,
+          546
+        ],
+        [
+          549,
+          549
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The hardware-register byte selector `isck_fifoaddr` is loaded in the iSCK (`clk_out_i`) domain using `sck_fifoaddr_latch`, which is a combinational pulse generated from the SCK-domain counter (`cmdaddr_bitcnt == 5'h1F`). Since the iSCK edge occurs half a SPI clock period before the corresponding SCK state has settled, the old load condition fires early and captures `sck_cmdaddr_wdata_d`, the next-stage shift value, rather than the completed shifted address in `sck_cmdaddr_wdata_q`. As a result, `isck_fifoaddr` is effectively one address bit too low. For unaligned reads of hardware-managed TPM registers, the design selects the previous aligned byte offset instead of the requested offset, so it returns the wrong register byte or wrong 0xFF data.",
+      "fix_hint": "Add an iSCK-domain registered version of `sck_fifoaddr_latch` (`isck_fifoaddr_latch`), reset it, and use it as the load enable for `isck_fifoaddr` in the `clk_out_i` domain. Also load `isck_fifoaddr` from `sck_cmdaddr_wdata_q[FifoRegSize-1:0]` instead of `sck_cmdaddr_wdata_d[FifoRegSize-1:0]` so the fully shifted and settled command/address is captured at the correct iSCK edge."
+    }
+  ]
+}

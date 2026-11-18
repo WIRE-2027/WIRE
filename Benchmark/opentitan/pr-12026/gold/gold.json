@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip_templates/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              176,
+              176
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/alert_handler/rtl/alert_handler_reg_wrap.sv",
+          "lines": [
+            [
+              176,
+              176
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the alert_handler_reg_wrap module, the alert ping enable output was computed as alert_en_shadowed[q] AND alert_regwen[q]. This is logically inverted: alert_regwen asserted high indicates that the alert configuration is still writable/unlocked, whereas ping testing is only allowed when the alert is enabled and its configuration is locked (alert_regwen is 0). As a result, ping testing would be enabled in the unlocked state and disabled in the locked state, contradicting the spec requirement that ping-enable is asserted only when the alert is both enabled and locked.",
+      "fix_hint": "Invert the lock/regwen term when generating alert_ping_en. Change the assignment to use ~reg2hw.alert_regwen[k].q instead of reg2hw.alert_regwen[k].q, so that ping is enabled only when the alert is enabled and the configuration register is locked. Apply the same fix in both the template and autogen copies of alert_handler_reg_wrap.sv."
+    }
+  ]
+}

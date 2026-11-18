@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          635,
+          635
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the RMA wipe sub-FSM, the word counter is loaded with BusWordsPerPage instead of 0 when moving from StRmaEraseWait to StRmaWordSel. The StRmaWordSel state then checks (word_cnt < BusWordsPerPage); since word_cnt starts at BusWordsPerPage, this condition is immediately false. As a result, the wipe sequence skips the per-word program and read-verify stages for every page and only performs page erases, so RMA entry does not randomly overwrite flash contents as required.",
+      "fix_hint": "Change the load value of u_word_cnt so that word_cnt is reset to 0 when word_cnt_ld is asserted, allowing the word-selection state to start from the first word and step through the page by WidthMultiple until reaching BusWordsPerPage."
+    }
+  ]
+}

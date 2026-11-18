@@ -1,0 +1,73 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_cmdparse.sv",
+          "lines": [
+            [
+              33,
+              33
+            ],
+            [
+              194,
+              194
+            ],
+            [
+              196,
+              196
+            ],
+            [
+              198,
+              198
+            ],
+            [
+              200,
+              200
+            ],
+            [
+              275,
+              275
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/spi_device/rtl/spi_device.sv",
+          "lines": [
+            [
+              287,
+              287
+            ],
+            [
+              1117,
+              1117
+            ],
+            [
+              1253,
+              1253
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/spi_device/rtl/spid_status.sv",
+          "lines": [
+            [
+              79,
+              79
+            ],
+            [
+              219,
+              219
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, spi_cmdparse generated opcode_en4b, opcode_ex4b, opcode_wren, opcode_wrdi, and upload solely from the configured cmd_info entries and the received opcode. It never consulted the current busy status. Therefore, when the BUSY bit was set, an incoming EN4B, EX4B, WREN, WRDI, or upload command still matched as a valid state-changing command, caused the parser to leave StIdle into StAddr4B, StWrEn, or StUpload, assert the corresponding early datapath selection, and change internal state or accept upload data. This violates the specification requirement that these command types be blocked while busy. The fix propagates the committed busy bit from spid_status as sck_status_busy and adds !sck_status_busy_i qualifiers to those match/upload signals.",
+      "fix_hint": "Add a committed-BUSY output to spid_status (sck_status_busy_o = sck_status_committed[BitBusy]), declare and wire it through spi_device to spi_cmdparse as sck_status_busy_i, and qualify opcode_en4b, opcode_ex4b, opcode_wren, opcode_wrdi, and upload with !sck_status_busy_i. Leave read status, read JEDEC, read SFDP, and read-command matching and cmd_sync_pulse generation unaffected, so blocked commands still enter StWait and hold retained cmd_info until CSB deassertion."
+    }
+  ]
+}

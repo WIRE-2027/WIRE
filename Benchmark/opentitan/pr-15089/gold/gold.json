@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          743,
+          743
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The operation tracker tests sha3_done with mubi4_test_false_strict when sha3_absorbed is canonically true. A noncanonical done encoding therefore leaves the tracker in KmacMsgFeed instead of selecting KmacDigest. Canonical true done still takes the higher-priority return-to-idle path.",
+      "fix_hint": "Use mubi4_test_false_loose for the message-feed to digest condition, retaining strict true testing for absorbed and the higher-priority canonical-true done path."
+    }
+  ]
+}

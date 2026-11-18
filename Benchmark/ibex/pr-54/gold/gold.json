@@ -1,0 +1,60 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          104,
+          105
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When decoding C.LUI with rd=x0 (bits[11:7]=5'b0), the decoder incorrectly asserts illegal_instr_o. According to the RISC-V spec, C.LUI with rd=x0 is a valid HINT instruction that should decode to a LUI instruction with rd=x0, not an illegal instruction. The condition `instr_i[11:7] == 5'b0` triggers the illegal flag incorrectly, causing valid HINT encodings to be rejected.",
+      "fix_hint": "Remove the `else if (instr_i[11:7] == 5'b0) begin illegal_instr_o = 1'b1; end` block. The zero-immediate check (`{instr_i[12], instr_i[6:2]} == 6'b0`) already handles the true illegal case for C.LUI. HINT instructions with rd=x0 should be allowed to pass through as valid LUI instructions."
+    },
+    {
+      "bug_lineno": [
+        [
+          120,
+          120
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When decoding C.SRLI/C.SRAI with shamt=0 (bits[6:2]=5'b0), the decoder incorrectly asserts illegal_instr_o. According to the RISC-V spec, C.SRLI/C.SRAI with shamt=0 is a valid HINT instruction that should decode to SRLI/SRAI with shamt=0, not an illegal instruction. The condition `instr_i[6:2] == 5'b0` incorrectly rejects these HINT encodings.",
+      "fix_hint": "Remove the `if (instr_i[6:2] == 5'b0) illegal_instr_o = 1'b1;` check for C.SRLI/C.SRAI. The bit[12] check already handles the reserved custom-1 case. HINT instructions with shamt=0 should be allowed to pass through as valid SRLI/SRAI instructions."
+    },
+    {
+      "bug_lineno": [
+        [
+          196,
+          197
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The C.SLLI decoder marks both `rd=x0` and a zero shift amount as illegal. These encodings are HINTs, so the two checks incorrectly raise an illegal-instruction exception for legal HINT forms; only the reserved `instr_i[12]` encoding must remain illegal.",
+      "fix_hint": "Remove the destination-zero and zero-shift illegality checks for C.SLLI while retaining the check for the reserved `instr_i[12]` bit."
+    },
+    {
+      "bug_lineno": [
+        [
+          93,
+          93
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When decoding C.LI with rd=x0 (bits[11:7]=5'b0), the decoder incorrectly asserts illegal_instr_o. According to the RISC-V spec, C.LI with rd=x0 is a valid HINT instruction that should decode to ADDI rd, x0, imm with rd=x0, not an illegal instruction. The condition `instr_i[11:7] == 5'b0` incorrectly rejects these HINT encodings.",
+      "fix_hint": "Remove the `if (instr_i[11:7] == 5'b0) illegal_instr_o = 1'b1;` check for C.LI. HINT instructions with rd=x0 should be allowed to pass through as valid ADDI instructions."
+    }
+  ]
+}

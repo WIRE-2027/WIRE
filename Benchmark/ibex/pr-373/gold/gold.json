@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          491,
+          491
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The decode_ci_caddi16sp_insn function does not set the data_accessed signal to indicate that rs1 and rd are accessed. This causes the trace output for c.addi16sp instructions to omit the register values (rs1 and rd) from the 'Register and memory contents' field, even though the instruction reads from and writes to the stack pointer (x2). The bug is triggered whenever a c.addi16sp instruction is executed, resulting in incomplete trace output that lacks the register values needed for debugging.",
+      "fix_hint": "Add the assignment 'data_accessed = RS1 | RD;' within the decode_ci_caddi16sp_insn function to indicate that both rs1 and rd are accessed by the c.addi16sp instruction. This will ensure the trace output includes the register values as shown in the PR evidence."
+    }
+  ]
+}

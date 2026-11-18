@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr.sv",
+          "lines": [
+            [
+              341,
+              341
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_input_checks.sv",
+          "lines": [
+            [
+              95,
+              95
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge code, the CreatorRootKey advance validity expression only included the ROM digest qualifier `rom_digest_i.valid`, but did not check the ROM digest data itself against the all-zero/all-one data-validity rule. As a result, an all-zero or all-one ROM digest with `valid` asserted was treated as valid input and could be used in a real derivation instead of being flagged invalid and replaced with random data. The input-check module also lacked a ROM digest validity output, so this missing data check could not be propagated to the advance-validity logic.",
+      "fix_hint": "Add a ROM digest validity check in `keymgr_input_checks` that combines the ROM digest qualifier with the data-validity check: valid only when `rom_digest_i.valid` is asserted and `rom_digest_i.data` is neither all zeros nor all ones. Expose this as a module output, connect it to a `rom_digest_vld` signal in `keymgr`, and use that signal in place of `rom_digest_i.valid` in the `adv_dvalid[Creator]` expression."
+    }
+  ]
+}

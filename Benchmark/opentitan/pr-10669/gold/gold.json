@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          291,
+          293
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the TL-UL read-response data mux, the error blanking condition used reqfifo_rdata.error instead of the actual response error signal d_error. For a read that fails due to an SRAM uncorrectable error, rspfifo_rdata.error is asserted so d_error is asserted, but reqfifo_rdata.error is not. The old expression therefore selected rspfifo_rdata.data instead of error_blanking_data, causing a TL-UL error response to carry the raw memory data rather than the configured error constant. This violates the requirement that read-class error responses return the configured error constant.",
+      "fix_hint": "Use d_error as the condition for selecting error_blanking_data in the d_data assignment. Since d_error already combines both request-side errors and SRAM read-data errors, qualifying the blanking mux with d_error ensures all read error responses return the configured error constant instead of memory read data."
+    }
+  ]
+}

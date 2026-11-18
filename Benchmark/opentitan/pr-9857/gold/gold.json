@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_host/rtl/spi_host_byte_merge.sv",
+          "lines": [
+            [
+              57,
+              57
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In spi_host_byte_merge, when the final byte of a segment has been accepted and the current output word is partial, the module asserts do_fill to pad the remaining byte positions with zeros. However, the packer write data wdata_i was connected directly to byte_i instead of to a zero value during do_fill. As a result, the bytes used for padding are whatever value is currently on byte_i (often the last received byte, or possibly the next segment's byte if the source is holding it), causing non-zero padding and corrupting the RX data. The spec requires the remaining higher-significance byte positions to be zero-filled when a final-byte indicator is accepted before the word contains four bytes.",
+      "fix_hint": "Select constant 8'h0 as the packer write data whenever do_fill is asserted, and use byte_i only for real incoming bytes. This can be done by muxing wdata_i between byte_i and 8'h0 based on do_fill before it is connected to the packer."
+    }
+  ]
+}

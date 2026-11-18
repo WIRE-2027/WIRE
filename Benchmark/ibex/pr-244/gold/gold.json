@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_controller.sv",
+          "lines": [
+            [
+              529,
+              529
+            ]
+          ]
+        },
+        {
+          "file": "rtl/ibex_decoder.sv",
+          "lines": [
+            [
+              162,
+              162
+            ],
+            [
+              558,
+              568
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The decoder and controller do not form a complete CSR-to-interrupt handling path. The decoder requests pipeline flushes primarily based on the CSR address: it flushes on read-only accesses to `mstatus` and the supported debug CSRs, but does not flush for write or set operations targeting `mie`. Even when a CSR-related flush occurs and a pending interrupt becomes newly eligible after an `mstatus` or `mie` update, the controller's `FLUSH` state resumes normal decode instead of entering `IRQ_TAKEN`. Consequently, the core may execute another instruction before taking the newly enabled interrupt, and that instruction may disable the interrupt again. The bug therefore spans CSR-related pipeline-flush generation in `ibex_decoder.sv` and interrupt handling at that flush boundary in `ibex_controller.sv`.",
+      "fix_hint": "Generate a dedicated CSR-related pipeline-flush request from the CSR access indication, operation type, and address. Assert it for write or set operations targeting `mstatus` or `mie`, and for non-read operations targeting the supported debug CSRs; keep it deasserted for read-only accesses and unrelated CSRs, and remove the old address-only flush detection. In the controller's `FLUSH` state, transition directly to `IRQ_TAKEN` when the flush is CSR-related and an enabled interrupt is pending; otherwise resume normal decode."
+    }
+  ]
+}

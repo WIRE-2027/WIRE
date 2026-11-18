@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac_app.sv",
+          "lines": [
+            [
+              280,
+              280
+            ],
+            [
+              514,
+              514
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/kmac/rtl/kmac_pkg.sv",
+          "lines": [
+            [
+              275,
+              275
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, fatal control conditions such as lc_escalation or sparse FSM integrity failures drive the FSM into StTerminalError and assert sparse_fsm_error_o, but the error-reporting path is incomplete. The StTerminalError state only holds the terminal state and asserts sparse_fsm_error_o; it never populates fsm_err, so error_o remains invalid with ErrNone instead of reporting a fatal error. Additionally, the selected application response computes error as error_i | fsm_digest_done_q only, without including sparse_fsm_error_o, so an application does not receive an error indication when a fatal control fault occurs. The err_code_e enumeration also lacks a dedicated fatal-error code, making it impossible to encode this condition in the error report.",
+      "fix_hint": "Add a fatal-error code to kmac_pkg::err_code_e, fill in fsm_err in StTerminalError with valid set, the new fatal-error code, and the offending app_id, and include sparse_fsm_error_o in the app response error assignment so fatal control faults / lc escalation are reported both through error_o and to the selected application interface."
+    }
+  ]
+}

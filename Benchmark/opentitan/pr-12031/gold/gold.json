@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          391,
+          395
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the TransProgSt FSM state, the old code checked only clock-bypass request/acknowledgment consistency before accepting otp_prog_ack_i. It did not recheck the flash RMA request/acknowledgment consistency during final life-cycle state programming. This violates the spec requirement that final programming must continue monitoring both clock-bypass and flash RMA consistency. As a result, an unstable or inconsistent flash RMA condition during the final OTP programming phase could go undetected, and the FSM could still move to PostTransSt and report transition success or an OTP programming status without reporting the flash RMA error. Additionally, because the old otp_prog_ack handling was a separate if statement, a concurrent clock-bypass mismatch could be overwritten by the normal programming completion path.",
+      "fix_hint": "In TransProgSt, before accepting otp_prog_ack_i, add an explicit flash RMA consistency check. If the transition target is RMA, require both lc_flash_rma_req_o and lc_flash_rma_ack[1] to be On; otherwise require both to be Off. On mismatch, set flash_rma_error_o and move to PostTransSt. Chain this check with the existing clock-bypass check using priority so that either inconsistency aborts the transition and prevents the programming completion path from overriding the error."
+    }
+  ]
+}

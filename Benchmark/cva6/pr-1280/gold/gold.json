@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          146,
+          146
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the always_comb block, x_result_valid_o reads x_result_o.data[3:0] before x_result_o.data is assigned from the current request operands. The comparison is therefore order-dependent and can use the value left by the previous evaluation, causing the ALWCOMBORDER warning and allowing result-valid timing to be computed from stale result data.",
+      "fix_hint": "Reorder the assignments in the always_comb block so that x_result_o.data is computed before x_result_valid_o, or compute the result sum in a separate intermediate signal and use that signal for both the valid comparison and the data assignment."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/cache_ctrl.sv",
+          "lines": [
+            [
+              271,
+              282
+            ],
+            [
+              284,
+              287
+            ],
+            [
+              289,
+              292
+            ],
+            [
+              300,
+              300
+            ]
+          ]
+        },
+        {
+          "file": "src/miss_handler.sv",
+          "lines": [
+            [
+              348,
+              348
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The cache controller failed to protect a store hit against an outstanding miss that targeted the same cache index. In the STORE_REQ state it unconditionally wrote the store data to the hit way and returned to idle, with no re-check of MSHR aliasing between the tag-lookup cycle and the data-write cycle. In the WAIT_MSHR state it used only the full-address match signal (mshr_addr_matches_i) to decide when to retry, so an outstanding miss with a different tag but the same index was not treated as a conflict. The miss_handler likewise only exposed a full-address match, providing no index-only match output. As a result, a store could update a cache line that the miss handler was simultaneously evicting or refilling for a different tag at the same index, and the store update could be silently overwritten by the refill, corrupting cached data.",
+      "fix_hint": "Add an index-only MSHR match output in miss_handler that compares only the cache-index bits of each port's address to the outstanding miss address, and route it to cache_ctrl as mshr_index_matches_i. In cache_ctrl, guard the STORE_REQ write with this index match and transition back to WAIT_MSHR when an alias is detected. In WAIT_MSHR, wait for mshr_index_matches_i to clear before re-requesting the tag lookup, so a store hit is deferred until no outstanding miss targets the same index."
+    }
+  ]
+}

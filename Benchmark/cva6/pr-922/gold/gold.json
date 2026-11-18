@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          139,
+          139
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In debug mode, the DRET branch unconditionally clears `illegal_instr`. This overwrites the earlier reserved-field checks, so malformed DRET encodings with nonzero rd or rs1 can execute as valid debug returns.",
+      "fix_hint": "Keep the existing `illegal_instr` value when debug mode permits DRET, and only force the instruction illegal when the hart is outside debug mode."
+    }
+  ]
+}

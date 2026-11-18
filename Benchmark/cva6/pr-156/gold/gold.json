@@ -1,0 +1,88 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          109,
+          109
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "A legal C.LI HINT form is incorrectly reported as an illegal instruction.",
+      "fix_hint": "Do not raise the illegal flag for the destination-x0 C.LI HINT encoding."
+    },
+    {
+      "bug_lineno": [
+        [
+          119,
+          120
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder treats the destination-x0 C.LUI HINT form as illegal instead of preserving only the separate reserved-immediate check.",
+      "fix_hint": "Accept the HINT destination form while retaining illegality for the reserved zero immediate."
+    },
+    {
+      "bug_lineno": [
+        [
+          134,
+          134
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "Zero-shift compressed right-shift HINT encodings are rejected as illegal.",
+      "fix_hint": "Allow the zero-shift forms to decode without asserting an illegal instruction."
+    },
+    {
+      "bug_lineno": [
+        [
+          204,
+          205
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "C.SLLI HINT encodings with destination x0 or a zero shift amount are incorrectly rejected.",
+      "fix_hint": "Remove illegality conditions that apply only because the encoding is a HINT."
+    },
+    {
+      "bug_lineno": [
+        [
+          241,
+          241
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "C.EBREAK selection ignores the source-register field, so other destination-x0 encodings enter the wrong decode path.",
+      "fix_hint": "Require both register fields to match the C.EBREAK encoding before selecting it."
+    },
+    {
+      "bug_lineno": [
+        [
+          244,
+          246
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The subgroup conditions misclassify destination-x0/source-nonzero HINTs and do not explicitly constrain the C.JALR case.",
+      "fix_hint": "Partition the subgroup using both register fields so EBREAK, JALR, and ADD/HINT forms are mutually correct."
+    }
+  ]
+}

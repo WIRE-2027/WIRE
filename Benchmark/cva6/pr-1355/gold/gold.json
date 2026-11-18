@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1095,
+          1095
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder recognizes double-word atomic encodings whenever the A extension and double-word funct3 are present, without requiring XLEN=64. RV32 therefore accepts RV64A instructions instead of raising an illegal-instruction exception.",
+      "fix_hint": "Add the 64-bit execution-width legality check to the double-word atomic decode branch."
+    }
+  ]
+}

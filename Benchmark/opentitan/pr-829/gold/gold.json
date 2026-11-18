@@ -1,0 +1,30 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          17,
+          19
+        ],
+        [
+          26,
+          26
+        ],
+        [
+          30,
+          30
+        ],
+        [
+          41,
+          41
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In tlul_err_resp.sv, the response d_size was hardwired to '0 regardless of the accepted request's a_size. The old code only latched err_source and err_opcode when a request was accepted, but did not latch a_size. As a result, any response to a request with a nonzero size carried an incorrect d_size, violating the TL-UL requirement that d_size match a_size.",
+      "fix_hint": "Add a size state register, reset it, capture tl_h_i.a_size when the request handshake is accepted (a_valid && a_ready), and drive tl_h_o.d_size from that registered size. Use the actual width of tl_h_i.a_size for the register declaration, e.g. via $bits(tl_h_i.a_size), and similarly ensure err_source uses the width of tl_h_i.a_source."
+    }
+  ]
+}

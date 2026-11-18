@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          163,
+          163
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the SFENCE.VMA decoding logic under the SYSTEM opcode, the default case for the immediate field checks bits [31:25] for the pattern 7'b1001 to identify SFENCE.VMA. However, when this pattern does not match, there is no else branch to set illegal_instr. Consequently, any instruction with opcode SYSTEM, funct3=3'b000, rs1=0, rd=0, and an immediate value not matching ECALL/EBREAK/SRET/MRET/DRET/WFI/SFENCE.VMA will be decoded as a valid instruction instead of being flagged as illegal.",
+      "fix_hint": "Add an else branch in the default case of the immediate field decoding for SYSTEM opcode (funct3=3'b000) to set illegal_instr = 1'b1 when instr.instr[31:25] != 7'b1001, ensuring that unrecognized immediate encodings are properly trapped as illegal instructions."
+    },
+    {
+      "bug_lineno": [
+        [
+          232,
+          236
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The FENCE.I decode branch marks the instruction illegal when bits [31:20] are nonzero. Those fields are reserved for future extensions and base implementations must ignore them, so legal FENCE.I encodings can raise an illegal-instruction exception.",
+      "fix_hint": "Remove the FENCE.I-specific nonzero immediate check and decode the instruction from its opcode and funct3 while ignoring the reserved rs1, rd, and immediate fields."
+    }
+  ]
+}

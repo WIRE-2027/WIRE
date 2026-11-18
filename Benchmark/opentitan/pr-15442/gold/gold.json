@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          714,
+          714
+        ],
+        [
+          1800,
+          1811
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The TPM `tpm_header_not_empty` interrupt was generated as a one-cycle pulse from a rising-edge detector on `tpm_status_cmdaddr_notempty`. Because the interrupt primitive received a pulse instead of the level status, software could clear the interrupt while the TPM command/address FIFO was still non-empty or while a new header arrived, losing the interrupt notification. This is a race condition in the interrupt handshake: the level status should be delivered directly to the interrupt logic so the interrupt remains asserted while the condition is true.",
+      "fix_hint": "Remove the edge detector and connect `tpm_status_cmdaddr_notempty` directly to the `event_intr_i` input of the `tpm_header_not_empty` interrupt primitive. Also delete the now-unused pulse signal declaration. This makes the interrupt level-sensitive with respect to the command/address FIFO not-empty status, preventing a software clear from losing a persistent nonempty condition. The interrupt state remains sticky after the FIFO drains until software clears it."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_tpm.sv",
+          "lines": [
+            [
+              178,
+              178
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The TpmReturnByHwAddr lookup table uses 12'h020 for the TPM_HASH_START offset, but the correct offset is 12'h028. As a result, the address comparison in the HW-register decode logic fails to recognize a read to 0x028 as a HW-managed register, so the command is unnecessarily queued to software instead of being answered directly by hardware with 0xFF. Conversely, an access to the wrong offset 0x020 is incorrectly treated as TPM_HASH_START.",
+      "fix_hint": "Change the TPM_HASH_START entry in the TpmReturnByHwAddr array from 12'h020 to 12'h028 so that reads to the actual HASH_START offset are decoded as HW-managed and return 0xFF as specified."
+    }
+  ]
+}

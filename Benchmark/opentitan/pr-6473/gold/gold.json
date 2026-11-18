@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/rom_ctrl/rtl/rom_ctrl_counter.sv",
+          "lines": [
+            [
+              102,
+              102
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/rom_ctrl/rtl/rom_ctrl_fsm.sv",
+          "lines": [
+            [
+              253,
+              253
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The ROM read address was driven directly from the registered data address `addr_q`. Since `addr_q` only updates on the following clock edge after `go` is asserted, the ROM does not see the next address in the same cycle that the current word is accepted. This causes the ROM output buffer to hold the previously fetched word for an extra cycle, so data at the old address is presented again instead of advancing to the next word. The fix separates the current data address from the ROM fetch address and makes the fetch address advance combinationally when the handshake is accepted.",
+      "fix_hint": "In `rom_ctrl_counter`, keep `addr_q` as the data address and drive `data_addr_o` from it. Add a separate `read_addr_o` output driven by `go ? addr_d : addr_q`, so the ROM request address moves to the next word immediately when the current beat is accepted. In `rom_ctrl_fsm`, connect `rom_addr_o` to the new counter read address (`counter_read_addr`) instead of the counter data address (`counter_addr`)."
+    }
+  ]
+}

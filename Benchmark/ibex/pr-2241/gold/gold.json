@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          158,
+          158
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When RdataMuxCheck=0, the error signals oh_raddr_a_err and oh_raddr_b_err are declared but never assigned a value in the gen_no_rdata_mux_check generate block. This causes undriven signal warnings during linting (e.g., Verilator UNDRIVEN warning). The signals are used in the err_o assignment but lack a default value when the one-hot mux check feature is disabled.",
+      "fix_hint": "Add explicit assignments of 1'b0 to oh_raddr_a_err and oh_raddr_b_err within the gen_no_rdata_mux_check generate block, similar to how oh_we_err is handled in the gen_no_wren_check block when WrenCheck=0."
+    }
+  ]
+}

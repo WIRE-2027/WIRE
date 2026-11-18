@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          214,
+          215
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "For AXI widths below the I-cache line width, icache_miss_rdata is directly assigned from the assembled response data. This path bypasses the address-based 64-bit lane selection required by uncacheable instruction reads, so the requested word may reach the I-cache in the wrong lane.",
+      "fix_hint": "Remove the direct raw-data assignment and route this configuration through the common uncacheable word-selection and right-alignment logic."
+    }
+  ]
+}

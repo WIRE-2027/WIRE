@@ -1,0 +1,42 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          124,
+          124
+        ],
+        [
+          1027,
+          1030
+        ],
+        [
+          1032,
+          1033
+        ],
+        [
+          1041,
+          1041
+        ],
+        [
+          1056,
+          1056
+        ],
+        [
+          1070,
+          1074
+        ],
+        [
+          1100,
+          1102
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In flash/passthrough mode, the top-level SPI datapath mux selected the internal SRAM port B source/destination using cmd_dp_sel_outclk, which is a version of cmd_dp_sel registered on clk_spi_out_buf (the inverted-SCK domain). However, cmd_dp_sel is produced in the SCK input clock domain and becomes valid before the inverted-SCK edge. Therefore, when a command such as an uploaded Page Program was decoded, the upload datapath began writing the command FIFO into SRAM while the SRAM mux was still connected to the previous/default path (DpNone). That first SRAM write was missed or misrouted, so software later read an incorrect or missing opcode from the upload command FIFO. The old code also embedded the SRAM mux in the same combinational block used for io_mode and P2S output selection, coupling the SCK-domain memory access to the inverted-SCK output selection.",
+      "fix_hint": "Separate the SRAM datapath mux from the inverted-SCK output mux. Create dedicated flash_sram_l2m/flash_sram_m2l signals and select them combinationally with cmd_dp_sel in the SCK domain, connecting IoModeReadCmd/IoModeUpload to the SRAM B port as needed. In flash/passthrough mode, drive mem_b_l2m from flash_sram_l2m and flash_sram_m2l from mem_b_m2l before the cmd_dp_sel_outclk case, and remove the old per-datapath mem_b_l2m/sub_sram_m2l assignments from the output datapath mux."
+    }
+  ]
+}

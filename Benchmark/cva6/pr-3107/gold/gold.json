@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          142,
+          142
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the combinational `always_comb` block, `valid_o[i]` is assigned only when `itt_out[i].valid` is true. When that condition is false, the signal has no assignment on that combinational path, so synthesis/static-analysis tools infer a latch to preserve the previous value. This violates the intended fully-combinational output assignment style and can leave stale valid indications instead of cleanly deasserting the output for ports that do not produce a trace packet.",
+      "fix_hint": "Give `valid_o[i]` a default value before the conditional trace-packet assignment in the `always_comb` loop. The signal should be driven on every combinational path, with the default deasserted value overridden only when a valid trace packet is produced."
+    }
+  ]
+}

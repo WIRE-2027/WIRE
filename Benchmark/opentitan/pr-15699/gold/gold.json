@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip_templates/alert_handler/rtl/alert_handler_ping_timer.sv",
+          "lines": [
+            [
+              126,
+              126
+            ]
+          ]
+        },
+        {
+          "file": "hw/top_earlgrey/ip_autogen/alert_handler/rtl/alert_handler_ping_timer.sv",
+          "lines": [
+            [
+              126,
+              126
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The alert channel ID is taken directly as an IdDw-bit slice of the LFSR state. Since IdDw = $clog2(NAlerts), when NAlerts is not a power of two the extracted value can fall in the unused range [NAlerts, 2**IdDw-1]. Such values do not correspond to any real alert channel. The zero-padded enable_mask then makes id_vld evaluate to 0 for these out-of-range IDs, causing the FSM in AlertPingSt to skip the alert ping attempt and advance to the escalation phase. This wastes alert ping attempts and can delay successful alert pings significantly, contributing to the observed ping timeout regression. The same defect appears in both the template and top_earlgrey autogen copies of alert_handler_ping_timer.sv.",
+      "fix_hint": "Constrain the LFSR-derived alert ID to the valid alert-channel range before loading id_to_ping_q. If the raw slice is greater than or equal to NAlerts, subtract NAlerts so the resulting ID is always in [0, NAlerts-1]; otherwise keep it unchanged. Apply the same range-reducing assignment to both the IP template and the generated top_earlgrey copy of alert_handler_ping_timer.sv."
+    }
+  ]
+}

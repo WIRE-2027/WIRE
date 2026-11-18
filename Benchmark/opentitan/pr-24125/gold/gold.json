@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          143,
+          143
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, err_o is a combinational function of the live sum of the two counter values. Because sum is produced by an adder and can glitch while counter or step inputs settle, these glitches propagate directly to err_o. This violates the specification, which requires err_o to be deasserted after reset and to be asserted/deasserted on clock edges based on the sampled invariant condition; it also creates a downstream CDC hazard because the output is not registered/synchronized. The fix adds a registered error flop so err_o reflects the comparison result sampled at the clock edge, with a proper reset value.",
+      "fix_hint": "Register the invariant comparison output instead of driving err_o combinationally. Compute err_d as the comparison result, add an err_q flop reset to 0 and updated from err_d on each clock edge, and assign err_o from err_q. This makes the error indication synchronous and glitch-free as required by the specification."
+    }
+  ]
+}

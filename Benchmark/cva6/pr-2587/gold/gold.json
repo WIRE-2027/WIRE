@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1832,
+          1850
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When the Hypervisor extension (RVH) is enabled, the condition for trapping to S-mode incorrectly excludes the non-virtualized S-mode trap path. The if condition `if (CVA6Cfg.RVH)` gates the entire S-mode trap logic, but when RVH is enabled and the trap is to S-mode but not to virtual supervisor mode (trap_to_v is false), the code falls through to the machine-mode trap handler instead of properly updating sstatus, scause, sepc, and stval. This causes S-mode traps to be incorrectly handled as M-mode traps when the Hypervisor extension is present.",
+      "fix_hint": "Adjust the if condition so that the S-mode trap logic executes when trap_to_priv_lvl is S-mode regardless of whether RVH is enabled. The fix should restructure the conditional to first check for virtual supervisor traps (RVH && trap_to_v), then handle non-virtualized S-mode traps (the else branch), ensuring both paths are accessible when RVH is configured."
+    }
+  ]
+}

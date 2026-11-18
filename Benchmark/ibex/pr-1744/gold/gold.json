@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          661,
+          665
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In the DBG_TAKEN_IF state, the priority encoding for debug_cause_o incorrectly places debug_single_step_i (step) above debug_req_i (haltreq). According to the RISC-V Debug Specification v1.0.0-STABLE, when multiple reasons for entering debug mode occur simultaneously, the cause with the highest priority should be reported. The specification defines haltreq (priority 1) as higher priority than step (priority 0). The buggy code checks trigger_match_i first (correct), then debug_single_step_i second, and defaults to DBG_CAUSE_HALTREQ last, which inverts the required priority between step and haltreq.",
+      "fix_hint": "In DBG_TAKEN_IF, select TRIGGER for trigger_match_i, HALTREQ for debug_req_i, and STEP otherwise. Treat the priority-chain and fallback edits as one defect."
+    }
+  ]
+}

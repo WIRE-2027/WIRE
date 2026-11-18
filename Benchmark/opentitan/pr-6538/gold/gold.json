@@ -1,0 +1,116 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/csrng/dv/env/csrng_env_pkg.sv",
+          "lines": [
+            [
+              30,
+              30
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In csrng_env_pkg, the ZERO_SEED_GENBITS parameter encoded the least-significant 32-bit word as 0x7 instead of the specified 0x4. Any DV sequence using ZERO_SEED_GENBITS to create a known deterministic seed would produce the wrong pattern, causing mismatched expected values in testbench flows that rely on this constant.",
+      "fix_hint": "Change the least-significant 32-bit word of ZERO_SEED_GENBITS from 32'h7 to 32'h4 so the constant matches the required zero-seed generation pattern: all zeros except the least-significant word equal to 0x00000004."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/csrng/rtl/csrng_ctr_drbg_cmd.sv",
+          "lines": [
+            [
+              69,
+              69
+            ],
+            [
+              88,
+              88
+            ],
+            [
+              118,
+              118
+            ],
+            [
+              152,
+              152
+            ],
+            [
+              198,
+              198
+            ],
+            [
+              199,
+              199
+            ],
+            [
+              232,
+              234
+            ],
+            [
+              272,
+              272
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In csrng_ctr_drbg_cmd, a generate command with all-zero additional data was not handled as a no-update command. The old command FIFO pop gated on upd_cmd_rdy_i, cmd_upd_req_o was asserted whenever the command FIFO was non-empty, the rcstage waited for upd_cmd_ack_i, and the final key/V were taken from the update outputs. For a zero-additional-data generate this performs an unwanted DRBG update and returns the post-update key/V instead of the current key/V/reseed counter unchanged, violating the CTR_DRBG generate specification. The fix detects the zero-adata generate condition, latches it as gen_adata_null_q, suppresses the update request, pops the staging FIFOs using the bypass indication instead of the update ack, and stores the pre-update key/V/instance in the widened rcstage FIFO so the final response can use those unchanged values.",
+      "fix_hint": "Add combinational detection of a GEN command whose additional data is all zeros, hold it in a flop across the pipeline stages, gate cmd_upd_req_o for that case, allow the command FIFO and rcstage FIFO to advance without update handshakes, and select the stored pre-update key/V/instance data for the final key/VRC FIFO instead of the update block outputs when the bypass flag is set."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/csrng/rtl/csrng_ctr_drbg_gen.sv",
+          "lines": [
+            [
+              331,
+              331
+            ],
+            [
+              338,
+              338
+            ],
+            [
+              384,
+              384
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In csrng_ctr_drbg_gen, the adstage FIFO was pushed in the ReqIdle FSM state on the same cycle as v_ctr_load, and its write data used genreq_v. At that point the incremented V counter has not yet been captured into v_ctr_q, so the stored adstage_v is the un-incremented incoming V. The block-encryption phase uses v_sized with the incremented counter, but the later update request uses adstage_v. This makes the DRBG update use a different V than the V used for the encryption phase. The fix moves the adstage push into ReqSend and writes v_sized into the adstage FIFO so the update uses the same incremented V as the block encryption.",
+      "fix_hint": "Delay the adstage FIFO write until the ReqSend state when the block-encryption request is active, and capture v_sized (the V value actually used for block encryption) in the FIFO rather than the raw genreq_v. This ensures adstage_v matches the encryption V used by the subsequent update."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/csrng/rtl/csrng_state_db.sv",
+          "lines": [
+            [
+              183,
+              183
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In csrng_state_db, the combinational instance_status signal was asserted only for INS, RES, and UPD command codes, omitting GEN. When a generate write is processed, the active/status bit stored for the DRBG instance is therefore cleared instead of being set or maintained, so an instantiated instance can appear inactive after a generate. The spec requires generate commands to set the active/status bit just like instantiate, reseed, and update commands.",
+      "fix_hint": "Add the missing condition to the instance_status assignment: treat state_db_wr_ccmd_i == GEN the same as INS, RES, and UPD so that a generate write stores the active/status bit as 1."
+    }
+  ]
+}

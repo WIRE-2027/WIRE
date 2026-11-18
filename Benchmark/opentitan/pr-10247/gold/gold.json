@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_core.sv",
+          "lines": [
+            [
+              2190,
+              2191
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/entropy_src/rtl/entropy_src_main_sm.sv",
+          "lines": [
+            [
+              129,
+              129
+            ],
+            [
+              152,
+              152
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In boot/bypass mode, the main state machine did not pop the bypass FIFO while waiting in BootHTRunning. If a previous boot health-test phase failed, the rejected samples remained in the bypass packer. When a later boot health-test phase passed, BootPostHTChk popped that stale data, and entropy_src_core's final-FIFO push logic treated any bypass_stage_pop as a valid delivery as long as the transient ht_failed_q signal was deasserted. Since ht_failed_q only reflects the current/latched health-test failure status and does not tag the contents of the bypass FIFO, stale health-test-rejected data could be pushed into sfifo_esfinal and released as an entropy seed. The old push gating `(main_stage_pop || bypass_stage_pop) && !ht_failed_q` was not a safe delivery indication for the boot path.",
+      "fix_hint": "Modify entropy_src_main_sm so that BootHTRunning pops the bypass FIFO whenever bypass_stage_rdy_i is asserted, discarding any stale sample left from a prior failed boot health-test phase. When a boot sample is actually accepted in BootPostHTChk, assert a dedicated main-stage push signal. Then change entropy_src_core's sfifo_esfinal_push to use that dedicated push signal instead of deriving it from main_stage_pop/bypass_stage_pop qualified by !ht_failed_q, so discard pops never write the final entropy FIFO."
+    }
+  ]
+}

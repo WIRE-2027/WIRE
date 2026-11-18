@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          315,
+          317
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The tracer has duplicate dispatch entries for floating-point store instructions (FSW, FSD, FSQ): the first set incorrectly calls printLoadInstr(), while a later set correctly calls printStoreInstr(). Because the earlier case item matches first, the store instructions are formatted as loads, causing the source register (rs2) to be treated as a destination register and producing wrong register names in the trace output. For example, fsd instruction shows x0 instead of the correct floating-point source register fa5.",
+      "fix_hint": "Remove the erroneous earlier FSW, FSD, and FSQ printLoadInstr() dispatch entries so that the existing later printStoreInstr() entries are the only handlers for these floating-point store instructions. This lets the tracer use rs2 as the store source register instead of treating the instruction as a load with a destination register."
+    }
+  ]
+}

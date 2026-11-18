@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          134,
+          154
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The old resolution-truncation logic in pwm_chan did not correctly clear the unused lower bits of phase_delay_i and duty_cycle_actual. It compared the input value against 16'h1 << (dc_resn_i + 1), then conditionally shifted right by lshift and unconditionally shifted left by lshift. For values below the comparison threshold this effectively multiplied the value by 2^lshift, while for values above the threshold the right-shift followed by left-shift restored the original value, leaving the low bits intact. As a result, with reduced dc_resn the computed on_phase/off_phase could be far too large or not truncated at all, producing incorrect PWM duty cycles.",
+      "fix_hint": "Replace the compare-and-shift scheme with direct clearing of the unused low bits. Compute a mask that keeps only the top dc_resn_i+1 bits, e.g. dc_mask = 16'hffff >> (dc_resn_i + 1), then assign phase_delay_masked = phase_delay_i & ~dc_mask and duty_cycle_masked = duty_cycle_actual & ~dc_mask. Use these masked values directly for on_phase and off_phase without additional scaling shifts."
+    }
+  ]
+}

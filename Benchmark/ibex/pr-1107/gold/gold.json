@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          769,
+          769
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In FLUSH, a general debug-entry request overrides the DBG_TAKEN_ID destination selected for a prioritized EBREAK with privilege-appropriate debug entry enabled. Concurrent halt or single step therefore selects DBG_TAKEN_IF and saves IF PC/cause instead of the EBREAK instruction PC and EBREAK cause.",
+      "fix_hint": "Retain the EBREAK-selected DBG_TAKEN_ID destination when ebrk_insn_prio and ebreak_into_debug are both true; apply the general enter_debug_mode override otherwise. EBREAK re-entry while already in debug mode must continue to leave debug CSRs unchanged."
+    }
+  ]
+}

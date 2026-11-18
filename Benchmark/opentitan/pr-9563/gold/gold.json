@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          185,
+          185
+        ],
+        [
+          215,
+          215
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "Startup two-pass completion and continuous completion/disable transition directly to Sha3Prep, asserting the halt request in the immediately following cycle. They omit the required intervening message-complete cycle with halt request low, so the last message has no specified settling/acceptance interval before preparation.",
+      "fix_hint": "Add a Sha3MsgDone state to the FSM enum and re-encode the state vector to make room for it. Change the StartupPass1 two-pass-success path and the ContHTRunning completion/disable path to go to Sha3MsgDone first, and add a Sha3MsgDone case that advances to Sha3Prep on the next cycle. This gives SHA-3 one cycle to absorb the final message before the halt request is asserted."
+    }
+  ]
+}

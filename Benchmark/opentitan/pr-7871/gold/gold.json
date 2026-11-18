@@ -1,0 +1,78 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          113,
+          113
+        ],
+        [
+          172,
+          172
+        ],
+        [
+          181,
+          181
+        ],
+        [
+          185,
+          185
+        ],
+        [
+          187,
+          187
+        ],
+        [
+          264,
+          264
+        ],
+        [
+          280,
+          281
+        ],
+        [
+          309,
+          309
+        ],
+        [
+          322,
+          322
+        ],
+        [
+          380,
+          380
+        ],
+        [
+          384,
+          384
+        ],
+        [
+          398,
+          398
+        ],
+        [
+          400,
+          407
+        ],
+        [
+          409,
+          409
+        ],
+        [
+          422,
+          422
+        ],
+        [
+          428,
+          430
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The pre-merge rv_dm design synchronized lc_hw_debug_en_i into only one enable copy and used it solely to disable instruction fetch from the debug ROM. All other hardware-debug-enable-gated functions were left unconditionally active: DMI request/response valid/ready handshakes could pass through to the debug module CSRs, the non-debug module reset output was driven directly from the dm_csrs block, the SBA TL-UL master valid/response paths were not masked, the debug request output was sent directly to the harts, and the debug-memory adapter accepted and returned data/error responses even when the lifecycle enable was off. Consequently, when lc_hw_debug_en_i was not On, debugger-visible DMI access, ndmreset, system-bus access, hart debug requests, and debug-memory data accesses could still be asserted, violating the spec requirement that all these functions be held inactive when hardware debug enable is gated off.",
+      "fix_hint": "Synchronize lc_hw_debug_en_i into per-function enable copies and use them to gate every lifecycle-controlled path: gate the DMI request/response handshakes between dmi_jtag and dm_csrs with dmi_en, gate the ndmreset output with reset_req_en, gate the SBA host TL-UL valid signals with sba_en, gate debug_req_o with debug_req_en, and gate the debug-memory TL-UL adapter request grant, read data, read valid, and error response with rom_en while retaining en_ifetch for instruction-fetch enable control."
+    }
+  ]
+}

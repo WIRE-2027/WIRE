@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          157,
+          157
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StError state, when lc_en_i becomes valid ON, the FSM transitions directly to StActive. This causes err_en to be deasserted before any already-accepted error responses have been drained. If outstanding_txn is nonzero, the locally generated TL-UL error response that is still pending can be dropped or blocked, violating the re-enabling transition requirement that outstanding error responses must be delivered before resuming forwarding.",
+      "fix_hint": "Change the StError exit on lc_en_i ON to transition to the error-outstanding/drain state instead of StActive. In that drain state, keep err_en asserted and block new requests until outstanding_txn reaches zero, then transition to StActive only after all pending error responses have been delivered."
+    }
+  ]
+}

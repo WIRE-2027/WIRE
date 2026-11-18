@@ -1,0 +1,54 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          32,
+          32
+        ],
+        [
+          38,
+          40
+        ],
+        [
+          59,
+          65
+        ],
+        [
+          67,
+          67
+        ],
+        [
+          73,
+          75
+        ],
+        [
+          77,
+          77
+        ],
+        [
+          79,
+          79
+        ],
+        [
+          94,
+          102
+        ],
+        [
+          105,
+          106
+        ],
+        [
+          112,
+          112
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, any non-idle clr_key_i was treated as `clr_key` and caused the FSM in StSideloadIdle to leave Idle and enter the dedicated StSideloadClear state. In that state keys_en was forced low and `clr` was held high until clr_key_i returned to SideLoadClrIdle. Because keys_en is the enable for all AES/KMAC/OTBN sideload key slots, clearing one slot disabled every sideload output and blocked all destinations, violating the spec that only the selected slot is cleared and the module remains operational. In addition, the old state-driven `clr` flag did not directly qualify the per-slot clear signals during a wipe, since `clr_all_keys` did not include `wipe_key_i`.",
+      "fix_hint": "Remove the StSideloadClear state and the related counter/`clr` state-machine machinery. Keep the FSM in StSideloadIdle during normal clears and derive aes_clr, kmac_clr, and otbn_clr combinationally from clr_key_i and an all-clear condition that includes wipe_key_i. Drive prng_en_o from the OR of those per-slot clear signals. Only a wipe request should move the FSM to StSideloadWipe/StSideloadStop and force keys_en low, permanently disabling the sideload outputs."
+    }
+  ]
+}

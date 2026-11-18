@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          332,
+          332
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In CnstyReadWaitSt, for digest-protected partitions, the consistency check pass condition is wrong. The OLD code uses `digest_o == data_mux || data_mux == '0 && digest_o == '0`. The second term is not a true blank-digest bypass: it only passes when both the buffered digest and the OTP digest are zero. According to the spec and the code comment, a zero buffered digest means the partition is blank/unlocked and the consistency check should pass regardless of the OTP digest value. As a result, when `digest_o` is still zero but the OTP digest block `data_mux` is nonzero, the check incorrectly takes the failure path, reports `CheckFailError`, enters `ErrorSt`, and locks the partition.",
+      "fix_hint": "Change the consistency check pass condition for digest-protected partitions to `digest_o == data_mux || digest_o == '0`. This preserves the match case and treats a zero buffered digest as an unconditional pass, independent of the OTP digest value. The redundant both-zero clause can be removed because it is already covered by `digest_o == data_mux`."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          196,
+          196
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, strap_sampled is cleared whenever either rst_lc_req_q or rst_sys_req_q is all-ones. The rst_lc_req_q term is too broad: rst_lc_req_q is asserted for any reset request, including NDM/life-cycle reset, and such a reset does not necessarily assert all system resets. As a result, an NDM reset can clear strap_sampled and cause the FSM to sample straps again during the next power-up, even though the required condition for strap sampling (all system resets asserted) did not occur.",
+      "fix_hint": "Remove the &rst_lc_req_q term from the clear condition and keep only &rst_sys_req_q, so that strap_sampled is preserved across LC-only reset assertions and is cleared only when all system reset requests are asserted."
+    }
+  ]
+}

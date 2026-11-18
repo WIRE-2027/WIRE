@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          245,
+          255
+        ],
+        [
+          287,
+          288
+        ],
+        [
+          354,
+          354
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the command stage FSM, locally rejected commands (invalid command sequence, invalid application command, or reseed count exceeded) were handled by popping only the rejected command header from the command FIFO and returning directly to Idle. If the rejected command had additional data words, those words could already be in the FIFO or arrive after the header. Because the FSM went back to Idle while the FIFO was still non-empty, the next FIFO word would be misinterpreted as a new command header, violating the spec requirement to discard the rejected command header and all additional data words belonging to it. The fix introduces a Flush state that keeps popping the FIFO until it is empty and no new command word is being presented, so the invalid command is fully absorbed before normal command processing resumes.",
+      "fix_hint": "Add a Flush state to the command-stage FSM. When an invalid command is detected in Idle, pop the current header and transition to Flush instead of remaining in Idle. In Flush, pop the FIFO while it is non-empty and also wait until the command input valid signal is low, then return to Idle. Include Flush in the disable-handling state set so that disabling during the flush returns to Idle and clears state as required."
+    }
+  ]
+}

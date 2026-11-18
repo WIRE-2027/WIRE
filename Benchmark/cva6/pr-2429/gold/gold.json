@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          394,
+          394
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In the is_inside_execute_regions function, the condition that selects between the no-rule case and the configured-rule case is inverted. When NrExecuteRegionRules is 0, the function initializes the match vector to zero and returns the OR-reduction of that empty/no-match result, denying execution even though no execute-region filter is configured. When NrExecuteRegionRules is non-zero, it bypasses the configured range checks and returns 1 unconditionally, allowing instruction fetches regardless of the configured executable regions.",
+      "fix_hint": "Make the configured-rule path execute only when NrExecuteRegionRules is non-zero. In that case, evaluate the configured execute-region range checks and return whether any rule matches. When NrExecuteRegionRules is zero, return 1 to indicate that execute-region filtering is not restricting instruction fetches."
+    }
+  ]
+}

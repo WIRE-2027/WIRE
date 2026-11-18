@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          211,
+          211
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The mask FIFO write enable is generated from the TL-UL acknowledge path (`a_ack & (tl_i.a_opcode == Get)`) instead of from the actual SRAM command handshake. Because `a_ready` is asserted not only on SRAM grant but also on internal error responses, a read request that is rejected/blocked can be accepted on TL-UL and pushed into the mask FIFO even though no SRAM read command is issued. Such an orphan mask entry is never popped by a corresponding `rvalid_i`, so it remains at the head of the mask FIFO and is used to mask the next real SRAM read response, corrupting the returned data and consuming mask FIFO capacity until it blocks future requests.",
+      "fix_hint": "Change `maskfifo_wvalid` to be qualified by the actual SRAM command acceptance and read type, e.g. `assign maskfifo_wvalid = sram_ack & ~we_o;`. This ensures mask FIFO entries are pushed only for reads that are really issued to the SRAM, so rejected/error reads do not insert stale entries and the FIFO head always corresponds to the next read response."
+    }
+  ]
+}

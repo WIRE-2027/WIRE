@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/pwm/rtl/pwm_chan.sv",
+          "lines": [
+            [
+              140,
+              141
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The phase and duty thresholds are obtained by unconditionally shifting the raw values left and then using the low 16 bits. At reduced resolution, values above the beat-count range need their significant bits retained and their low fractional bits discarded. For example R=7, V=0x8000 produces effective zero in the original expression, whereas the required cropped fractional value is 0x8000. This changes the pulse phase or duration. The defect is in value interpretation and threshold truncation; it does not depend on an assertion that the shift expression itself is only 16 bits wide.",
+      "fix_hint": "Use the beat-count value directly when V is no greater than the 16-bit threshold 2^(R+1); otherwise crop V by shifting right by 15-R. Align the selected value by shifting left by 15-R and use its low 16 bits for the phase or duty threshold."
+    }
+  ]
+}

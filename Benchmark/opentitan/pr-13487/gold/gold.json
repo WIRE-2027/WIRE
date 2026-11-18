@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          97,
+          97
+        ],
+        [
+          108,
+          108
+        ],
+        [
+          112,
+          112
+        ],
+        [
+          129,
+          129
+        ],
+        [
+          140,
+          140
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In heartbeat mode, the 17-bit step computation produces dc_wrap when the next duty-cycle value crosses the 16-bit boundary. The old code had two related problems. First, the direction-turn logic used the delayed pulse dc_htbt_end_q in the dc_wrap branches, so for typical blink_param_x_i values the wrap condition is not observed on the same update edge and htbt_direction fails to reverse at the boundary. Second, duty_cycle_htbt was assigned directly from dc_htbt_q, so the low 16-bit wrapped residue appeared on the output during a wrapped step interval instead of being clamped to 16'hffff or 0 as required by the heartbeat spec.",
+      "fix_hint": "Latch dc_wrap into a new dc_wrap_q register on the heartbeat step boundary so the wrap is remembered for the entire output step interval. In the direction-turn logic, use the current dc_htbt_end pulse instead of the delayed dc_htbt_end_q so the direction reverses when the step actually crosses the target boundary. Finally, when dc_wrap_q is set, override duty_cycle_htbt to the appropriate clamp value: 16'hffff for a positive overflow and 0 for a negative underflow; otherwise pass dc_htbt_q through."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          108,
+          119
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The misa CSR's 'I' bit (bit 8) is always set to 1 regardless of the RV32E parameter. According to the RISC-V Privileged Specification v1.11, the 'E' bit (bit 4) should be the complement of the 'I' bit. When RV32E=1 (RV32E base ISA selected), the 'I' bit should be cleared to 0, and the 'E' bit should be set to 1. The current implementation hardcodes the 'I' bit to 1, causing misa to incorrectly report RV32I support even when RV32E is configured, violating the spec requirement that 'E' and 'I' are mutually exclusive.",
+      "fix_hint": "Change the 'I' bit assignment in MISA_VALUE from a hardcoded 1 to a conditional expression based on the RV32E parameter: use `32'(!RV32E) << 8` instead of `1 << 8`. This ensures the 'I' bit is set only when RV32E is not selected, and the 'E' bit (already correctly using `32'(RV32E) << 4`) will be its complement as required by the spec."
+    }
+  ]
+}

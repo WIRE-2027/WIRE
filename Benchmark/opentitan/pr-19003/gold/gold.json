@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          124,
+          124
+        ],
+        [
+          133,
+          133
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the SPI clock domain, the software-configured address-mode update path samples spi_reg_cfg_addr_4b_en_sync on the raw spi_csb_asserted_pulse_i cycle. That synchronized value comes from a two-flop CDC synchronizer and may not yet be stable at the same cycle as the transaction-start pulse. In particular, the synchronizer is initialized to 1'b1 while the effective mode and software register reset to 0, so on the first SPI transaction the update condition can incorrectly load the stale reset value into spi_cfg_addr_4b_en_o and set 4-byte mode without any EN4B command or software write.",
+      "fix_hint": "Delay spi_csb_asserted_pulse_i by one extra SPI clock cycle in the SPI domain and use this delayed pulse in the spi_cfg_addr_4b_en_o software-update condition instead of the raw pulse. This ensures the update only occurs after spi_reg_cfg_addr_4b_en_sync has settled through the synchronizer."
+    }
+  ]
+}

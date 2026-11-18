@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          205,
+          205
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "A valid C.FLDSP whose destination is ft0 raises an illegal-instruction fault because the decoder treats floating-point register zero like integer x0.",
+      "fix_hint": "Do not apply the integer destination-zero legality check to C.FLDSP."
+    }
+  ]
+}

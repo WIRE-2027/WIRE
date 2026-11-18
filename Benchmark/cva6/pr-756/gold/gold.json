@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          126,
+          127
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "A word-unaligned compressed branch is moved to frontend slot zero but receives BHT and BTB metadata for the aligned slot-zero address, producing an incorrect or missed prediction.",
+      "fix_hint": "Select predictor metadata using the emitted instruction's halfword address position, while preserving saved metadata for a carried unaligned instruction."
+    }
+  ]
+}

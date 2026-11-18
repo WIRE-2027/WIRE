@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          599,
+          599
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The `dcsr.xdebugver` field is reset to `XDEBUGVER_NO` (4'h0) instead of `XDEBUGVER_STD`. According to the RISC-V debug specification, `xdebugver` is a read-only field that should indicate the debug version supported by the implementation. The current reset value of 0 incorrectly indicates no debug support, while the write logic in the `CSR_DCSR` case always forces `xdebugver` to `XDEBUGVER_STD`. This creates an inconsistent state where the field reads as 0 after reset but becomes `XDEBUGVER_STD` after any write to `dcsr`, even though the field is read-only and should remain constant.",
+      "fix_hint": "Change the reset value of `dcsr_q.xdebugver` from `XDEBUGVER_NO` to `XDEBUGVER_STD` in the reset block of the `always_ff` process. This ensures the field immediately reflects the correct debug version after reset, consistent with the read-only nature of the field and the write behavior that always forces `XDEBUGVER_STD`."
+    }
+  ]
+}

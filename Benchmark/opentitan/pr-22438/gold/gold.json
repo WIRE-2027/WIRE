@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          19,
+          20
+        ],
+        [
+          22,
+          22
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The ACK timeout interval for non-isochronous IN transactions is computed incorrectly. The old AckTimeoutCnt parameter used (17 + 3) * 4 = 80, assuming that rx_pkt_start_i is seen 3 bit times after the USB SOP transition. The actual delay is only 1.5 bit times (6 cycles of the 48 MHz clock), and the down-counter also needs a -1 adjustment because it is a [N-1:0] countdown value. As a result, the module waits longer than the required 16-18 bit-time handshake window before declaring a timeout, so a missing ACK is detected too late.",
+      "fix_hint": "Update the AckTimeoutCnt parameter to reflect the real rx_pkt_start_i delay of 1.5 bit times (6 USB clock cycles) and account for the countdown counter representation by subtracting one, i.e. use ((17 * 4) + 6) - 1. Update the nearby comment to describe the corrected SOP-to-rx_pkt_start_i delay."
+    }
+  ]
+}

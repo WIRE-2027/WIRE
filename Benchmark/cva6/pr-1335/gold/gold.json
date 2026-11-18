@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          875,
+          875
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The PMP address write guard checks the current entry's lock bit twice. It never checks whether the next entry is locked in TOR mode, even though that upper entry uses `pmpaddr[index]` as its lower bound. Software can therefore modify an address register that must be protected by the locked TOR entry above it.",
+      "fix_hint": "Keep the current entry lock check and test `pmpcfg_q[index+1].locked` for the adjacent TOR restriction when deciding whether `pmpaddr[index]` may be written."
+    }
+  ]
+}

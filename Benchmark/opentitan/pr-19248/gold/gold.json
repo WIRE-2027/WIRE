@@ -1,0 +1,44 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac.sv",
+          "lines": [
+            [
+              1179,
+              1179
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/kmac/rtl/kmac_entropy.sv",
+          "lines": [
+            [
+              229,
+              229
+            ],
+            [
+              505,
+              505
+            ],
+            [
+              532,
+              532
+            ],
+            [
+              640,
+              640
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The EDN entropy request output was driven directly from the kmac_entropy FSM and defaulted to 0. When the EDN wait timer expired, the FSM left StRandEdn and entered the error path, so entropy_req_o was deasserted before the EDN side acknowledged the request. Dropping an outstanding request can leave the prim_sync_reqack_data CDC/request-ack handshake in an inconsistent state and caused assertion failures. The old kmac.sv code also disabled req_chk_i whenever an entropy error or entropy FSM error was present, masking the dropped-request scenario instead of preventing it.",
+      "fix_hint": "Hold the EDN request high until it is acknowledged. In kmac_entropy, introduce an internal entropy_req signal plus a hold latch, drive entropy_req_o from entropy_req OR the hold latch, and clear the hold only when entropy_ack_i is seen. Keep the FSM driving the internal entropy_req; in kmac.sv, set req_chk_i to 1'b1 since the request is now held until ack."
+    }
+  ]
+}

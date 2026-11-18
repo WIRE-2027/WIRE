@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          543,
+          543
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the ClockPulseAck state, the NACK event was asserted whenever SDA was sampled high and the NAK-OK flag was not set, without verifying that SCL had actually reached its high phase. If an external target stretches SCL low before the ACK sampling edge, SDA may appear high during the stretched low period, causing a spurious NACK event. The old condition therefore sampled the ACK bit at the wrong time instead of waiting for the SCL rising edge.",
+      "fix_hint": "Qualify the NACK detection with the SCL rising-edge condition, e.g. detect NACK only when SCL transitions from low to high (!scl_i_q && scl_i) and SDA is high, so the ACK value is sampled at the actual ACK sampling point rather than during clock stretching."
+    }
+  ]
+}

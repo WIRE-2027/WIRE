@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          288,
+          288
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "During an update operation, the TLB replaces an entry even when a lookup hit occurs in the same cycle. The spec states that if a lookup hit occurs during the same cycle as an update, the update shall be ignored because the existing hit entry is already correct. The buggy code only checks update_i.valid and replace_en[i], missing the !lu_hit_o condition, causing an unnecessary and incorrect replacement of a valid matching entry.",
+      "fix_hint": "Add the condition '&& !lu_hit_o' to the update enable logic so that an update only proceeds when no lookup hit is detected in the same cycle. The fix should be applied in the update_flush always_comb block where the replacement condition is evaluated."
+    }
+  ]
+}

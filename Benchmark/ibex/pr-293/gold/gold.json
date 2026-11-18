@@ -1,0 +1,43 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "rtl/ibex_prefetch_buffer.sv",
+          "lines": [
+            [
+              103,
+              104
+            ],
+            [
+              118,
+              118
+            ],
+            [
+              120,
+              121
+            ],
+            [
+              136,
+              136
+            ],
+            [
+              146,
+              146
+            ],
+            [
+              196,
+              196
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The prefetch buffer incorrectly manages pending request and address state across cycles. First, valid_req is generated from the current req_i, FIFO availability, branch indication, and request-queue occupancy without preserving an unaccepted request, so an asserted request can be withdrawn before instr_gnt_i if those combinational conditions change. Second, addr_valid can update instr_addr_q from req_i and fifo_ready even when the request has not been granted, causing the stored sequential-fetch address to advance for a transaction that the memory interface never accepted. Using valid_req_q to select instr_addr_q is also incorrect because, for a newly pending sequential request, instr_addr_q may still contain the address of the previous or oldest request while the correct pending address is fetch_addr. Finally, instr_rvalid_i participates in response-completion and queue-shift logic even when no oldest request is outstanding. These errors can drop pending requests, advance the fetch address without a grant, use a stale request address, or incorrectly modify outstanding-request state in response to a spurious rvalid indication.",
+      "fix_hint": "Make request validity persistent until grant by combining the saved valid_req_q state with the new-request condition and clearing the saved request only when instr_gnt_i accepts it. Qualify updates of instr_addr_q with valid_req and instr_gnt_i so that an ungranted request cannot advance the stored fetch address. Separate request persistence from address-source holding by introducing hold_addr_q: use instr_addr_q only when a previously captured address must be held, and otherwise continue presenting the stable sequential fetch_addr. Qualify rvalid_or_pmp_err with rdata_outstanding_q[0] so that a response-valid indication is ignored when no oldest request is outstanding. Register and reset the new address-hold state consistently."
+    }
+  ]
+}

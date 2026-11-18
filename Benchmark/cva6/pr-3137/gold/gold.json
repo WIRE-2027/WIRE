@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          81,
+          92
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The instruction fetch PMP/PMA check unconditionally overwrites the fetch exception when a PMP or PMA violation is detected, without checking whether the fetch request is valid or whether the incoming request already carries a higher-priority exception such as an instruction page fault. This can incorrectly replace an instruction page fault with an instruction access fault, violating RISC-V exception-priority rules and causing incorrect trap reporting.",
+      "fix_hint": "Apply the PMP/PMA instruction access-fault override only for valid fetch requests and only when the incoming fetch exception is not already an instruction page fault. Preserve higher-priority page-fault exceptions instead of replacing them with instruction access faults."
+    }
+  ]
+}

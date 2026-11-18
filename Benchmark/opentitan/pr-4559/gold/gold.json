@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          352,
+          353
+        ],
+        [
+          357,
+          358
+        ],
+        [
+          360,
+          360
+        ],
+        [
+          364,
+          365
+        ],
+        [
+          367,
+          367
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In lc_ctrl.sv, the alert vectors were assembled in reversed bit order. The live alert vector `alerts` had `otp_prog_error_q` in the high bit and `state_invalid_error_q` in the low bit, while both software and TAP `alert_test` vectors had `lc_programming_failure` in the high bit and `lc_state_failure` in the low bit. Since alert index 0 corresponds to the programming-failure alert and index 1 to the state-failure alert, this swapped the two alert senders and made the `alert_test` bits trigger the wrong alert: writing bit 0 caused `lc_state_failure` instead of `lc_programming_failure`, and writing bit 1 caused the programming-failure alert instead of the state-failure alert. The same misordering existed on the TAP path.",
+      "fix_hint": "Swap the order of the two concatenated alert entries in `alerts`, `alert_test`, and `tap_alert_test` so that bit 0 drives/selects the programming-failure alert and bit 1 drives/selects the state-failure alert. Ensure the live alert vector, software test path, and TAP test path all use the same enumeration order."
+    }
+  ]
+}

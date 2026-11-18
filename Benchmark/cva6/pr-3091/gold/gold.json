@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          859,
+          865
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In superscalar dual-issue mode, the ALU-ALU bypass logic incorrectly blocks the second instruction when both instructions write the same destination register (WAW hazard). The condition `issue_instr_i[i].rd == issue_instr_i[i-1].rd` checks for a WAW hazard, but the comment and surrounding logic indicate it was intended to handle RAW dependencies. Since WAW hazards are already eliminated by the scoreboard, this redundant check causes a false stall: the second instruction is not acknowledged even though no real data hazard exists and the ALU-ALU bypass is available.",
+      "fix_hint": "Remove the WAW hazard check `(issue_instr_i[i].rd == issue_instr_i[i-1].rd)` from the dual-issue acknowledge logic in `issue_read_operands.sv`. The scoreboard already guarantees WAW elimination, so only the existing RAW hazard logic (`stall_raw`) and the ALU-ALU bypass conditions (`alu_bypass.rs1_from_rd` / `alu_bypass.rs2_from_rd`) are needed to determine if the second instruction can issue."
+    }
+  ]
+}

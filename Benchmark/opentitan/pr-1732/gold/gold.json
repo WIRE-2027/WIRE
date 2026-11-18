@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          56,
+          56
+        ],
+        [
+          154,
+          154
+        ],
+        [
+          159,
+          159
+        ],
+        [
+          197,
+          197
+        ],
+        [
+          205,
+          205
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the adapter did not store the TL-UL byte-lane mask with the request in the request FIFO, and read data was written into the response FIFO directly from rdata_i without masking. As a result, read responses could return bytes that were not requested by the original transaction. This violates the specification requirement that unrequested byte lanes be returned as zero, and it can propagate invalid/X data from the SRAM onto the TileLink response bus for sub-word reads.",
+      "fix_hint": "Store the original request mask in the request FIFO by adding a mask field to req_t and populating it from tl_i.a_mask when accepting a request. When capturing SRAM read data, expand the stored byte mask into a bit mask (rmask) using the request FIFO output, and AND rdata_i with rmask before pushing it into the response FIFO. This ensures only byte lanes enabled by the original request are forwarded."
+    }
+  ]
+}

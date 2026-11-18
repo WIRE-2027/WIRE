@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          193,
+          193
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The exception cause code for illegal instruction (EXC_CAUSE_ILLEGAL_INSN) is incorrectly encoded as {1'b0, 5'd01} (value 1) instead of the correct value {1'b0, 5'd02} (value 2) as specified in the RISC-V Privileged Specification. This causes the core to report an incorrect exception cause when an illegal instruction is detected, leading to wrong trap handler behavior and potential system malfunction.",
+      "fix_hint": "Change the encoding of EXC_CAUSE_ILLEGAL_INSN from {1'b0, 5'd01} to {1'b0, 5'd02} in the exc_cause_e enum definition in rtl/ibex_pkg.sv to match the RISC-V specification."
+    }
+  ]
+}

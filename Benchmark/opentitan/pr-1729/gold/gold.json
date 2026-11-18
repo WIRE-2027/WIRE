@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          46,
+          46
+        ],
+        [
+          61,
+          61
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In both the peripheral-input mux and the chip-pad-output mux, data_mux/oe_mux are declared with exactly the number of valid source entries (NMioPads+2 and NPeriphOut+3). The register selection fields can represent encodings outside that legal range because their binary width is rounded up. Indexing the packed vectors with such an out-of-range value performs an out-of-bounds bit-select, which returns X in simulation. This violates the spec requirement that invalid insel encodings drive constant zero and invalid outsel encodings disable the pad driver, and it can cause the ASSERT_KNOWN checks on mio_to_periph_o, mio_out_o, and mio_oe_o to fail.",
+      "fix_hint": "Size the mux vectors to the next power of two greater than or equal to the number of valid source entries (2**$clog2(NMioPads+2) and 2**$clog2(NPeriphOut+3) entries) and let the width cast zero-extend the stacked source vector. This makes every representable register-field index select a defined bit: valid selections keep their behavior, while illegal high encodings index the zero-filled extension, yielding peripheral-input zero and pad output-enable zero / high-impedance."
+    }
+  ]
+}

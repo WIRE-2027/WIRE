@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "core/csr_regfile.sv",
+          "lines": [
+            [
+              274,
+              274
+            ]
+          ]
+        },
+        {
+          "file": "core/include/riscv_pkg.sv",
+          "lines": [
+            [
+              460,
+              460
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The mandatory RISC-V CSR mconfigptr (address 0xF15) is not implemented in the CSR register file. The CSR address constant is missing from the package, and the CSR read logic has no case for this address, so any access falls through to the default case and incorrectly raises an illegal-instruction exception instead of returning 0.",
+      "fix_hint": "Define CSR_MCONFIGPTR as 12'hF15 in the csr_reg_t enum in core/include/riscv_pkg.sv, and add a read-only-zero entry for it in the unique case of core/csr_regfile.sv next to the other machine ID registers."
+    }
+  ]
+}

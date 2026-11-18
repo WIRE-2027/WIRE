@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          971,
+          971
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The WFI exit condition uses the raw pending interrupt bits (mip_q) without masking them against the enabled interrupt bits (mie_q). This causes the hart to resume from WFI when any interrupt is pending, even if the corresponding individual interrupt enable is not set, violating the RISC-V privileged specification recommendation and causing unnecessary wake-ups.",
+      "fix_hint": "Modify the WFI exit condition in the wfi_ctrl block to check for pending AND enabled interrupts (mip_q & mie_q) instead of just pending interrupts (mip_q). The fix should be applied in core/csr_regfile.sv."
+    }
+  ]
+}

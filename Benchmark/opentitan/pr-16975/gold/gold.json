@@ -1,0 +1,48 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_device.sv",
+          "lines": [
+            [
+              1784,
+              1784
+            ],
+            [
+              1803,
+              1803
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/spi_device/rtl/spi_passthrough.sv",
+          "lines": [
+            [
+              83,
+              83
+            ],
+            [
+              117,
+              117
+            ],
+            [
+              625,
+              625
+            ],
+            [
+              636,
+              636
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, spi_passthrough always generates the downstream SPI clock by clock-gating host_sck_i directly. The module had no knowledge of the configured SPI clock polarity and no inverted host clock input. For CPOL=1 (SPI mode 3), the host SCK idles high, so the filter/gating sequence that was designed for an idle-low clock re-enables the downstream clock at the wrong point. As a result, after a filtered command the downstream device misses or mis-times the first clock edge of the next transaction, breaking passthrough operation in CPOL=1. The fix must propagate the CPOL configuration and an inverted host SCK into spi_passthrough, gate both clock polarities, and select the correct gated clock for the downstream SCK output based on CPOL.",
+      "fix_hint": "Add cfg_cpol_i and host_isck_i ports to spi_passthrough and connect them from spi_device. Gate both host_sck_i and host_isck_i with the existing sck_gate_en, using separate clock-gating cells. Then drive passthrough_o.sck from the normal gated clock when CPOL is 0 and from the inverted gated clock when CPOL is 1, so that the downstream clock polarity and the filter/enable timing are consistent with the SPI mode."
+    }
+  ]
+}

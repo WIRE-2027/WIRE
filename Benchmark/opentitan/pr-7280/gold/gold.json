@@ -1,0 +1,39 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac_entropy.sv",
+          "lines": [
+            [
+              201,
+              201
+            ],
+            [
+              276,
+              276
+            ],
+            [
+              280,
+              280
+            ],
+            [
+              399,
+              399
+            ],
+            [
+              423,
+              423
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The kmac_entropy module used the live entropy mode input (mode_i) directly in the seed-selection mux and evaluated it only while in StRandReset. After software asserted entropy_ready and the FSM left StRandReset, the configured mode was not latched. If software later changed entropy_mode, the internal datapath immediately switched to the new mode instead of continuing with the mode captured at initialization. This could cause the LFSR seed to come from the wrong source, or the design to miss an invalid-mode error, because the FSM state and the datapath no longer agreed on the active entropy configuration.",
+      "fix_hint": "In kmac_entropy.sv, add a registered mode_q that is reset to EntropyModeNone and captures mode_i when the FSM leaves StRandReset. Assert a mode_latch control in StRandReset when entropy_ready_i is true, initialize mode_latch to 0 in the combinational block, and change the seed-selection case to use mode_q instead of mode_i. This makes the entropy mode sticky for the entire hash session, as required by the specification, while still allowing the mode to be re-evaluated after reset."
+    }
+  ]
+}

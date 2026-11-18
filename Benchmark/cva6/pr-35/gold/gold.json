@@ -1,0 +1,50 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/cache_ctrl.sv",
+          "lines": [
+            [
+              148,
+              148
+            ],
+            [
+              189,
+              189
+            ],
+            [
+              201,
+              201
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In src/cache_ctrl.sv, the FSM starts new requests and speculative tag lookups based on data_req_i alone, without checking the flush_i input. While flush_i is asserted, the controller can leave IDLE, drive req_o for the next request, and continue from a hit into a new WAIT_TAG transaction. This violates the flush semantics that require the controller to remain idle and ignore new requests until flush completes.",
+      "fix_hint": "Gate every new or speculative request path in cache_ctrl.sv with !flush_i, including IDLE entry, WAIT_TAG speculative req_o, and the hit-continuation request that switches back to WAIT_TAG, so the cache controller remains quiescent during a flush."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "src/miss_handler.sv",
+          "lines": [
+            [
+              307,
+              308
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In src/miss_handler.sv, the FLUSHING state's no-dirty branch increments the set counter and moves to FLUSH_REQ_STATUS, but it never invalidates the clean valid ways of the current set. After a flush completes, stale valid bits remain, so later requests may falsely hit on old cache lines instead of being fetched from memory.",
+      "fix_hint": "In the FLUSHING branch that has no dirty way, request a status-array write for the current set (addr_o = cnt_q, req_o = 1, we_o = 1, be_o.valid = all ones) so that all remaining valid bits are cleared before advancing to the next set."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          462,
+          467
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When software writes an unaligned address (LSB set) to the debug program counter (dpc) CSR, the entire write is ignored instead of masking off the LSB. This occurs because the write logic checks `csr_wdata_int[0] == 1'b0` and only assigns `depc_d` when the condition is true, causing any write with bit 0 set to be silently discarded. The observable failure is that debug software cannot set dpc to an unaligned value and have it automatically aligned, unlike the behavior for mepc which masks the LSB.",
+      "fix_hint": "Change the dpc write logic to always assign `depc_d` but force the LSB to zero, matching the mepc behavior: `depc_d = {csr_wdata_int[31:1], 1'b0};`. This ensures writes with unaligned addresses are accepted and the LSB is ignored rather than the entire write being dropped."
+    }
+  ]
+}

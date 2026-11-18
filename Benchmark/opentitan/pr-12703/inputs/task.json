@@ -1,0 +1,19 @@
+{
+  "input": {
+    "repo": "lowRISC/opentitan",
+    "pr_id": 12703,
+    "lang": "sv",
+    "rtl_files": [
+      "hw/ip/tlul/rtl/tlul_cmd_intg_gen.sv"
+    ],
+    "specs": [
+      {
+        "file": "hw/ip/tlul/rtl/tlul_cmd_intg_gen.sv",
+        "spec": "# TL-UL Command Integrity Generator Specification\n\n## 1. Purpose\n\nThis module is a combinational integrity generator for TL-UL host-to-device requests. It receives a request and produces an equivalent outgoing request with integrity information generated or preserved as required. The module does not check integrity, does not store transactions, and does not process responses.\n\n## 2. Functional Requirements\n\n### 2.1 Request Pass-Through\n\n- The output request shall correspond to the input request in the same cycle.\n- The module shall not drop, merge, reorder, or delay requests.\n- The opcode, parameters, size, source identifier, address, mask, data, and all user attributes other than the integrity fields shall be passed through unchanged.\n- Any response flow-control field carried in the host-to-device request interface shall also be passed through unchanged.\n\n### 2.2 Command Integrity Generation\n\n- The module shall compute a command integrity code over the command portion of the request.\n- The command integrity encoder covers `instr_type`, address, opcode, and mask, as returned by `extract_h2d_cmd_intg`. Size and source identifier pass through the module but are outside the encoded command payload.\n- The newly computed command integrity code shall be placed in the outgoing command integrity field.\n- The incoming command integrity value shall be ignored. It shall not be checked, compared, or forwarded.\n\n### 2.3 Data Integrity Generation\n\n- The module shall compute a data integrity code over the request data field when data integrity generation is enabled.\n- The request data field itself shall always be passed through unchanged.\n- When data integrity generation is enabled, the computed data integrity code shall replace the incoming data integrity field.\n- When data integrity generation is disabled, the incoming data integrity field shall be passed through unchanged and shall not be recomputed.\n\n### 2.4 Parameterized Behavior\n\n- In the default configuration, with data integrity generation enabled, both command and data integrity fields are generated.\n- When data integrity generation is disabled, only the command integrity field is generated; the data integrity field is preserved from the input.\n- Command integrity generation is always active and is independent of data integrity generation.\n\n## 3. Additional Behavioral Requirements\n\n- The module is purely combinational. Its output depends only on the current input and it introduces no latency or state.\n- The same behavior applies to all request opcodes. The module does not distinguish read, write, or partial-write requests.\n- The module does not validate input integrity values and has no status or alarm output."
+      }
+    ],
+    "commit_id": "b465ef9965c0b2cff2f8aebc3686be46f0b1ba91",
+    "timestamp": "2022-05-17T17:06:44+00:00",
+    "is_multi_file": false
+  }
+}

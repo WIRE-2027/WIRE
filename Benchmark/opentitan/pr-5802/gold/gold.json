@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          580,
+          580
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In external RNG source mode, the RNG input FIFO was popped using the LFSR/rate entropy pulse (es_rate_entropy_pulse) instead of the actual RNG source valid signal (es_rng_src_valid). The push side correctly accepts each valid RNG sample with es_enable_rng && es_rng_src_valid, but the pop side waited for the internal rate counter. This breaks the external RNG handshake: valid raw samples can remain in the FIFO or be dropped when the rate pulse does not align with incoming samples, so the entropy delivered downstream and ultimately read from entropy_data does not match the incoming RNG entropy stream in bypass mode. The fix is to make the FIFO pop follow the RNG input valid/ready consumption, not the rate-based LFSR pacing.",
+      "fix_hint": "Change sfifo_esrng_pop to assert when the external RNG source is enabled and a valid RNG sample is present, i.e. es_enable_rng && es_rng_src_valid && sfifo_esrng_not_empty. This consumes each incoming raw RNG sample as it arrives, as required for external RNG mode, instead of gating consumption on the internal rate entropy pulse."
+    }
+  ]
+}

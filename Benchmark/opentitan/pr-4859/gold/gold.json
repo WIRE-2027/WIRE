@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          374,
+          374
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In FetchEntropySt, the FSM asserted the EDN request to fetch entropy, but left scrmbl_mtx_req_o at its default deasserted value. The key derivation still needs the shared scrambling datapath to ingest the fetched entropy and finalize the digest, so the KDI must keep the scrambling mutex requested while waiting for EDN. By dropping the mutex request in this state, another requester such as the DAI can acquire the scrambling datapath in the middle of the KDI digest operation, overwrite the digest state, and cause an incorrect key to be produced when the KDI resumes.",
+      "fix_hint": "Assert scrmbl_mtx_req_o in FetchEntropySt so the KDI retains exclusive access to the scrambling datapath while waiting for entropy and before moving to DigEntropySt. This prevents other requesters from stealing the mutex during an in-progress key derivation."
+    }
+  ]
+}

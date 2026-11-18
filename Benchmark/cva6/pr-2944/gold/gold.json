@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          767,
+          767
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the CVXIF valid generation block, cvxif_off_instr_n is assigned to orig_instr[i] (a single-bit slice of the instruction word) instead of the full 32-bit instruction orig_instr_i[i]. This causes the offloaded instruction value propagated to the CVXIF coprocessor and subsequently into exception tval to be truncated to a single bit, leading to incorrect trap values (e.g., mtval=1 instead of the full instruction encoding).",
+      "fix_hint": "Change the assignment of cvxif_off_instr_n from orig_instr[i] to orig_instr_i[i] to capture the complete 32-bit instruction word for the corresponding issue port."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/aes/rtl/aes_control_fsm.sv",
+          "lines": [
+            [
+              138,
+              144
+            ],
+            [
+              492,
+              492
+            ],
+            [
+              590,
+              590
+            ],
+            [
+              608,
+              608
+            ],
+            [
+              746,
+              746
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The AES control FSM used one CLEAR state for both clearing input-side registers (initial key, IV, data-in, previous data-in) and waiting for the cipher-core clear handshake. Because CLEAR remained the current state until cipher_out_valid_i was accepted, data_in_we_o drove the data-in register clearing for more than one cycle. The data_in_new_d status tracker was reset using data_in_we_o, so when the FSM finally returned to IDLE and data_in_we_o deasserted, the write-enable activity associated with the clear (all four data_in_qe_i bits high) could be ORed into data_in_new_q. This made a cleared/partially-written input block appear complete, so automatic mode could start before all four data input registers had been written, violating the input-ready and automatic-start specifications.",
+      "fix_hint": "Split the clear operation into two FSM states: CLEAR_I, which clears the initial key, IV, data-in and previous-data input registers for exactly one cycle, and CLEAR_CO, which performs the cipher-core clear handshake and clears output data/trigger bits. Rename and re-encode the states accordingly. In the data-in status tracker, clear data_in_new_d using the all-four data_in_qe_i pulse (&data_in_qe_i) instead of data_in_we_o, so the clear write-enable pulse resets the tracker instead of arming it after returning to IDLE."
+    }
+  ]
+}

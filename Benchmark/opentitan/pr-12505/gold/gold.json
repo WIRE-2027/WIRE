@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_passthrough.sv",
+          "lines": [
+            [
+              642,
+              644
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, spi_passthrough forwarded the host SPI clock directly to the downstream SPI device: passthrough_o.sck was assigned from host_sck_i without any clock gating. Although sck_gate_en was asserted/deasserted by the passthrough filter logic, it only drove the unused sck_gate_en field and had no effect on the actual SCK output. spi_host also explicitly ignores sck_gate_en. As a result, when a command was filtered or a transaction was cancelled and the downstream clock should have been stopped, the downstream flash device still received toggling SCK edges, violating the requirement to stop the downstream SPI clock during command filtering/cancellation.",
+      "fix_hint": "Place a clock gating cell on the passthrough SCK path in spi_passthrough. Instantiate prim_clock_gating with host_sck_i as the clock input, sck_gate_en as the enable, and drive passthrough_o.sck from the gated clock output. Keep passthrough_o.sck_en asserted so the pad output enable is controlled separately, while the actual SCK value is now gated by sck_gate_en."
+    }
+  ]
+}

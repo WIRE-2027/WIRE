@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          493,
+          493
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the decode_b_insn function for branch instructions (beq, bne, blt, bge, bltu, bgeu), the data_accessed signal incorrectly includes the RD flag (data_accessed = RS1 | RS2 | RD). Branch instructions in RISC-V do not write to any destination register, so RD should not be included. This causes the tracer to incorrectly report register write data for branch instructions in the trace output, even though no register is actually written.",
+      "fix_hint": "Remove the RD flag from the data_accessed assignment in decode_b_insn. Change 'data_accessed = RS1 | RS2 | RD;' to 'data_accessed = RS1 | RS2;' to correctly reflect that branch instructions only read source registers and do not write to any destination register."
+    }
+  ]
+}

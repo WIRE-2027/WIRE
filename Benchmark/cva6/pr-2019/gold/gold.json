@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          2435,
+          2435
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The PMPCFG write WARL logic incorrectly rejects the entire configuration write when the access type field has the reserved combination (R=0, W=1). According to the RISC-V spec, only the X, W, R fields form a collective WARL field; the write should be accepted and only the illegal field combination should be coerced to a legal value, not cause the entire pmpcfg entry to be discarded.",
+      "fix_hint": "For a writable PMPCFG entry with reserved R=0,W=1, retain the previous collective RWX field while accepting the independently legal address-mode and lock fields. Preserve existing entry-lock and read-only restrictions."
+    },
+    {
+      "bug_lineno": [
+        [
+          2437,
+          2437
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When a writable PMPCFG entry requests unsupported NA4 address mode while its RWX permission field is legal, the all-or-nothing guard discards the whole entry. The unsupported address-mode value should retain the previous address-mode field; the independently legal permission and lock fields in that write must still take effect.",
+      "fix_hint": "For an unsupported NA4 address-mode write to a writable PMPCFG entry, retain the previous address-mode field and accept the independently legal RWX and lock fields. Preserve existing entry-lock and read-only restrictions."
+    }
+  ]
+}

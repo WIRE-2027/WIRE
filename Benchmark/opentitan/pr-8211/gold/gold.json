@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          756,
+          761
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, async_fault was assigned combinationally from the raw asynchronous fault sources (kmac_cmd_err_i, kmac_fsm_err_i, regfile_intg_err_i, shadowed_storage_err_i, state_intg_err_q, and cnt_err). As a result, a transient async fault such as a shadow register storage error was only visible on async_fault and fault_o while the source input was asserted. Once the fault source deasserted, async_fault cleared and the module no longer treated the fault as pending. This violates the requirement that asynchronous fatal faults be latched/reflected permanently until reset, and that a pending async fault cause the next software command to fail, wipe key material, and enter Invalid.",
+      "fix_hint": "Latch the asynchronous fault indications into a sticky register. Drive async_fault from the OR of the latched value and the current raw fault sources, and clear the latch only on reset. This ensures any asynchronous fault that asserts for even one cycle remains visible to fault_o and to the control logic until reset."
+    }
+  ]
+}

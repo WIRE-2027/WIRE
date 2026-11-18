@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          724,
+          724
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The tracer incorrectly decodes an all-zero 16-bit instruction (0x0000) as 'c.addi4spn' instead of marking it as INVALID. This occurs because the compressed instruction decoder uses a casez statement that matches the all-zero encoding to the INSN_CADDI4SPN pattern. According to the RISC-V specification, the all-zero encoding is reserved and should be decoded as 'c.unimp' or 'INVALID'. The bug manifests when the core encounters an all-zero instruction word, producing an incorrect trace output that misrepresents the instruction as a valid compressed instruction.",
+      "fix_hint": "Add a specific check for the all-zero instruction encoding (0x0000) before the casez statement for compressed instructions. When rvfi_insn[15:0] equals 16'h0000, decode it as 'c.unimp' or 'INVALID' instead of falling through to the casez matching. This ensures the tracer correctly identifies reserved/illegal encodings per the RISC-V specification."
+    }
+  ]
+}

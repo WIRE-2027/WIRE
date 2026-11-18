@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          241,
+          243
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The decoder incorrectly treats FENCE and FENCE.I instructions with non-zero rs1, rd, or upper immediate fields as illegal. According to the RISC-V specification, these fields are reserved for future extensions and must be ignored by base implementations. The check `if (instr.stype.rs1 != '0 || instr.stype.imm0 != '0 || instr.instr[31:28] != '0) illegal_instr = 1'b1;` causes valid FENCE/FENCE.I instructions with non-zero values in these fields to raise an illegal instruction exception.",
+      "fix_hint": "Remove the over-restrictive check on rs1, imm0, and instr[31:28] fields for FENCE and FENCE.I instructions in the MISC-MEM opcode decoder block. The decoder should ignore these reserved fields and only validate the funct3 field to distinguish between FENCE and FENCE.I."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              578,
+              578
+            ],
+            [
+              603,
+              603
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the old code, when a flash read completed in the direct forward path, `forward` was asserted and the buffer was updated immediately using `alloc_q`. The same read was also pushed into the read-storage FIFO with `forward_q` set, so in the next cycle `hint_forward` became active. The `update` selection did not exclude this `hint_forward` case and therefore asserted `update` again from `alloc_q2` whenever `fifo_data_ready` was high. This produced a redundant second update to the same already-valid buffer. If an allocation chose that buffer in the same cycle, `alloc` and `update` collided, violating the exclusive buffer-command assertion and risking incorrect buffer state/command ordering. Additionally, the old `muxed_err` expression still selected `data_err_q` during `hint_forward`, allowing a stale error flag from the already-forwarded FIFO entry to propagate into `data_err_o` or buffer error inputs even though that entry was only being drained.",
+      "fix_hint": "Qualify the non-forward update path with `~hint_forward` so that FIFO entries corresponding to already-forwarded reads do not generate a second buffer update. Also mask `muxed_err` to zero when `hint_forward` is active, so stale `data_err_q` from forwarded entries cannot affect responses or buffer updates. The update signal should be asserted only for a real direct forward or for a non-forwarded FIFO entry being consumed, keeping buffer allocations and updates mutually exclusive."
+    }
+  ]
+}

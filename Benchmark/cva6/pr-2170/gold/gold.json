@@ -1,0 +1,74 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          117,
+          117
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The cache-line bit offset discards address bit 2 and advances in 64-bit units. With XLEN=32, addresses in the upper 32-bit word of each 64-bit block therefore use the preceding word's cache-line position. This affects both cache-hit reads and byte-enabled cache-hit writes.",
+      "fix_hint": "Compute the cache-line bit offset from the address using XLEN-sized words."
+    },
+    {
+      "bug_lineno": [
+        [
+          360,
+          360
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The outgoing miss or bypass request copies the core byte enables into the low bus lanes regardless of the request address. With XLEN=32 on the 64-bit memory interface, an upper-word store consequently enables the wrong bytes.",
+      "fix_hint": "Position the core byte enables within the 64-bit request according to the saved address and XLEN."
+    },
+    {
+      "bug_lineno": [
+        [
+          363,
+          363
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The outgoing miss or bypass request copies the core write data into the low bits of the 64-bit bus word regardless of the request address. With XLEN=32, an upper-word store has incorrect data at the addressed bus lanes even if its byte enables are aligned.",
+      "fix_hint": "Position the core write data in the addressed XLEN word of the memory-side request."
+    },
+    {
+      "bug_lineno": [
+        [
+          402,
+          402
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The refill load response assigns the entire 64-bit critical word to the XLEN-bit core result. With XLEN=32 this always retains the low 32 bits, including when the saved address requests the upper word.",
+      "fix_hint": "Select the addressed XLEN word from the critical-word response before returning it to the core."
+    },
+    {
+      "bug_lineno": [
+        [
+          431,
+          431
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The bypass load response assigns the entire 64-bit bypass data to the XLEN-bit core result. With XLEN=32 this always retains the low 32 bits, including when the saved address requests the upper word.",
+      "fix_hint": "Select the addressed XLEN word from the bypass response before returning it to the core."
+    }
+  ]
+}

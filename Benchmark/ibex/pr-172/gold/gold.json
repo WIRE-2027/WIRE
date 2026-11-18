@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          616,
+          616
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "When an illegal JALR instruction is detected (e.g., funct3 != 0), the decoder correctly sets illegal_insn = 1'b1, but the jump_in_dec_o and jump_set_o signals remain asserted from the earlier decode logic. The illegal instruction handling block at the end of the always_comb block clears jump_in_dec_o but does not clear jump_set_o. This allows the PC to be updated to an incorrect jump target computed from the illegal instruction's operands, causing the wrong PC value to be saved to mepc during the illegal instruction exception.",
+      "fix_hint": "Add jump_set_o = 1'b0 to the illegal instruction handling block that clears other control signals (alongside jump_in_dec_o, branch_in_dec_o, etc.) to prevent the PC from being set upon illegal JALR instructions."
+    }
+  ]
+}

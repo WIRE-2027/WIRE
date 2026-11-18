@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          528,
+          528
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When user mode is not implemented (CVA6Cfg.RVU is false), the mcounteren CSR should not be readable because it controls counter access from U-mode. However, the CSR read logic unconditionally returns mcounteren_q without checking whether U-mode is implemented. As a result, reads of mcounteren can succeed in a configuration where the CSR should instead raise a read access exception.",
+      "fix_hint": "Gate the CSR_MCOUNTEREN read case on the U-mode configuration. In the CSR read process, return mcounteren_q only when CVA6Cfg.RVU is true; otherwise assert the CSR read access exception instead of exposing the register value."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          314,
+          314
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In FastPwrStateAckPwrUp, the wake interrupt output wkup_o was asserted whenever the slow FSM power-up cause was Wake, without also checking the fast FSM's recorded reset cause. Per the specification, a wake interrupt should only be generated when exiting low power due to a wake event and the previous reset cause was LowPwrEntry. If the power-up is caused by a reset event, no wake interrupt should be generated. The old expression could therefore assert a spurious wakeup interrupt after a reset-recovery or hardware-reset power-up if the slow FSM's most recent low-power exit had been reported as a wake event. The root cause is a missing qualifier in the boolean expression for wkup_o.",
+      "fix_hint": "Qualify the wake interrupt generation with both the slow FSM power-up cause and the fast FSM reset cause. Specifically, assert wkup_o only when pwrup_cause_i is Wake and reset_cause_q is LowPwrEntry. This ensures regular reset-recovery power-ups do not generate a wakeup interrupt."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim/rtl/prim_fifo_async.sv",
+          "lines": [
+            [
+              13,
+              13
+            ],
+            [
+              201,
+              201
+            ],
+            [
+              203,
+              203
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/tlul/rtl/tlul_fifo_async.sv",
+          "lines": [
+            [
+              28,
+              28
+            ],
+            [
+              61,
+              61
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, prim_fifo_async's read-data output was not explicitly qualified with rvalid_o. The old output mux either passed rdata_int unconditionally when OutputZeroIfEmpty=0, or zeroed only based on empty_rclk when OutputZeroIfEmpty=1. Meanwhile, tlul_fifo_async instantiated both the request and response FIFOs without enabling any zeroing of invalid read-data. As a result, the TL-UL output payload fields driven from rdata_o could hold stale FIFO contents while the corresponding output valid signal was deasserted. This violates the TL-UL async FIFO requirement that all output payload bits be zero when output-valid is low, and can create CDC concerns because invalid payload data may propagate without being qualified by the valid signal.",
+      "fix_hint": "Add an OutputZeroIfInvalid parameter to prim_fifo_async and use it in the read-data output generate branches to drive rdata_o to zero whenever rvalid_o is low. In tlul_fifo_async, set OutputZeroIfInvalid(1) on both the request FIFO and response FIFO instances so that their payload outputs are forced to zero when their respective valid outputs are deasserted."
+    }
+  ]
+}

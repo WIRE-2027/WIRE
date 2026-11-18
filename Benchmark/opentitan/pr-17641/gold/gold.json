@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac_app.sv",
+          "lines": [
+            [
+              708,
+              710
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, when the software operation owns the Keccak state visibility mux (mux_sel_buf_output == SelSw) and lifecycle escalation is off, the full Keccak state is forwarded to reg_state_o. If the software operation uses the sideloaded key (keymgr_key_en_i asserted), the capacity part of the Keccak state is secret and must not be exposed to software. The old code forwarded the entire state, including capacity, allowing software to read secret-derived state and potentially recover the sideloaded key. The spec requires that, for a software operation using a sideloaded key, the capacity portion corresponding to the selected security strength be forced to zero before the state is made visible.",
+      "fix_hint": "When the state visibility mux selects software and keymgr_key_en_i is asserted, zero the capacity bits of each state share before driving reg_state_o, using reg_keccak_strength_i to determine the capacity width for the selected strength (e.g. L128: 256 bits, L256: 512 bits, etc.). For undefined or unsupported strengths, zero the entire state share. The rate portion may remain visible, and the zeroing should be applied after the state is captured but before it is propagated to the state output."
+    }
+  ]
+}

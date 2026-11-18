@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          85,
+          85
+        ],
+        [
+          87,
+          89
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In flash_mp, region_match was computed without checking region_cfgs_i[i].en.q. As a result, disabled regions still participated in the priority-based region selection. Since the lowest-index matching region has priority, a disabled low-index region could be selected over a higher-index enabled region or the default region. The selected disabled region then produced no read/program/page-erase enable, so the request was treated as erroneous even though a higher-priority enabled region (or default region) should have matched instead.",
+      "fix_hint": "Qualify the region_match computation with region_cfgs_i[i].en.q so disabled regions do not match and cannot occupy priority selection. Because region_sel now only selects enabled regions, the en.q checks in rd_en, prog_en, and pg_erase_en are redundant and can be removed, leaving permission qualifiers and region_sel."
+    }
+  ]
+}

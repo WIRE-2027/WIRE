@@ -1,0 +1,19 @@
+{
+  "input": {
+    "repo": "lowRISC/opentitan",
+    "pr_id": 6523,
+    "lang": "sv",
+    "rtl_files": [
+      "hw/ip/rom_ctrl/rtl/rom_ctrl_mux.sv"
+    ],
+    "specs": [
+      {
+        "file": "hw/ip/rom_ctrl/rtl/rom_ctrl_mux.sv",
+        "spec": "# ROM Access Multiplexer Behavioral Specification\n\n## 1. Purpose\n\nThis module controls which of two requesters may use a shared ROM read port:\n\n- the system bus, which performs normal ROM reads after boot, and\n- the ROM checker, which performs the startup ROM integrity check.\n\nThe module forwards address and request signals to the ROM side and routes the returned read data to the appropriate requester.\n\n## 2. Reset and Initial State\n\nAfter reset, the module shall:\n\n- give ownership of the ROM port to the ROM checker,\n- not assert a valid read response to the bus,\n- not assert the alert output.\n\nThe module shall remain in this checker-owner state until the ownership input requests bus ownership.\n\n## 3. Ownership Selection and One-Way Transfer\n\nThe ownership selection input has two levels:\n\n- one level selects the ROM checker as the owner,\n- the other level selects the bus as the owner.\n\nThe module shall support exactly one ownership transition: from checker ownership to bus ownership.\n\nOnce the bus-owner level has been sampled, the module shall remain in bus-owner state until reset. A later return to the checker-owner level shall be treated as an error condition and shall cause the alert output to be asserted.\n\n## 4. Address and Request Forwarding\n\nThe instantaneous forwarding of the ROM address and ROM request shall follow the current ownership selection input.\n\nWhen the checker-owner level is selected:\n\n- the ROM address shall be driven from the checker address input,\n- the ROM request shall be asserted continuously,\n- the bus request shall be ignored,\n- the bus grant output shall be deasserted.\n\nWhen the bus-owner level is selected:\n\n- the ROM address shall be driven from the bus address input,\n- the ROM request shall follow the bus request input,\n- the bus grant output shall be asserted.\n\nThe module shall not modify, scramble, or otherwise interpret the address. It shall simply forward the selected address unchanged.\n\n## 5. Read Data Routing\n\nThe ROM side supplies two versions of the read data:\n\n- a scrambled/raw version, and\n- a descrambled/clear version.\n\nThe module shall:\n\n- forward the scrambled/raw version to the ROM checker, and\n- forward the descrambled/clear version to the bus.\n\nNo data transformation, checking, or validation shall be performed by this module.\n\n## 6. Bus Read Response\n\nThe bus read-valid output shall be asserted only when:\n\n- the ROM read-valid input is asserted, and\n- the module has already recorded the transition to bus-owner state.\n\nThis masking prevents a read response generated for the ROM checker from being presented as a valid bus read response.\n\nThe bus-side read data output is meaningful only when the bus read-valid output is asserted.\n\n## 7. Alert Behavior\n\nThe alert output shall assert when the ownership selection input requests checker ownership after the module has already recorded bus ownership.\n\nWhile this error condition is present:\n\n- the alert output shall remain asserted,\n- the recorded bus-owner state shall not be cleared,\n- the alert output shall deassert when the ownership input returns to the bus-owner level, or when reset is applied.\n\nDuring normal checker-owner operation before any transfer to bus ownership has occurred, the alert output shall not assert."
+      }
+    ],
+    "commit_id": "4f6b60a47f246cdd8be8c2e713ddccca14b8c4c3",
+    "timestamp": "2021-05-13T19:14:44+00:00",
+    "is_multi_file": false
+  }
+}

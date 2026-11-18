@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          82,
+          82
+        ],
+        [
+          117,
+          117
+        ],
+        [
+          123,
+          133
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the EDN synchronizer's req_chk_i input was tied only to the synchronized life-cycle escalation signal. As a result, when a fatal alert was asserted and the AES core dropped an outstanding EDN request before receiving the EDN acknowledgement, the synchronizer's request-checking logic could treat this as a handshake protocol violation. The spec explicitly permits a pending entropy request to be dropped when a fatal alert or life-cycle escalation is active, so the old gating condition was too restrictive and did not cover the fatal-alert case.",
+      "fix_hint": "Create a separate request-check enable signal that is deasserted both when life-cycle escalation is active and when the fatal alert is asserted, then feed this signal to the EDN synchronizer's req_chk_i port. This allows the EDN request to be dropped before acknowledgement in the fatal-alert/escalation case, which is acceptable because the module must be reset before normal operation resumes."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/pinmux/rtl/pinmux_strap_sampling.sv",
+          "lines": [
+            [
+              247,
+              250
+            ],
+            [
+              252,
+              259
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "When JTAG is enabled (jtag_en asserted because a TAP has been selected), the old per-pad output mux in pinmux_strap_sampling only overrode the TDO pad. All other JTAG pads still drove out_padring_o and oe_padring_o from the core-side out_core_i/oe_core_i signals, so TCK/TMS/TRST/TDI could be actively driven instead of being placed high-impedance, causing contention with the external JTAG driver. In addition, pad attributes were not overridden for any JTAG pad, so programmed attributes such as pull-up/pull-down, inversion, or other electrical settings remained active on JTAG pads and could corrupt JTAG signaling. This violates the requirement that all non-TDO JTAG pads be non-driving and that pad attributes be forced to their inactive/default values when a TAP is selected.",
+      "fix_hint": "In the per-pad JTAG mux, treat all JTAG pads as a group when jtag_en is asserted: keep the TDO override using jtag_rsp.tdo/tdo_oe, force all other JTAG pads to high-impedance (out_padring_o=0, oe_padring_o=0), and force attr_padring_o to all zeros for every JTAG pad. When jtag_en is deasserted, pass through the core-side output, output-enable, and pad attributes unchanged. This requires routing the pad attribute vector through pinmux_strap_sampling so it can be overridden during JTAG-active mode."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          218,
+          218
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The combinational default clears nmi_mode_d instead of retaining the active NMI-handler state. After an NMI entry, nmi_mode_q is therefore cleared on the next ordinary DECODE cycle. A continuously asserted irq_nm_i becomes eligible again and causes repeated interrupt entry before an MRET has ended the handler. This can repeatedly redirect execution and overwrite saved trap state.",
+      "fix_hint": "Change the default assignment of `nmi_mode_d` from `1'b0` to `nmi_mode_q` so that the NMI mode register retains its current value unless explicitly modified (e.g., set to 1 when entering NMI mode in IRQ_TAKEN, or cleared to 0 when exiting NMI mode via MRET in FLUSH)."
+    }
+  ]
+}

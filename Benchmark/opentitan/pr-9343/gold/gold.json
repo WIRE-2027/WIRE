@@ -1,0 +1,34 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          260,
+          260
+        ],
+        [
+          282,
+          282
+        ],
+        [
+          296,
+          305
+        ],
+        [
+          341,
+          341
+        ],
+        [
+          355,
+          365
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The FSM advances immediately after sampling a valid ADC datum without waiting for adc_d_val_i to be deasserted. In the old code, ONEST_021 unconditionally moves to ONEST_1, LP_021 to LP_1, NP_021 to NP_1, LP_EVAL to LP_SLP/NP_0, and NP_EVAL to NP_0. If adc_d_val_i remains asserted for more than one cycle, the same ADC sample can be mistaken for a subsequent channel sample or evaluation trigger, causing incorrect channel values, incorrect sample counts, or premature mode transitions.",
+      "fix_hint": "Gate each forward FSM transition on the deassertion of adc_d_val_i: hold in the current channel-transition/evaluation state while adc_d_val_i is high, and only move to the next state once it is low. This enforces a complete four-phase handshake and prevents the same valid sample from being sampled again."
+    }
+  ]
+}

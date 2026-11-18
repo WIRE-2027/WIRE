@@ -1,0 +1,62 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/ariane.sv",
+          "lines": [
+            [
+              295,
+              295
+            ]
+          ]
+        },
+        {
+          "file": "src/csr_regfile.sv",
+          "lines": [
+            [
+              541,
+              541
+            ],
+            [
+              800,
+              814
+            ]
+          ]
+        },
+        {
+          "file": "src/issue_stage.sv",
+          "lines": [
+            [
+              63,
+              63
+            ],
+            [
+              135,
+              135
+            ]
+          ]
+        },
+        {
+          "file": "src/scoreboard.sv",
+          "lines": [
+            [
+              56,
+              56
+            ],
+            [
+              126,
+              126
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In single-step debug mode, the Debug PC (DPC) saved on entry is computed from the original branch prediction rather than the architecturally resolved branch target. The old csr_regfile recomputed `next_pc` using `commit_instr_i[0].bp.predict_taken` and `bp.predict_address`, which are predictor metadata. If the branch unit resolves that the branch was taken when predicted not-taken, or targets a different address than predicted, the single-step trap saves the wrong next-PC into DPC, causing the debugger to resume at an incorrect address.",
+      "fix_hint": "Propagate the branch unit's resolved target (`resolved_branch.target_address`) through `issue_stage` into the `scoreboard`, and overwrite each branch instruction's `bp.predict_address` field in the scoreboard entry when the branch writes back. Then, in `csr_regfile`, use that stored resolved target (`commit_instr_i[0].bp.predict_address`) directly as DPC for single-step debug entry, and remove the local `next_pc` re-computation that used stale prediction state."
+    }
+  ]
+}

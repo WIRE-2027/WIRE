@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          596,
+          596
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the old code, ctr_drbg_gen_sts_err is asserted when the genbits FIFO is popped and ctr_drbg_gen_ccmd_o is not equal to GEN. However, the generate command is deliberately renamed as it flows through the pipeline: the incoming GEN command is converted to GENB for block encryption, and the block-encryption response is converted to GENU for the update and final result. Thus a valid generate result has ctr_drbg_gen_ccmd_o equal to GENU, not GEN. The stale comparison to GEN wrongly flags successful generate completions as CMD_STS_INVALID_GEN_CMD, causing spurious error status reports on the result interface.",
+      "fix_hint": "Update the status-error comparison to check for the final pipeline command code GENU instead of the original input command code GEN. Specifically, change `ctr_drbg_gen_ccmd_o != GEN` to `ctr_drbg_gen_ccmd_o != GENU` so that valid generate-update results are not incorrectly reported as invalid generate commands."
+    }
+  ]
+}

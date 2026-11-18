@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/tlul/rtl/tlul_cmd_intg_chk.sv",
+          "lines": [
+            [
+              42,
+              43
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/rv_core_ibex/rtl/rv_core_ibex.sv",
+          "lines": [
+            [
+              380,
+              380
+            ],
+            [
+              394,
+              394
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In tlul_cmd_intg_chk, err_o was computed so that |data_err was gated by wr_txn. Therefore a_data integrity errors were only reported on PutFullData/PutPartialData write requests; read requests with corrupted data-integrity sidebands were accepted silently. This violates the checker requirement that data integrity is validated for every presented request regardless of read/write. In rv_core_ibex, the instruction TL-UL adapter previously connected wdata_intg_i to a literal all-zero value on its read-only port, which is not the valid prim_secded_inv_39_32_enc() integrity word for the zero a_data payload. Once the checker validates a_data integrity on reads, instruction fetches would be falsely flagged unless the adapter supplies the correct zero-data integrity value.",
+      "fix_hint": "Change the checker's combinational expression so |data_err is included whenever a_valid is asserted, not only when wr_txn is asserted. In rv_core_ibex, generate the correct integrity word for the constant-zero instruction write-data payload with prim_secded_pkg::prim_secded_inv_39_32_enc('0) and drive that onto wdata_intg_i of the instruction tlul_adapter_host instead of the previous all-zero value."
+    }
+  ]
+}

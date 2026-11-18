@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          158,
+          158
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the p_fsm combinational block, the default value of err_d is set to NoError every cycle. Since err_d is registered into err_q and err_o is driven from err_q, any error condition that is not explicitly re-assigned in the same cycle as the final response is lost. In a multi-word read, a correctable ECC error detected on an intermediate native-word read sets err_d = MacroEccCorrError for only one cycle; on the following Read/ReadWait cycles the default assignment overwrites it with NoError before valid_o is asserted. As a result, the correctable ECC error is not reported on the final read response and the downstream OTP controller misses it.",
+      "fix_hint": "Change the default assignment for err_d from NoError to err_q in the p_fsm combinational block so that the registered error value is held until it is explicitly cleared. The error should be cleared when a new command is accepted, e.g. the existing err_d = NoError assignment in the IdleSt command-accept path, while remaining stable across intermediate read sub-word cycles so it appears with valid_o on the final response."
+    }
+  ]
+}

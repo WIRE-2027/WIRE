@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          261,
+          261
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When a page-table walker (PTW) access exception occurs during an instruction fetch, the MMU incorrectly reports the physical address (ptw_bad_paddr) as the faulting address in the tval field of the instruction access fault exception. According to the RISC-V privileged specification, when page-based virtual memory is enabled, mtval/stval must contain the faulting virtual address, even for physical-memory access-fault exceptions.",
+      "fix_hint": "Modify the instruction access fault exception generation in the instr_interface block of mmu.sv to use the faulting virtual address (update_vaddr) instead of the physical address (ptw_bad_paddr) for the tval field when ptw_access_exception is asserted."
+    },
+    {
+      "bug_lineno": [
+        [
+          369,
+          369
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When a PMP violation occurs during a store operation, the MMU incorrectly reports the physical address (lsu_paddr_o) as the faulting address in the tval field of the store access fault exception. According to the RISC-V privileged specification, when page-based virtual memory is enabled, mtval/stval must contain the faulting virtual address, even for physical-memory access-fault exceptions.",
+      "fix_hint": "Modify the store access fault exception generation in the data_interface block of mmu.sv to use the faulting virtual address (lsu_vaddr_q) instead of the physical address (lsu_paddr_o) for the tval field when a PMP violation is detected."
+    },
+    {
+      "bug_lineno": [
+        [
+          379,
+          379
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "When a PMP violation occurs during a load operation, the MMU incorrectly reports the physical address (lsu_paddr_o) as the faulting address in the tval field of the load access fault exception. According to the RISC-V privileged specification, when page-based virtual memory is enabled, mtval/stval must contain the faulting virtual address, even for physical-memory access-fault exceptions.",
+      "fix_hint": "Modify the load access fault exception generation in the data_interface block of mmu.sv to use the faulting virtual address (lsu_vaddr_q) instead of the physical address (lsu_paddr_o) for the tval field when a PMP violation is detected."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          125,
+          126
+        ],
+        [
+          135,
+          136
+        ],
+        [
+          140,
+          141
+        ],
+        [
+          157,
+          158
+        ],
+        [
+          163,
+          165
+        ],
+        [
+          170,
+          171
+        ],
+        [
+          176,
+          177
+        ],
+        [
+          180,
+          181
+        ],
+        [
+          183,
+          183
+        ],
+        [
+          195,
+          196
+        ],
+        [
+          207,
+          208
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The EDN main state machine does not honor edn_enable_i in several states. In the old code, Idle, BootDone, and SWPortMode are the only states that test edn_enable_i. All wait/send states such as BootInsAckWait, BootSendGenCmd, BootGenAckWait, AutoLoadIns, AutoFirstAckWait, AutoAckWait, AutoSendGenCmd, and AutoSendReseedCmd only wait for their handshake conditions (csrng_cmd_ack_i, cmd_sent_i, or sw_cmd_req_load_i) and ignore a disable. AutoDispatch also lacks an enable check and may start another generate/reseed command when edn_enable_i is deasserted without auto_req_mode_i also being cleared. This violates the spec requirement that disabling the module returns the FSM to Idle with priority and causes the FSM to hang indefinitely waiting for an acknowledgement that may never come, potentially leaving EDN and CSRNG out of sync.",
+      "fix_hint": "Add an edn_enable_i priority check in every wait/send/dispatch state. When edn_enable_i is low, transition to Idle before evaluating any command handshake or dispatch conditions. In AutoDispatch, keep the existing auto_req_mode_i completion-pulse exit only when edn_enable_i remains high, and only then decide between AutoCaptReseedCnt and AutoCaptGenCnt based on max_reqs_cnt_zero_i."
+    }
+  ]
+}

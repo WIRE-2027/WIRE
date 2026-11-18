@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          2198,
+          2198
+        ],
+        [
+          2303,
+          2303
+        ],
+        [
+          2333,
+          2334
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In FW_OV entropy-insert mode, the SHA3 intake pipeline used the standard-mode clear/end controls, which are incorrect for the FW_OV register-write path. pfifo_postht_clr and pfifo_precon_clr were tied to health_test_clr; health_test_clr is low once the module-enable Mubi is deasserted, so disabling the module did not clear post-health data or establish predictable clear-on-disable behavior for the pre-conditioner packer. At the same time, sha3_msg_end was selected as fw_ov_sha3_disable_pulse in FW_OV insert mode, so deasserting fw_ov_sha3_start closed the SHA3 message window before sha3_process. As a result, a full 64-bit word already sitting in pfifo_precon could not be popped/drained by the SHA3 engine, and FW-inserted entropy could be stranded or handled unpredictably across a disable event.",
+      "fix_hint": "For FW_OV entropy-insert mode, drive pfifo_postht_clr from the module-disable condition (!es_enable_q_fo[23]) so the post-health packer clears on disable. Drive pfifo_precon_clr from disable only when the pre-con packer is empty (!es_enable_q_fo[26] & !pfifo_precon_not_empty), allowing a complete word already in the FIFO to be drained by the SHA3 engine before the clear takes effect. Make sha3_msg_end unconditionally sha3_process so the SHA3 message-ready mask stays high until the SHA3 engine actually processes, rather than being closed early by fw_ov_sha3_disable_pulse."
+    }
+  ]
+}

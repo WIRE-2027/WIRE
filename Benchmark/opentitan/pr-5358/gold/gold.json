@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          388,
+          388
+        ],
+        [
+          392,
+          393
+        ],
+        [
+          395,
+          396
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "The old code generated otp_error as a level-sensitive OR of part_errors_reduced and chk_timeout. Since the error/status bits remain set until software clears them (and fatal errors remain latched), otp_error stayed high continuously after the first error. This made the error interrupt sticky: software could not clear intr_state because the still-high event input re-asserted it immediately. Additionally, the FSM error flags lfsr_fsm_err, scrmbl_fsm_err, and key_deriv_fsm_err were not included in otp_error at all, even though the spec says all non-zero error conditions should cause the error interrupt.",
+      "fix_hint": "Build an interrupt trigger vector from all error sources (part_errors_reduced, chk_timeout, lfsr_fsm_err, scrmbl_fsm_err, key_deriv_fsm_err), register a copy of that vector, and assert otp_error only on the rising edge of any trigger bit (trigger & ~previous_trigger). Reset the previous-trigger register to zero. This makes the interrupt pulse on new error events rather than remaining asserted while stale error status is present, so software can clear intr_state and the interrupt stays cleared until another error occurs."
+    }
+  ]
+}

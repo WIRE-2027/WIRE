@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          597,
+          597
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the Active state output decode, scl_temp was unconditionally driven low. When a format FIFO entry with fmt_flag_start_before_i is consumed, the FSM passes through Active before entering SetupStart/HoldStart. During that one-cycle Active pass, SCL is driven low while SDA is still released, producing an I2C SCL low glitch at the beginning of a transaction instead of leaving the bus idle until the START condition. The SCL drive value in Active should depend on whether the current format entry requests a START.",
+      "fix_hint": "Change the Active state output so scl_temp follows fmt_flag_start_before_i: when the start flag is asserted, keep SCL released high while passing through Active; otherwise drive SCL low as before for normal byte/read continuation. This prevents the SCL glitch while preserving the existing behavior for non-START entries."
+    }
+  ]
+}

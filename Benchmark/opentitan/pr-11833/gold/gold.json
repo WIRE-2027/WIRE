@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/spi_device/rtl/spi_readcmd.sv",
+          "lines": [
+            [
+              395,
+              395
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, `addr_latched` was generated as a level signal: `addr_latched = (addr_cnt_d == 5'd0)`. Once the address count reaches zero, `addr_cnt_d` remains zero, so `addr_latched` stays high for the rest of the transaction. The downstream `spid_readsram` module expects `addr_latched_i` to be a single-cycle address-latch pulse and uses it as `strb_set`. Because the level remains asserted, the `strb` register in `spid_readsram` can be repeatedly reloaded from the changing `current_address_i[1:0]` instead of holding the captured starting byte offset. This corrupts the byte offset selection and can produce a shifted or incorrect SPI read data byte stream.",
+      "fix_hint": "Convert the address-complete indication into a one-cycle pulse in `spi_readcmd`. Keep a combinational level derived from `addr_cnt_d == 5'd0`, then pass it through a rising-edge detector such as `prim_edge_detector` so that `addr_latched` pulses only when the count first reaches zero. This matches the pulse expectation of `spid_readsram.addr_latched_i` and prevents `strb` from being continuously overwritten from `current_address_i` during the data output phase."
+    }
+  ]
+}

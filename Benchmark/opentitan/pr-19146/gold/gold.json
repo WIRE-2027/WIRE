@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim/rtl/prim_subreg.sv",
+          "lines": [
+            [
+              64,
+              64
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In Read-to-clear (SwAccessRC) mode, when a software read (we) and a hardware write (de) occur in the same cycle, the software-visible output qs is driven from the current stored value q instead of the hardware write data d. This violates the specification that software should see the hardware write data in this collision case. The storage element itself is still cleared as required, but the read data returned to software is stale.",
+      "fix_hint": "In the SwAccessRC generate block, select the software-visible output qs based on the collision condition: when both de and we are asserted, drive qs from d; otherwise drive qs from q. Leave non-RC access modes unchanged with qs = q."
+    }
+  ]
+}

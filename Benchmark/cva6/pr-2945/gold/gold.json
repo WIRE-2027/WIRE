@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          313,
+          313
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The Shared TLB per-way hit condition uses the entire match_asid and match_vmid vectors instead of the match bits for the current way. This allows ASID or VMID comparison results from other ways to influence the hit decision for way i. As a result, a Shared TLB entry can be reported as a hit even when the current way's ASID or VMID does not match the lookup context.",
+      "fix_hint": "Use match_asid[i] and match_vmid[i] when forming the hit condition for way i, so that the valid bit, ASID match, VMID match, stage match, and VPN level match all refer to the same Shared TLB way."
+    }
+  ]
+}

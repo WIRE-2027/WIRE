@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          450,
+          450
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "During a G-stage intermediate page-table walk, the PTW incorrectly applies the original instruction-fetch permission rule to the intermediate translation result by requiring execute permission on the PTE. This can raise a spurious page-fault exception for an intermediate G-stage page-table access, even though the walk is translating a page-table memory access rather than completing the original instruction fetch.",
+      "fix_hint": "When the current PTW stage is the G-stage intermediate stage, do not require execute permission solely because the original request was an instruction fetch. Keep the required PTE validity and access checks for the page-table walk, but distinguish intermediate G-stage page-table accesses from final instruction-fetch translations."
+    },
+    {
+      "bug_lineno": [
+        [
+          465,
+          467
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "During a G-stage intermediate page-table walk for a data-side request, the PTW incorrectly applies final load/store permission handling to the intermediate translation result. In particular, a store-triggered walk can be faulted because the intermediate G-stage entry does not satisfy final store write/dirty requirements, even though the intermediate access is a page-table memory translation rather than the final store access.",
+      "fix_hint": "When forming the data-side permission condition, treat the G-stage intermediate stage as a page-table walk access and exempt it from final store write/dirty requirements. Preserve the normal permission checks for final S-stage or G-stage translations."
+    },
+    {
+      "bug_lineno": [
+        [
+          475,
+          479
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "After the data-side permission condition succeeds, the PTW performs a separate post-check for store requests that unconditionally faults when the PTE lacks write or dirty permission. This post-check also runs during G-stage intermediate page-table walks, so it can override the intended intermediate-stage behavior and force a spurious page-fault exception for store-triggered nested translation walks.",
+      "fix_hint": "Remove or fold the separate store write/dirty post-check into the main permission condition so that it is not applied to G-stage intermediate page-table walks. Store write/dirty requirements should only affect final translations where the PTE authorizes the original store access."
+    }
+  ]
+}

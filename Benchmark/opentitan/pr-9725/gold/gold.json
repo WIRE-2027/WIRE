@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          178,
+          178
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the ReseedPrep state, the flag0_i=1 branch is intended to skip entropy waiting and proceed to the reseed request state. The old code incorrectly sets state_d to InstantReq, so a reseed command with flag0_i=1 causes the FSM to enter the instantiate request state and assert instant_req_o instead of reseed_req_o. This violates the command-decode and command-request requirements: a reseed command must issue a reseed request, not an instantiate request.",
+      "fix_hint": "In the ReseedPrep state, when flag0_i is set, change the next-state assignment from InstantReq to ReseedReq so that the FSM proceeds to the correct request state and asserts reseed_req_o."
+    }
+  ]
+}

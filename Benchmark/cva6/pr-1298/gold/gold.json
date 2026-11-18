@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "core/cvxif_fu.sv",
+          "lines": [
+            [
+              19,
+              19
+            ],
+            [
+              45,
+              45
+            ]
+          ]
+        },
+        {
+          "file": "core/ex_stage.sv",
+          "lines": [
+            [
+              365,
+              365
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The CV-X-IF issue request did not carry the core's current privilege mode. In the old cvxif_fu module there was no priv_lvl_i input, and cvxif_req_o.x_issue_req.mode was never assigned, so the struct field remained at its default ('0) value after the zero-initialization of cvxif_req_o. The ex_stage instantiation of cvxif_fu_i also did not connect any privilege-level signal. As a result, whenever the core issued an instruction to the coprocessor, the coprocessor received a constant/incorrect mode instead of the core's actual privilege level, violating the spec requirement to provide the current privilege mode with each issue request.\n\n【审阅修订(zihan 2026-08-18):HUNK_0003(ex_stage.sv 的 .priv_lvl_i 实例连接)由 filtered 移入 candidate,bug_lineno 相应补齐 core/ex_stage.sv 第 365 行——多文件 benchmark 的答案键应覆盖模型必须修改的全部位置,该缺失连接是修复不可或缺的一部分。】",
+      "fix_hint": "Add a riscv::priv_lvl_t priv_lvl_i input to cvxif_fu, assign cvxif_req_o.x_issue_req.mode from priv_lvl_i when the issue request is valid, and wire the core's priv_lvl_i signal to the cvxif_fu_i instance in core/ex_stage.sv."
+    }
+  ]
+}

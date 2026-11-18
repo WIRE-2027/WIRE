@@ -1,0 +1,49 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "dv/uvm/core_ibex/common/ibex_cosim_agent/ibex_cosim_agent.sv",
+          "lines": [
+            [
+              54,
+              54
+            ]
+          ]
+        },
+        {
+          "file": "dv/uvm/core_ibex/common/ibex_cosim_agent/ibex_cosim_scoreboard.sv",
+          "lines": [
+            [
+              80,
+              81
+            ],
+            [
+              83,
+              102
+            ],
+            [
+              297,
+              297
+            ]
+          ]
+        },
+        {
+          "file": "dv/uvm/core_ibex/env/core_ibex_env.sv",
+          "lines": [
+            [
+              71,
+              71
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The co-simulation reset sequence is controlled independently by the scoreboard's interface-level reset waits and by the environment's component-reset routine. During an on-the-fly reset, termination of the checking workers, removal of queued pre-reset observations, ISS reinitialization, test-binary reload, and restart of checking are therefore not ordered deterministically. The environment does not reset the co-simulation agent, and the agent provides no operation to flush its analysis FIFOs and notify the scoreboard. Consequently, stale observations may be processed against a new ISS session, or the rebuilt ISS may resume before its memory is reloaded, causing it to fetch `0x0`, report a spurious illegal-instruction trap, and mismatch the DUT.",
+      "fix_hint": "Centralize reset coordination in the testbench reset sequence. Have the environment invoke a reset operation on the co-simulation agent; the agent must first flush all pending observation FIFOs and then signal an explicit reset event to its internal scoreboard. In the scoreboard, wait for reset deassertion before launching the checking workers, run those workers concurrently without blocking the control loop, terminate them when the reset event is received, reinitialize the ISS, and return to waiting for the next reset deassertion. Remove redundant reset-deassertion waits from the ISS reinitialization routine. After the ISS has been rebuilt, reload the test binary into its new memory model before post-reset checking resumes."
+    }
+  ]
+}

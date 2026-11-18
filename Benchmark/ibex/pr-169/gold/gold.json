@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          625,
+          625
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "When a load instruction completes with an LSU error (lsu_load_err_i asserted), the WAIT_MULTICYCLE state still transitions to IDLE and asserts regfile_we_wb, allowing the erroneous load data to be written to the register file. The condition (data_req_dec & lsu_valid_i) only checks that the LSU has completed, but does not verify that the load completed without error. This causes corrupted or zero data from error responses to be stored in the destination register.",
+      "fix_hint": "Gate `regfile_we_wb` with `~lsu_load_err_i` so a completed load that reports an LSU error cannot write response data into its destination register."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          47,
+          47
+        ],
+        [
+          53,
+          53
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old code, the software reset request passed to the reset consistency checker was the raw combinational value ~sw_rst_req_ni. A software reset request that is only a short pulse can deassert before the corresponding leaf reset assertion becomes visible to the consistency checker in the local clock domain. As a result, the checker sees leaf_rst_o asserted without a valid software reset cause and may fire err_o. The missing behavior is a pending software-reset latch that keeps the request active until the deasserted request has propagated through the leaf-clock synchronization path.",
+      "fix_hint": "Add a latched_sw_rst_req register in the local reset-manager clock domain. Set it when the software reset request is asserted (!sw_rst_req_ni), clear it only after the request has been deasserted by software and the deasserted value has propagated through leaf_rst_sync (latched_sw_rst_req && sw_rst_req_ni && leaf_rst_sync), and reset it to 0 by rst_ni. Feed this latched pending request to rstmgr_cnsty_chk.sw_rst_req_i instead of the raw ~sw_rst_req_ni so the consistency checker sees a valid cause for the entire reset cycle."
+    }
+  ]
+}

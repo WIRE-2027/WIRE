@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          95,
+          99
+        ],
+        [
+          110,
+          110
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In tlul_socket_1n.sv, num_req_outstanding is declared as logic [7:0], which can represent only 0..255. The TL-UL source width allows up to 2^TL_AIW outstanding requests; with the expected 8-bit source ID width, that is 256 outstanding requests. When the 256th request is accepted before any response, the 8-bit counter overflows from 255 to 0, corrupting the outstanding-request count and the associated device-select tracking used by hold_all_requests and response steering. The old assertion used num_req_outstanding != '1, which treated 255 as the maximum and did not express the true legal boundary of MaxOutstanding = 2**TL_AIW.",
+      "fix_hint": "Expand the outstanding-request counter so it can hold the full legal range 0..2**TL_AIW. Define MaxOutstanding as 2**top_pkg::TL_AIW and OutstandingW as $clog2(MaxOutstanding+1), then declare num_req_outstanding as [OutstandingW-1:0]. Update the overflow assertion to num_req_outstanding < MaxOutstanding so accepting the 256th outstanding request is legal, and keep all downstream comparisons and increments consistent with the wider counter."
+    }
+  ]
+}

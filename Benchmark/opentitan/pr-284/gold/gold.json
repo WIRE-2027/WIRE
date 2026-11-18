@@ -1,0 +1,58 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          43,
+          43
+        ],
+        [
+          44,
+          45
+        ],
+        [
+          73,
+          73
+        ],
+        [
+          75,
+          76
+        ],
+        [
+          83,
+          83
+        ],
+        [
+          85,
+          85
+        ],
+        [
+          91,
+          91
+        ],
+        [
+          117,
+          117
+        ],
+        [
+          119,
+          119
+        ],
+        [
+          121,
+          123
+        ],
+        [
+          133,
+          133
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, erroneous requests were not converted into local error responses. req_o was still asserted whenever wrsp_error was set, a_ready required gnt_i even for an error request, and the request FIFO stored only a write-enable bit plus a wrsp_error flag that was ignored for read responses. Thus an illegal Get could be sent to SRAM and return success (or wait for read data), an illegal non-read opcode could be treated as a read and return AccessAckData instead of AccessAck, and read error responses were sourced only from the SRAM response FIFO rather than from the stored request error. The fix creates an op/error request record, computes error_internal from the TL-UL checker and local checks, suppresses req_o for error requests, accepts those requests into the FIFO without SRAM grant, and derives d_valid/d_opcode/d_error/rspfifo_rready from the stored request type and error.",
+      "fix_hint": "Introduce a request-op enum and an error bit in the request FIFO, instantiate tlul_err, gate req_o with ~error_internal, qualify a_ready with error_internal so error requests can be accepted without grant, push accepted requests as (opcode != Get ? write-ish : read) with error_internal, and use that stored entry to generate the D-channel response and to enable rspfifo pop only for non-error read requests."
+    }
+  ]
+}

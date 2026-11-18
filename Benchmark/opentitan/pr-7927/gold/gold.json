@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          42,
+          43
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, the valid_q register is asynchronously reset, but the key_q storage register is not reset at all. Per the spec, reset must clear all stored key data to zero. Because key_q has no reset assignment, it retains an arbitrary/unknown value after reset or power-up, and this value is continuously presented on key_o, which can expose unknown key data to downstream logic.",
+      "fix_hint": "Add reset handling to the key_q register so that when rst_ni is deasserted, all shares of key_q are cleared to zero. This reset must take precedence over the existing clr_i and set_i update paths, and the existing clear/set behavior should be preserved once reset is released."
+    }
+  ]
+}

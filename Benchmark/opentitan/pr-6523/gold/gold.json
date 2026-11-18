@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          55,
+          55
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge rom_ctrl_mux, bus_gnt_o was asserted from the registered/sticky signal sel_q instead of the current ownership input sel_i. In the cycle when sel_i first drops from checker ownership to bus ownership, rom_addr_o and rom_req_o already switch to the bus inputs immediately, so a bus request can be accepted by the ROM in that cycle. However, bus_gnt_o remained deasserted until sel_q updates to 0 on the following cycle. This caused the bus grant to be asserted only together with the ROM read-valid response, making the ROM appear to respond in zero time and creating a request/grant/valid handshake violation.",
+      "fix_hint": "Derive bus_gnt_o combinationally from the current ownership selection input rather than from the registered ownership state. Specifically, assert bus_gnt_o whenever sel_i selects the bus, i.e. use ~sel_i. Keep using the registered state sel_q for bus_rvalid_o so that read responses caused by checker requests are still masked from the bus."
+    }
+  ]
+}

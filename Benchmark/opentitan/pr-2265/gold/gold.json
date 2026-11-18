@@ -1,0 +1,27 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim_generic/rtl/prim_generic_ram_2p.sv",
+          "lines": [
+            [
+              63,
+              63
+            ],
+            [
+              77,
+              77
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In both port A and port B clocked blocks, the read-data output is updated unconditionally whenever the port request is asserted, regardless of whether the operation is a write or a read. Since the assignment lives outside the write-enable branch, a write operation also causes rdata_o to be loaded from the addressed memory word. This violates the specified port behavior: during a write, the read-data output must not be updated and should retain its previous value.",
+      "fix_hint": "Restructure each port's request handling so that the read-data output is updated only for a read operation, not for a write. In each clocked block, keep the masked-write behavior inside the write_enable branch and move the rdata_o assignment into an else branch so it executes only when write_enable is deasserted while request is asserted. Apply the same change to both port A and port B."
+    }
+  ]
+}

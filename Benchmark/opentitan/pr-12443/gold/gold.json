@@ -1,0 +1,48 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          105,
+          107
+        ],
+        [
+          168,
+          168
+        ],
+        [
+          170,
+          170
+        ],
+        [
+          172,
+          172
+        ],
+        [
+          178,
+          178
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, `active` was a level signal derived only from the FSM state and SPI mode: `(st_q == StActive) && (spi_mode_i == FlashMode)`. It stayed high for every cycle while the state machine was in StActive, regardless of `address_update_i`. The flip and watermark event logic used this level `active` as its enable, so events and sticky watermark state could be evaluated continuously rather than only at byte-address update points. The `address_update_i` input was not used at all. The fix moves `active` generation into the FSM combinational block: it defaults to 0, is pulsed when a qualifying Flash-mode start occurs in StIdle, and is set to `address_update_i` in StActive. It also adds the Flash-mode check to the StIdle start condition so a non-Flash start cannot produce a spurious active/event pulse.",
+      "fix_hint": "Replace the standalone level-based `active` assignment with an FSM-derived combinational pulse. In the state-machine combinational block, default `active` to 0; in StIdle assert it only when `start_i` is qualified by Flash mode and the access is not SFDP/mailbox; in StActive assert it only when `address_update_i` is high. Remove the old `assign active = ...` expression."
+    },
+    {
+      "bug_lineno": [
+        [
+          151,
+          151
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "The original watermark output expression was `event_watermark_o = active && !watermark_crossed && watermark_cross`. This suppresses the watermark event whenever `watermark_crossed` is already set. A required corner case is a simultaneous flip and watermark crossing: when the host address enters the next buffer already at or above the watermark threshold, the flip condition is true and `watermark_crossed` may still be set from the previous buffer window. The old expression produced no watermark event in that cycle, violating the requirement that the watermark event be asserted together with the flip event in this case.",
+      "fix_hint": "Rework the watermark event combinational logic so that, when `active && watermark_cross`, the event is asserted either on the first crossing in the current buffer window (`!watermark_crossed`) or when a flip is occurring simultaneously (`flip`). Keep the sticky `watermark_crossed` behavior and clear it on flip as before."
+    }
+  ]
+}

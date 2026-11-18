@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          307,
+          307
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The core tracer references id_stage_i.operand_b_fw_id, but that identifier is neither declared nor driven in the pre-merge ID stage. Tracer-enabled elaboration therefore cannot resolve this hierarchical operand-B observation signal. The architectural ALU operand-B path is separately assigned.",
+      "fix_hint": "Declare the 32-bit operand_b_fw_id observation signal and drive it from regfile_data_rb_id for the tracer connection."
+    }
+  ]
+}

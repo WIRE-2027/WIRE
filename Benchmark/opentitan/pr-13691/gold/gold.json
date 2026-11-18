@@ -1,0 +1,81 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/flash_ctrl/rtl/flash_phy_pkg.sv",
+          "lines": [
+            [
+              69,
+              69
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/flash_ctrl/rtl/flash_phy_rd.sv",
+          "lines": [
+            [
+              180,
+              180
+            ],
+            [
+              223,
+              223
+            ],
+            [
+              555,
+              555
+            ],
+            [
+              577,
+              577
+            ],
+            [
+              580,
+              580
+            ],
+            [
+              634,
+              634
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/flash_ctrl/rtl/flash_phy_rd_buffers.sv",
+          "lines": [
+            [
+              28,
+              28
+            ],
+            [
+              43,
+              43
+            ],
+            [
+              45,
+              45
+            ],
+            [
+              47,
+              47
+            ],
+            [
+              52,
+              52
+            ],
+            [
+              55,
+              55
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the old read pipeline, when a flash read completed with a reliability ECC error, `muxed_err` became asserted but the read-buffer update was gated with `~muxed_err`. As a result, an allocated buffer entry that was in the `Wip` state never received its update, so it never transitioned to `Valid`. Transactions that matched this in-progress buffer were accepted and waited for that entry to become valid, causing the read pipeline to hang. Additionally, the `rd_buf_t` record had no `err` field, so the pipeline had no way to remember that a completed buffer entry contained erroneous data; future hits could match a bad entry and buffer responses could not report the stored error.",
+      "fix_hint": "Add an `err` flag to `rd_buf_t` and to the read-buffer entry module. Do not suppress the buffer update when `muxed_err` is asserted; instead, always update the buffer and capture `muxed_err` through a new `err_i` port. Clear the error flag on reset, disable, wipe, and allocation. Exclude entries with `err` set from buffer-hit matching so known-bad data is re-read from flash. When a response is selected from a buffer, propagate `read_buf[i].err` into `data_err_o` and gate `data_err_o` with `data_valid_o` so errors are only presented with valid responses."
+    }
+  ]
+}

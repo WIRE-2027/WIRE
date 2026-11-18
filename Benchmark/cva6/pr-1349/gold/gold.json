@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          81,
+          81
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The speculative store-buffer ready signal uses the registered count and the threshold `DEPTH_SPEC-1`. It reports not-ready with one free entry and does not reflect same-cycle enqueue, commit, or flush updates, unnecessarily stalling stores and underusing the queue.",
+      "fix_hint": "Compute `ready_o` after the next speculative count is formed and assert it whenever that next count is below `DEPTH_SPEC` or a commit frees space in the same cycle."
+    }
+  ]
+}

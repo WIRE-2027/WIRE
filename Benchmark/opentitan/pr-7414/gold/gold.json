@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/kmac_app.sv",
+          "lines": [
+            [
+              118,
+              118
+            ],
+            [
+              502,
+              502
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/kmac/rtl/kmac_pkg.sv",
+          "lines": [
+            [
+              184,
+              184
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In kmac_app.sv, the localparam SelKeySize was computed from AppDigestW and then used both to select the sideloaded key length (KeyLen[SelKeySize] -> SideloadedKey) and to select the right_encode output-length constant (EncodedOutLen[SelKeySize]). Once AppDigestW was increased to 384, this made the KMAC application interface report a 384-bit sideloaded key (Key384) even though the actual sideloaded key is only 256 bits wide, corrupting key_len_o and the key encoding used for KMAC. The same conflation would also cause the output-length encoding to follow the key-size selector if SelKeySize were changed to use the key width. The fix adds AppKeyW=256, derives SelKeySize from it, and adds a separate SelDigSize derived from AppDigestW so EncodedOutLen can be indexed by the digest width.",
+      "fix_hint": "Add a compile-time parameter for the application sideloaded key width (AppKeyW) and compute the key-length index from it. Compute a separate digest-width index from AppDigestW and use that index for the encoded output length, while keeping the key-length index for SideloadedKey. This decouples the two independent size selections in kmac_app.sv."
+    }
+  ]
+}

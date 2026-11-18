@@ -1,0 +1,26 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          708,
+          712
+        ],
+        [
+          714,
+          714
+        ],
+        [
+          716,
+          719
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, key_len_o and key_data_o were selected using keymgr_key_en_i or mux_sel_buf_key == SelApp. mux_sel_buf_key follows the message data mux and is only SelApp during StAppMsg. When an application operation receives its last message beat, the FSM moves to StAppOutLen (for KMAC) or StAppProcess and mux_sel changes to SelOutLen, so the key output immediately reverts to the software key registers even though the downstream KMAC/SHA3 core may not have consumed the sideloaded key block yet. For short application messages this can cause the final hash to be computed with the CSR key instead of the required sideloaded key, violating the requirement that an application-owned KMAC operation must use the sideloaded key throughout the operation.",
+      "fix_hint": "In kmac_app.sv, replace the combinational key mux based on keymgr_key_en_i/mux_sel_buf_key with state-driven selection: default key_len_o and key_data_o to the software register values, then in a unique case over st select SideloadedKey and keymgr_key for all application-owned states (StAppCfg, StAppMsg, StAppOutLen, StAppProcess, StAppWait) so the sideloaded key is maintained until the operation completes. Keep the sideloaded key selection for StSw only when keymgr_key_en_i is set."
+    }
+  ]
+}

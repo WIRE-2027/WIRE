@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "core/csr_regfile.sv",
+          "lines": [
+            [
+              1941,
+              1942
+            ]
+          ]
+        },
+        {
+          "file": "core/include/riscv_pkg.sv",
+          "lines": [
+            [
+              40,
+              40
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Exception Scenario Bug"
+      },
+      "bug_desc": "In core/csr_regfile.sv, the mstatus_d.sxl and mstatus_d.uxl fields are unconditionally assigned to riscv::XLEN_64 whenever CVA6Cfg.IS_XLEN64 is true, without checking whether S-mode (CVA6Cfg.RVS) or U-mode (CVA6Cfg.RVU) are actually implemented. This causes mstatus.SXL and mstatus.UXL to read as non-zero even in configurations where the corresponding privilege mode does not exist, violating the RISC-V Privileged Specification requirement that these WARL fields be read-only zero when their associated privilege mode is absent. The missing XLEN_NA encoding in riscv_pkg.sv prevents the CSR write/update logic from representing the not-implemented value.",
+      "fix_hint": "Add an XLEN_NA encoding (value 2'b00) to the riscv::xlen_e enum in core/include/riscv_pkg.sv, and update the mstatus legalization logic in core/csr_regfile.sv so that mstatus_d.sxl is assigned XLEN_64 only when CVA6Cfg.RVS is set and XLEN_NA otherwise, and mstatus_d.uxl is assigned XLEN_64 only when CVA6Cfg.RVU is set and XLEN_NA otherwise."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          256,
+          256
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the FSM's default branch handles an illegal or undefined state encoding by only setting state_d = FsmError; it does not assert fsm_err_o in the same combinational cycle. Because fsm_err_o is initialized to 0 at the top of the always_comb block and is only set inside the FsmError case, the error output remains low until the FSM actually reaches the FsmError state on a subsequent clock edge. If the FSM is stuck in the illegal state due to a glitch or a severed/disabled clock or enable, it may never advance to FsmError, so fsm_err_o can remain deasserted indefinitely. This violates the specification that the FSM error output assert immediately when an illegal or undefined state is detected.",
+      "fix_hint": "In the default branch of the FSM case statement, assert fsm_err_o = 1'b1 in addition to transitioning to FsmError. This makes an illegal state directly drive the FSM error output without relying on the state registers advancing to the FsmError state on the next clock edge."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          1077,
+          1077
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "When RVH is disabled and the stored `mstatus.mpp` value is already the reserved encoding 2, a non-virtual `sstatus` write changes MPP to U-mode even though MPP is outside the SSTATUS write mask. This is a conditional state-preservation defect; the reserved prior state is established by explicit state injection, not by a demonstrated legal software sequence.",
+      "fix_hint": "During a non-virtual SSTATUS write, preserve the previous `mstatus_q.mpp` value instead of changing a pre-existing reserved MPP encoding to U-mode."
+    }
+  ]
+}

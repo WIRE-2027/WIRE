@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          125,
+          125
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge RTL, the wipe operation on secret_key incorrectly uses an XOR assignment instead of overwriting the key with the wipe value. When wipe_secret is asserted, secret_key becomes `secret_key ^ {8{wipe_v}}`, so the old key material remains recoverable; for example, performing the wipe twice with the same wipe_v restores the original key. This violates the spec requirement that the secret key be overwritten with the supplied value replicated across all key bytes, leaving wiped key material potentially reconstructable.",
+      "fix_hint": "Change the wipe_secret branch in the secret_key always_ff block to directly assign the replicated wipe value, i.e. `secret_key <= {8{wipe_v}}`, instead of XORing it with the current secret_key. This ensures the wipe operation destroys the previous key value rather than mixing it with the wipe constant."
+    }
+  ]
+}

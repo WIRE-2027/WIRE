@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          370,
+          373
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the StMsg state of hmac_core, the stop-request transition to StWaitResp was taken whenever txcnt_eq_blksz was true and reg_hash_stop_q was set for the Inner round. txcnt_eq_blksz only indicates that txcount is a multiple of the block size, not that all message words have been transferred. If stop was requested at an intermediate block boundary while the MSG FIFO still contained valid data words to send (i.e. txcount < sha_message_length_o), the FSM prematurely left StMsg, blocked hmac_sha_rvalid, and waited for sha_hash_done_i. This prevented the remaining MSG FIFO words from being pushed into the SHA-2 engine and could leave the operation stuck or produce an incorrect digest.",
+      "fix_hint": "Update the stop-request branch in the StMsg next-state logic so the transition to StWaitResp is taken only after the complete inner-stage message length has been reached. Specifically, require txcount >= sha_message_length_o in addition to txcnt_eq_blksz, reg_hash_stop_q, and round_q == Inner before disabling hmac_sha_rvalid and moving to StWaitResp. This ensures all words already buffered in the MSG FIFO are drained before waiting for SHA-2 completion."
+    }
+  ]
+}

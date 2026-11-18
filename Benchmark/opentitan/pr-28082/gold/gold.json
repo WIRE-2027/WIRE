@@ -1,0 +1,47 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/prim/rtl/prim_sum_tree.sv",
+          "lines": [
+            [
+              16,
+              17
+            ],
+            [
+              20,
+              25
+            ],
+            [
+              37,
+              37
+            ],
+            [
+              39,
+              39
+            ],
+            [
+              65,
+              65
+            ],
+            [
+              72,
+              75
+            ],
+            [
+              78,
+              78
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge prim_sum_tree, the internal sum_tree nodes and the sum output are sized identically to the input value width (Width). When multiple valid sources are summed, the natural carry out of the addition is discarded, causing the result to wrap/overflow whenever the exact sum exceeds 2^Width - 1. This is observable in entropy_src uses of prim_sum_tree in the adaptive proportion and Markov health-test modules, especially for wider RNG configurations and large windows, where summed counters can exceed the counter width. The old code had no saturation and no exact-width output option, so the reported test count could silently become incorrect.",
+      "fix_hint": "Add a Saturate parameter and separate input/output width parameters so the tree has enough headroom: use OutWidth = InWidth + $clog2(NumSrc) for exact sums, or keep OutWidth = InWidth with saturation. Propagate OutWidth through the entire tree, cast leaf inputs to OutWidth, and in saturation mode compute the node sum in a one-bit-wider temporary so the carry is detected and saturated to all ones instead of wrapping. In non-saturating mode simply rely on the wider OutWidth to represent the exact sum."
+    }
+  ]
+}

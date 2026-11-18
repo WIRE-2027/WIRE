@@ -1,0 +1,32 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          466,
+          466
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The compressed-register trace decoder marks only RS1 as accessed for the shared C.JR/C.JALR path. When instruction bit 12 selects C.JALR, the instruction also writes the link register, but the missing RD flag causes that write to be omitted from the trace.",
+      "fix_hint": "Use instruction bit 12 to distinguish C.JALR from C.JR and include RD in `data_accessed` only for C.JALR."
+    },
+    {
+      "bug_lineno": [
+        [
+          552,
+          552
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The decode_cj_insn function for compressed jump instructions (c.j, c.jal) does not set the data_accessed flags. For c.jal, which writes the return address to x1 (rd=x1), the RD flag is not set, so the trace log does not show the register write. This is inconsistent with the uncompressed JAL instruction which correctly sets data_accessed = RD.",
+      "fix_hint": "The decode_cj_insn function should set data_accessed = RD for c.jal instructions (which write to x1), similar to how decode_j_insn handles uncompressed JAL. For c.j (which does not write to a register), data_accessed should remain 0. The fix should differentiate between c.j and c.jal based on the instruction encoding or mnemonic."
+    }
+  ]
+}

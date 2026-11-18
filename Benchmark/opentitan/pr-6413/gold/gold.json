@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          522,
+          522
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the KMAC main FSM state KmacMsgFeed, the transition logic only checks sha3_absorbed. If the SHA3 core asserts sha3_absorbed and sha3_done in the same cycle, the FSM moves to KmacDigest and misses the done pulse. KmacDigest then waits for sha3_done, which has already passed, so the FSM can remain stuck in KmacDigest with entropy_in_progress held high and never return to KmacIdle. This can happen for application-interface operations where the kmac_app FSM issues CmdDone immediately when it sees absorbed, causing both signals to be active together.",
+      "fix_hint": "In the KmacMsgFeed state, handle the simultaneous absorbed and done case explicitly: when sha3_absorbed && sha3_done, transition directly to KmacIdle; otherwise, only transition to KmacDigest when sha3_absorbed is asserted without sha3_done; otherwise remain in KmacMsgFeed. This prevents the lost done event and ensures the FSM returns to idle and clears entropy status for the next operation."
+    }
+  ]
+}

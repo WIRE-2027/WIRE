@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          430,
+          430
+        ],
+        [
+          435,
+          435
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge FSM, the local escalation/invalid-state check `if (|state_invalid_error | token_if_fsm_err_i)` was evaluated before the global escalation check `else if (esc_scrap_state0_i || esc_scrap_state1_i)`. As a result, when a token-hashing/FSM error or invalid state was present at the same time as a scrap escalation input, the FSM selected `InvalidSt` instead of entering `EscalateSt`. The spec requires security escalation inputs to be treated as priority events and forces the FSM into the escalation state even when other error conditions are also active. This priority inversion could prevent the expected escalation behavior and leave the FSM in the wrong terminal state.",
+      "fix_hint": "Reverse the priority of the two escalation checks: first evaluate the global scrap escalation condition and, if asserted, transition to `EscalateSt`; only if that condition is not active should the local state-invalid / token-interface-error condition be allowed to transition to `InvalidSt`. This matches the spec's requirement that security escalation has priority over local FSM error handling."
+    }
+  ]
+}

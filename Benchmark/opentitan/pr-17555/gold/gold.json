@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          455,
+          455
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In FastPwrStateResetPrep, the ndmreset_req contribution to rst_sys_req_d is gated by lc_ctrl_pkg::lc_tx_test_false_loose(lc_dft_en_i), i.e. the DFT enable life-cycle signal. According to the reset behavior, a non-debug-module reset request should assert system reset domains only when the life-cycle hardware debug enable is not active. Using DFT enable causes the system reset domains to be asserted in the wrong life-cycle states, such as when DFT is disabled but hardware debug is active, and also fails to assert them when DFT is active but hardware debug is disabled.",
+      "fix_hint": "Replace the life-cycle signal used in the ndmreset gating term with lc_hw_debug_en_i. The expression should gate ndmreset_req on lc_ctrl_pkg::lc_tx_test_false_loose(lc_hw_debug_en_i), so that system reset requests are asserted for ndmreset when hardware debug is not enabled, and suppressed when hardware debug is active."
+    }
+  ]
+}

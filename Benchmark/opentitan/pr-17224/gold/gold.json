@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          115,
+          116
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the reset block of pwrmgr_slow_fsm, pwr_clamp_q and pwr_clamp_env_q are initialized to 1'b0, which deasserts the main and environment isolation clamps immediately on power-on reset. This violates the spec requirement that after power-on reset all isolation clamps remain asserted. If reset occurs while the MAIN power domain is not yet stable or the chip is in deep sleep, the deasserted clamps allow signals from an unpowered MAIN domain to reach the always-on domain, causing floating or undefined signal conditions.",
+      "fix_hint": "Change the reset values of pwr_clamp_q and pwr_clamp_env_q to 1'b1 so that both isolation clamps are asserted at reset and remain asserted until the FSM has observed main power-ok and begins the normal power-up clamp-release sequence."
+    }
+  ]
+}

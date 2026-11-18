@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          620,
+          620
+        ],
+        [
+          746,
+          747
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "In the pre-merge code, the CLEAR state kept data_in_we_o asserted while clearing the input data registers, including during the cycle in which the cipher core acknowledges the clear and the FSM returns to IDLE. At the same time, the data-input status tracker data_in_new_d was only cleared by data_in_load, data_in_we_o, or clear_in_out_status, but not by key_iv_data_in_clear_we. As a result, the input-data write-enable event associated with the clear operation could be recorded by data_in_new as if software had written one of the data registers. This can make data_in_new appear complete and input_ready deasserted after a clear, even though not all four input-data registers have been written since the clear. In automatic operation, start_common depends on data_in_new, so the AES can erroneously start a block before the input block is fully configured, violating the automatic start and clearing requirements in the specification.",
+      "fix_hint": "Deassert data_in_we_o as soon as the clear handshake completes (inside the cipher_out_valid_i branch before returning to IDLE) so the input-data clear write does not extend into the IDLE cycle. Also add key_iv_data_in_clear_we to the data_in_new_d reset condition alongside data_in_load, data_in_we_o, and clear_in_out_status, so the data-input status tracker is explicitly cleared while the clear trigger is being deasserted. This ensures input_ready is asserted after clearing and remains so until all four input-data registers are written again."
+    }
+  ]
+}

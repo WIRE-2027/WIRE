@@ -1,0 +1,46 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          210,
+          212
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The bit-12-zero compressed-register path emits C.MV before deciding whether `rs2` selects C.JR, and the resulting C.JR path lacks explicit handling for its reserved `rs1=x0` encoding. The loosely ordered decode permits the all-zero register form to be emitted as a JALR-style instruction instead of being rejected.",
+      "fix_hint": "Partition the path on `rs2` first: emit C.MV for nonzero `rs2`, otherwise emit C.JR and validate that its `rs1` field is nonzero."
+    },
+    {
+      "bug_lineno": [
+        [
+          215,
+          215
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "The C.JR decoding path does not validate that rs1 (instr_i[11:7]) is non-zero. According to the RISC-V spec, C.JR is only valid when rs1≠x0; the encoding with rs1=x0 is reserved and must be treated as an illegal instruction. The buggy code unconditionally decodes C.JR without this check, allowing reserved encodings to be executed as valid JALR instructions.",
+      "fix_hint": "Add a check for instr_i[11:7] != 5'b0 in the C.JR decoding path. If rs1 is x0, assert illegal_instr_o to signal an illegal instruction exception."
+    },
+    {
+      "bug_lineno": [
+        [
+          218,
+          226
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "In the bit-12-one subgroup, the decoder checks `rd` before `rs2`. For `rd=x0` and nonzero `rs2`, the encoding is a C.ADD HINT, but the old ordering enters the C.EBREAK branch and marks it illegal. This rejects a legal compressed HINT.",
+      "fix_hint": "Restructure the decoding to first check instr_i[6:2] (rs2). If rs2≠x0, decode as C.ADD. If rs2=x0, then check instr_i[11:7] (rd): if rd=x0, decode as C.EBREAK; if rd≠x0, decode as C.JALR. This ensures correct precedence per the RISC-V spec."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "src/lsu.sv",
+          "lines": [
+            [
+              333,
+              333
+            ],
+            [
+              337,
+              337
+            ],
+            [
+              344,
+              344
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In src/lsu.sv, the canonical-address check for load/store effective addresses is performed unconditionally on lsu_ctrl.vaddr[63:39]. It therefore flags non-canonical high bits even when load/store address translation is disabled (en_ld_st_translation_i is low). It also tests the wrong bit range for SV39 (omitting bit 38) and reports riscv::LOAD_PAGE_FAULT / STORE_PAGE_FAULT instead of access faults. This violates the LSU spec, which requires non-canonical-address detection only when data translation is enabled and faults to be reported as load/store access faults.",
+      "fix_hint": "Gate the LSU canonical-address check on en_ld_st_translation_i, change the tested range to lsu_ctrl.vaddr[63:38], and use the load/store access-fault exception codes for the reported misaligned_exception values."
+    },
+    {
+      "bug_lineno": [
+        {
+          "file": "src/mmu.sv",
+          "lines": [
+            [
+              195,
+              197
+            ],
+            [
+              203,
+              203
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In src/mmu.sv, the instruction-fetch canonical-address check is placed before the enable_translation_i guard, so it can raise an exception when instruction translation is disabled. It tests icache_areq_i.fetch_vaddr[63:39] (off by one for SV39) and reports riscv::INSTR_PAGE_FAULT instead of an instruction access fault. Per the MMU spec, this check must be performed only when instruction translation is enabled and must produce an instruction access fault for non-canonical SV39 addresses.",
+      "fix_hint": "Remove the unconditional instruction canonical-address check and add it inside the enable_translation_i block, testing fetch_vaddr[63:38] and reporting riscv::INSTR_ACCESS_FAULT."
+    }
+  ]
+}

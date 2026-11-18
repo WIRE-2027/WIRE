@@ -1,0 +1,18 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          484,
+          484
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "General Control Flow Bug"
+      },
+      "bug_desc": "The signal instr_executing is asserted for single-cycle instructions when the IF stage stalls (instr_new_i remains high), because it depends on instr_new_i OR ~instr_multicycle_done_q. Since instr_multicycle_done_q is never set for single-cycle instructions, instr_executing stays high during IF stalls, which keeps data_req_id, mult_en_id, and div_en_id asserted. This prevents the register file write enable (regfile_we) from deasserting, causing continuous writes to the register file with stale ALU results.",
+      "fix_hint": "Modify the instr_executing logic to only evaluate instr_multicycle_done_q for multi-cycle instructions (load/store, multiply/divide, branches, jumps). For single-cycle instructions, instr_executing should deassert once the instruction has been accepted and executed, regardless of IF stalls. This can be achieved by gating the ~instr_multicycle_done_q term with a condition that indicates a multi-cycle instruction is currently in the ID stage."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr.sv",
+          "lines": [
+            [
+              438,
+              438
+            ],
+            [
+              442,
+              442
+            ],
+            [
+              461,
+              461
+            ],
+            [
+              465,
+              465
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/keymgr/rtl/keymgr_pkg.sv",
+          "lines": [
+            [
+              77,
+              77
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Data Flow Bug"
+      },
+      "bug_desc": "The advance-operation KMAC payloads were constructed with the wrong seed/data blocks. For the Initialized-to-CreatorRootKey advance, `adv_matrix[Creator]` included both `revision_seed` and `creator_seed` as 256-bit data blocks, even though the spec requires this transition to use only one hardware-revision-secret diversification block and does not include the flash creator seed in the data payload. For the CreatorRootKey-to-OwnerIntermediateKey advance, `adv_matrix[OwnerInt]` used `owner_seed`, but the spec requires the creator seed. For the OwnerIntermediateKey-to-OwnerKey advance, `adv_matrix[Owner]` contained only `sw_binding` and omitted the required `owner_seed` block. The `keymgr_pkg::AdvDataWidth` parameter was also sized for three key-width blocks, which matches the old oversized/misaligned Creator payload but not the corrected two-key-block payload layout. As a result, the KMAC messages, and therefore the derived internal keys, were computed from the wrong advance diversification inputs and the specified key-derivation domain separation was violated.",
+      "fix_hint": "Reorganize the advance payload concatenations so each advance transition uses the state-appropriate single key-width seed block: omit `creator_seed` from `adv_matrix[Creator]` and keep `revision_seed` as the one derivation block; use `creator_seed` in `adv_matrix[OwnerInt]` instead of `owner_seed`; and add `owner_seed` to `adv_matrix[Owner]` alongside `sw_binding`. Update `keymgr_pkg::AdvDataWidth` to `SwBindingWidth + 2*KeyWidth + DevIdWidth + HealthStateWidth` so the width matches the new maximum payload size."
+    }
+  ]
+}

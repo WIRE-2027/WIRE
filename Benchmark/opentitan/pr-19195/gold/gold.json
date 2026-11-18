@@ -1,0 +1,36 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/usbdev/rtl/usb_consts_pkg.sv",
+          "lines": [
+            [
+              33,
+              33
+            ]
+          ]
+        },
+        {
+          "file": "hw/ip/usbdev/rtl/usb_fs_rx.sv",
+          "lines": [
+            [
+              281,
+              281
+            ],
+            [
+              518,
+              518
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "State Machine Control Flow Bug"
+      },
+      "bug_desc": "The receiver has no handling for a PRE special PID. After the SYNC and PID are received, the PRE PID completes with pid_valid and pid_complete asserted, but packet_valid_q remains high because see_eop only triggers on SE0 or bitstuff_error. The following hub idle period and low-speed SYNC/data bits are therefore interpreted as a continuation of the current Full-Speed packet, causing the NRZI/bit-stuff logic to accumulate false bit-stuff violations and raise bitstuff_error_o. The packet-boundary state should instead be terminated immediately after recognizing a valid PRE PID.",
+      "fix_hint": "Add a UsbPidPre constant to usb_consts_pkg, detect a valid complete PRE PID in usb_fs_rx with a see_preamble flag, and include that flag in the see_eop condition. This causes the packet state machine to clear packet_valid_q and in_packet_q and generate pkt_end_o immediately after the PRE PID, so the subsequent low-speed portion of the bus traffic is not processed as Full-Speed packet data."
+    }
+  ]
+}

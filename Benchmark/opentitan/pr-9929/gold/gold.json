@@ -1,0 +1,22 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        [
+          704,
+          704
+        ],
+        [
+          1981,
+          1981
+        ]
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Logic Operation Bug"
+      },
+      "bug_desc": "In the pre-merge code, the FIFO error vectors for the raw entropy input FIFO and the observe FIFO had their write-error bit hardwired to 1'b0. As a result, a write to a full FIFO was not reported as a FIFO write error, so the corresponding ERR_CODE write-error status and fatal alert condition could not be triggered for these FIFOs. The spec requires internal FIFO write errors, including writes to a full FIFO, to be detected and reported. The fix replaces the constant zero with the actual write-to-full condition for each FIFO.",
+      "fix_hint": "For each FIFO error vector, compute the write-error bit as the conjunction of the FIFO push/valid signal and the FIFO full signal, e.g. bit [2] should be (sfifo_esrng_push && sfifo_esrng_full) for the raw entropy input FIFO and (sfifo_observe_push && sfifo_observe_full) for the observe FIFO, instead of tying that bit to 1'b0."
+    }
+  ]
+}

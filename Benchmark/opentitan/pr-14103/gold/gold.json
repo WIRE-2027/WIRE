@@ -1,0 +1,23 @@
+{
+  "bug_info": [
+    {
+      "bug_lineno": [
+        {
+          "file": "hw/ip/kmac/rtl/keccak_round.sv",
+          "lines": [
+            [
+              408,
+              408
+            ]
+          ]
+        }
+      ],
+      "bug_type": {
+        "level1": "Functional Bug",
+        "level2": "Boundary Condition Bug"
+      },
+      "bug_desc": "In the old keccak_round.sv, the internal storage-reset control `rst_storage` was only intended to be asserted when the FSM is in StIdle and `clear_i` has a valid true MUBI encoding. However, there was no integrity check on `rst_storage` itself: if it was asserted unexpectedly, for example due to FSM corruption or fault injection while not in StIdle or without a valid clear request, the state storage would be cleared and no storage-reset integrity error would be reported. This violates the spec requirement that the module assert the storage-reset error output when a clear operation is signaled while the idle or clear-validity condition is not satisfied.",
+      "fix_hint": "Add a combinational checker that monitors `rst_storage` and asserts `rst_storage_error_o` whenever `rst_storage` is high while `keccak_st` is not StIdle or while `clear_i` is not a valid true encoding. The normal storage reset and clearing behavior should remain unchanged."
+    }
+  ]
+}
